@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "planTierId": {
+          "type": "string",
+          "description": "Reference to the PlanTier. (Relationship: PlanTier 1:N User)"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "displayName",
+        "planTierId"
+      ]
+    },
+    "PlanTier": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "PlanTier",
+      "type": "object",
+      "description": "Represents a plan tier with specific features and limitations.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the plan tier."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the plan tier (e.g., Basic, Premium)."
+        },
+        "maxVisions": {
+          "type": "number",
+          "description": "The maximum number of visions allowed for this plan tier."
+        },
+        "aiFeaturesEnabled": {
+          "type": "boolean",
+          "description": "Indicates whether AI features are enabled for this plan tier."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "maxVisions",
+        "aiFeaturesEnabled"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile data.  Secured by path-based ownership, where only the user with the matching userId can access the document. Includes denormalized 'planTierId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/plan_tiers/{planTierId}",
+        "definition": {
+          "entityName": "PlanTier",
+          "schema": {
+            "$ref": "#/backend/entities/PlanTier"
+          },
+          "description": "Stores plan tier information. Access control should be set up to restrict editing to admin users.",
+          "params": [
+            {
+              "name": "planTierId",
+              "description": "The unique identifier for the plan tier."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support user authentication, plan tiers, vision input, AI roadmap generation, and task management, while adhering to the principles of Authorization Independence, Structural Segregation, Access Modeling, and Data Clarity. The structure emphasizes path-based ownership and denormalization to simplify security rules and ensure data integrity.\n\n*   `/users/{uid}`: Stores user profile data. This utilizes Path-Based ownership.\n*   `/plan_tiers/{planTierId}`: Stores plan tier information.\n\nAuthorization Independence:\n\n*   The `users` collection includes a `planTierId` field. This design is chosen because it avoids the need for `get()` calls to the `plan_tiers` collection during user creation or updates. The plan tier a user is subscribed to is directly available within the user document.\n\nQAPs Support:\n\n*   The data structure enables secure `list` operations. Access to user data is controlled by path-based ownership in the `/users/{uid}` collection, ensuring only the authenticated user can access their own data. Plan tiers are stored in a separate `/plan_tiers` collection which can have separate rules to restrict editing to admin users only."
+  }
+}

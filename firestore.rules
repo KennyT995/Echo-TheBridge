@@ -1,0 +1,135 @@
+/**
+ * Core Philosophy: This ruleset enforces a strict user-ownership model for all user-specific data,
+ * ensuring that users can only access their own information. Publicly readable data, such as
+ * subscription plan details, is segregated into its own collection. The default security posture
+ * is to deny access unless explicitly granted.
+ *
+ * Data Structure: The data is organized into two primary top-level collections:
+ * - /users/{userId}: Contains private user profile information. Access is strictly controlled
+ *   by matching the authenticated user's ID with the document's ID in the path.
+ * - /plan_tiers/{planTierId}: Contains public reference data about subscription plans.
+ *   This data is readable by any authenticated user but is not writable from the client-side
+ *   to protect its integrity.
+ *
+ * Key Security Decisions:
+ * - User Enumeration is Disabled: A `list` operation on the top-level `/users` collection is
+ *   explicitly forbidden (`allow list: if false;`). This is a critical security measure to
+ *   prevent malicious actors from downloading a list of all application users.
+ * - Admin-Only Data is Read-Only: The `/plan_tiers` collection is treated as administrative
+ *   data. To ensure its integrity (e.g., preventing a user from changing plan prices or
+ *   features), all client-side write operations (`create`, `update`, `delete`) are disabled.
+ *   This data must be managed through a trusted server-side environment (e.g., Admin SDK).
+ * - Self-Creation of User Profile: A user is permitted to create their own user document in
+ *   `/users/{userId}` only if the document ID matches their authentication UID. This allows
+ *   for secure and straightforward user profile setup upon sign-up.
+ *
+ * Denormalization for Authorization: While not directly enforced in these rules, the schema
+ * design correctly places `planTierId` directly on the `User` document. This avoids costly and
+ * complex `get()` calls in security rules and application logic when checking a user's plan.
+ *
+ * Structural Segregation: The separation of private user data (`/users`) from public reference
+ * data (`/plan_tiers`) into distinct top-level collections is a core design principle. This
+ * allows for simple, performant, and highly secure rules for each collection, avoiding the
+ * complexity of filtering mixed-privacy data within a single collection.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    //-------------------------------------------------------------------------
+    // Helper Functions
+    //-------------------------------------------------------------------------
+
+    /**
+     * isSignedIn
+     * Checks if the user making the request is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * isOwner
+     * Checks if the authenticated user's UID matches the provided userId.
+     * This is the foundation of the user-ownership security model.
+     * @param userId The user ID to check against the request's auth UID.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * isExistingOwner
+     * For update/delete operations, verifies ownership AND that the document exists.
+     * This prevents unauthorized writes to non-existent paths.
+     * @param userId The user ID to check against the request's auth UID.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * hasValidUserIdOnCreate
+     * On create, validates that the document's internal `id` field matches
+     * the document's ID from the path. This enforces relational integrity.
+     * @param userId The user ID from the path.
+     */
+    function hasValidUserIdOnCreate(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * hasImmutableUserId
+     * On update, ensures the internal `id` field cannot be changed.
+     * This protects the fundamental link between the document and its owner.
+     */
+    function hasImmutableUserId() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+
+    //-------------------------------------------------------------------------
+    // Collection Rules
+    //-------------------------------------------------------------------------
+
+    /**
+     * @description Manages user profile documents. Only the user who owns the
+     *              document can read, create, update, or delete it. Listing
+     *              all users is explicitly forbidden.
+     * @path /users/{userId}
+     * @allow (create) An authenticated user creating their own profile document,
+     *          e.g., `/users/user_abc` where `request.auth.uid` is 'user_abc'.
+     * @deny (get) A user trying to read another user's profile, e.g.,
+     *          `request.auth.uid` 'user_xyz' reading `/users/user_abc`.
+     * @deny (list) Any user attempting to query the entire `/users` collection.
+     * @principle Restricts access to a user's own data tree and prevents user enumeration.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
+      allow update: if isExistingOwner(userId) && hasImmutableUserId();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Stores subscription plan tiers. This data is considered
+     *              publicly readable for any authenticated user but is not
+     *              writable from the client to protect its integrity.
+     * @path /plan_tiers/{planTierId}
+     * @allow (get) An authenticated user reading a plan's details to see its features.
+     * @allow (list) An authenticated user querying all available plans for a pricing page.
+     * @deny (create, update, delete) Any client attempting to modify plan details.
+     * @principle Protects critical application configuration data (like pricing) by
+     *            making it read-only for clients. All modifications must be
+     *            done through a trusted backend/admin environment.
+     */
+    match /plan_tiers/{planTierId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
