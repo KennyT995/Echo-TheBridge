@@ -5,7 +5,6 @@ import { FirebaseClientProvider } from '@/firebase/client-provider';
 import {
   SidebarProvider,
   Sidebar,
-  SidebarContent,
   SidebarInset,
 } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/app-sidebar';
