@@ -28,6 +28,7 @@ import {
 } from '@/firebase/non-blocking-login';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -42,8 +43,10 @@ export default function LoginPage() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [activeAction, setActiveAction] = useState<'login' | 'signup' | null>(null);
+
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -53,22 +56,28 @@ export default function LoginPage() {
     },
   });
 
-  const handleAction = async (action: 'login' | 'signup') => {
+  const onSubmit = (values: LoginFormValues, action: 'login' | 'signup') => {
     setIsSubmitting(true);
-    setAuthError(null);
-    const { email, password } = form.getValues();
+    setActiveAction(action);
+
     try {
       if (action === 'login') {
-        initiateEmailSignIn(auth, email, password);
+        initiateEmailSignIn(auth, values.email, values.password);
       } else {
-        initiateEmailSignUp(auth, email, password);
+        initiateEmailSignUp(auth, values.email, values.password);
       }
       // Non-blocking, so we don't await. Redirection is handled by the effect below.
     } catch (error: any) {
-      setAuthError(error.message);
-      setIsSubmitting(false);
+        toast({
+            variant: "destructive",
+            title: "Authentication Error",
+            description: error.message,
+        });
+        setIsSubmitting(false);
+        setActiveAction(null);
     }
   };
+
 
   if (isUserLoading) {
     return (
@@ -128,25 +137,20 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              {authError && (
-                <p className="text-sm font-medium text-destructive">
-                  {authError}
-                </p>
-              )}
               <div className="grid grid-cols-2 gap-4">
                 <Button
-                  onClick={() => handleAction('login')}
+                  onClick={form.handleSubmit((values) => onSubmit(values, 'login'))}
                   disabled={isSubmitting}
                   variant="outline"
                 >
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isSubmitting && activeAction === 'login' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Login
                 </Button>
                 <Button
-                  onClick={() => handleAction('signup')}
+                  onClick={form.handleSubmit((values) => onSubmit(values, 'signup'))}
                   disabled={isSubmitting}
                 >
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isSubmitting && activeAction === 'signup' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign Up
                 </Button>
               </div>
