@@ -1,6 +1,6 @@
 'use client';
 
-import { useCollection, useMemoFirebase } from '@/firebase';
+import { useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { useFirestore, useUser } from '@/firebase';
 import Header from '@/components/header';
 import { collection, doc, updateDoc } from 'firebase/firestore';
@@ -20,6 +20,10 @@ type PlanTier = {
   features: string[];
 };
 
+type UserData = {
+    planTierId: string;
+}
+
 export default function PlansPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
@@ -36,7 +40,7 @@ export default function PlansPage() {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
-  const { data: userData } = useCollection(userDocRef as any);
+  const { data: userData } = useDoc<UserData>(userDocRef);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
