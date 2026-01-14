@@ -27,7 +27,7 @@ export async function generateRoadmap(
   } catch (error: any) {
     console.error('Error in generateRoadmap:', error);
     // Check for AI flow related errors
-    if (error.message.includes('AI') || error.message.includes('flow')) {
+    if (error.message.includes('AI') || error.message.includes('flow') || error.message.includes('genkit') ) {
          return {
             error:
             'An unexpected error occurred while generating your roadmap with the AI. Please try again later.',
