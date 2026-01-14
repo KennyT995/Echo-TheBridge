@@ -3,13 +3,13 @@
 import { useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { useFirestore, useUser } from '@/firebase';
 import Header from '@/components/header';
-import { collection, doc, updateDoc } from 'firebase/firestore';
+import { collection, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 type PlanTier = {
   id: string;
@@ -24,17 +24,86 @@ type UserData = {
     planTierId: string;
 }
 
+const defaultPlans: PlanTier[] = [
+    {
+      id: 'trailblazer',
+      name: 'Trailblazer',
+      price: 0,
+      maxVisions: 1,
+      aiFeaturesEnabled: false,
+      features: ['1 Vision', 'Basic Roadmap Generation', 'Community Support'],
+    },
+    {
+      id: 'pathfinder',
+      name: 'Pathfinder',
+      price: 15,
+      maxVisions: 5,
+      aiFeaturesEnabled: true,
+      features: [
+        '5 Visions',
+        'Advanced AI-Powered Roadmap',
+        'Strategic Briefings',
+        'Email Support',
+      ],
+    },
+    {
+      id: 'visionary',
+      name: 'Visionary',
+      price: 45,
+      maxVisions: Infinity,
+      aiFeaturesEnabled: true,
+      features: [
+        'Unlimited Visions',
+        'Advanced AI-Powered Roadmap',
+        'Strategic Briefings',
+        'Priority Support',
+        'Legacy Planning',
+      ],
+    },
+  ];
+
+async function seedDefaultPlans(db: any) {
+    const plansRef = collection(db, 'plan_tiers');
+    const batch = writeBatch(db);
+    defaultPlans.forEach((plan) => {
+        const docRef = doc(plansRef, plan.id);
+        batch.set(docRef, plan);
+    });
+    await batch.commit();
+}
+
+
 export default function PlansPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const [isSeeding, setIsSeeding] = useState(true);
 
   const plansQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return collection(firestore, 'plan_tiers');
   }, [firestore]);
 
-  const { data: plans, isLoading: plansLoading } = useCollection<PlanTier>(plansQuery);
+  const { data: plans, isLoading: plansLoading, error } = useCollection<PlanTier>(plansQuery);
+
+  useEffect(() => {
+    async function handleSeeding() {
+        if (firestore) {
+            // Check if plans exist, if not, seed them.
+            if (plans && plans.length === 0 && !plansLoading && !isSeeding) {
+              try {
+                await seedDefaultPlans(firestore);
+              } catch (e) {
+                console.error("Error seeding plans:", e)
+              }
+            }
+            // Add a small delay to prevent flickering if seeding is fast
+            setTimeout(() => setIsSeeding(false), 500);
+        }
+    }
+    handleSeeding();
+  }, [firestore, plans, plansLoading, isSeeding])
+
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -55,7 +124,7 @@ export default function PlansPage() {
     }
   };
 
-  if (isUserLoading || plansLoading) {
+  if (isUserLoading || plansLoading || isSeeding) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />

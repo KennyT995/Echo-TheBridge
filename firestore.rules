@@ -127,7 +127,7 @@ service cloud.firestore {
     match /plan_tiers/{planTierId} {
       allow get: if isSignedIn();
       allow list: if isSignedIn();
-      allow create: if false;
+      allow create: if isSignedIn();
       allow update: if false;
       allow delete: if false;
     }
