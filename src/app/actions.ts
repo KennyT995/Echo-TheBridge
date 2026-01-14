@@ -2,7 +2,6 @@
 
 import {
   generateRoadmapFromVision,
-  GenerateRoadmapFromVisionInput,
   GenerateRoadmapFromVisionOutput,
 } from '@/ai/flows/generate-roadmap-from-vision';
 import {
