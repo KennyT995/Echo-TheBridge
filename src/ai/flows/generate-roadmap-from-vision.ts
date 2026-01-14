@@ -40,7 +40,7 @@ const prompt = ai.definePrompt({
   name: 'generateRoadmapFromVisionPrompt',
   input: {schema: GenerateRoadmapFromVisionInputSchema},
   output: {schema: GenerateRoadmapFromVisionOutputSchema},
-  prompt: `You are an expert life coach and strategist specializing in reverse-engineering long-term visions into actionable roadmaps. Based on the user's goal titled "{{{title}}}" with the description "{{{goal}}}", create a comprehensive, structured roadmap. This roadmap must include yearly milestones, monthly sprints, weekly tactics, and daily habits. Each item in the roadmap must be an object with a 'text' field (the actionable step) and a 'completed' field, which you must set to false.`,
+  prompt: `You are an expert life coach and strategist specializing in reverse-engineering long-term visions into actionable roadmaps. Based on the user's goal titled "{{{title}}}" with the description "{{{goal}}}", create a comprehensive, structured roadmap. This roadmap must include yearly milestones, monthly sprints, weekly tactics, and daily habits. For each item, only generate the 'text' field describing the actionable step.`,
 });
 
 
