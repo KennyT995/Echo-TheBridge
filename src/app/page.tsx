@@ -3,30 +3,33 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/header';
 import { Rocket, Target, BrainCircuit, CheckCircle } from 'lucide-react';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const featureData = [
   {
     icon: Target,
     title: 'Define Your Vision',
     description: 'Structure your long-term aspirations across different life categories and time horizons, from 2 to 10 years.',
-    image: 'https://picsum.photos/seed/feature-1/600/400',
-    hint: 'planning future'
+    image: PlaceHolderImages.find(img => img.id === 'feature-vision')?.imageUrl || "https://picsum.photos/seed/feature-1/600/400",
+    hint: PlaceHolderImages.find(img => img.id === 'feature-vision')?.imageHint || 'planning future'
   },
   {
     icon: Rocket,
     title: 'Generate Your Roadmap',
     description: 'Our AI reverse-engineers your vision into a concrete, actionable plan with yearly, monthly, weekly, and daily goals.',
-    image: 'https://picsum.photos/seed/feature-2/600/400',
-    hint: 'path map'
+    image: PlaceHolderImages.find(img => img.id === 'feature-roadmap')?.imageUrl || "https://picsum.photos/seed/feature-2/600/400",
+    hint: PlaceHolderImages.find(img => img.id === 'feature-roadmap')?.imageHint || 'path map'
   },
   {
     icon: BrainCircuit,
     title: 'Stay on Track with AI Coach',
     description: "Check in with your AI coach to analyze progress, celebrate wins, and get strategic advice to overcome obstacles.",
-    image: 'https://picsum.photos/seed/feature-3/600/400',
-    hint: 'guidance help'
+    image: PlaceHolderImages.find(img => img.id === 'feature-coach')?.imageUrl || "https://picsum.photos/seed/feature-3/600/400",
+    hint: PlaceHolderImages.find(img => img.id === 'feature-coach')?.imageHint || 'guidance help'
   },
 ];
+
+const heroImage = PlaceHolderImages.find(img => img.id === 'hero-background');
 
 export default function HomePage() {
   return (
@@ -35,14 +38,16 @@ export default function HomePage() {
       <main className="flex-1">
         {/* Hero Section */}
         <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center text-center px-4">
-            <Image
-                src="https://picsum.photos/seed/vision-hero/1200/800"
-                alt="Abstract background"
-                fill
-                priority
-                className="object-cover z-0 opacity-20"
-                data-ai-hint="abstract dark"
-            />
+            {heroImage && (
+              <Image
+                  src={heroImage.imageUrl}
+                  alt="Abstract background"
+                  fill
+                  priority
+                  className="object-cover z-0 opacity-20"
+                  data-ai-hint={heroImage.imageHint}
+              />
+            )}
             <div className="z-10">
                 <h1 className="font-headline text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-primary">
                     Bridge Your Vision to Reality
