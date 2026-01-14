@@ -63,26 +63,39 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
+  const handleAuthError = (error: any) => {
+    let message = 'An unknown error occurred.';
+    if (error.code) {
+        switch (error.code) {
+            case 'auth/wrong-password':
+                message = 'Incorrect password. Please try again.';
+                break;
+            case 'auth/user-not-found':
+                message = 'No account found with this email.';
+                break;
+            case 'auth/email-already-in-use':
+                message = 'This email is already registered.';
+                break;
+            default:
+                message = error.message;
+        }
+    }
+    toast({
+        variant: "destructive",
+        title: "Authentication Error",
+        description: message,
+    });
+    setIsSubmitting(false);
+    setActiveAction(null);
+  }
 
   const onSubmit = (values: LoginFormValues, action: 'login' | 'signup') => {
     setIsSubmitting(true);
     setActiveAction(action);
-
-    try {
-      if (action === 'login') {
-        initiateEmailSignIn(auth, values.email, values.password);
-      } else {
-        initiateEmailSignUp(auth, values.email, values.password);
-      }
-      // Non-blocking, so we don't await. Redirection is handled by the effect above.
-    } catch (error: any) {
-        toast({
-            variant: "destructive",
-            title: "Authentication Error",
-            description: error.message,
-        });
-        setIsSubmitting(false);
-        setActiveAction(null);
+    if (action === 'login') {
+      initiateEmailSignIn(auth, values.email, values.password, handleAuthError);
+    } else {
+      initiateEmailSignUp(auth, values.email, values.password, handleAuthError);
     }
   };
 
@@ -99,9 +112,9 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Welcome</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account or sign up.
+            Login or create an account to start building your vision.
           </CardDescription>
         </CardHeader>
         <CardContent>

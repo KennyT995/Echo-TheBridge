@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Zap } from 'lucide-react';
+import { Loader2, Zap, Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,7 +13,12 @@ import {
   FormItem,
   FormLabel,
 } from '@/components/ui/form';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Textarea } from '@/components/ui/textarea';
 import { generateRoadmap } from '@/app/actions';
 import { VisionFormSchema, type VisionFormValues, type Roadmap } from '@/lib/types';
@@ -22,18 +27,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 
 type VisionHorizon = 'twoYearVision' | 'fiveYearVision' | 'tenYearVision';
-const visionHorizons: { id: VisionHorizon; label: string }[] = [
-  { id: 'twoYearVision', label: '2 Years' },
-  { id: 'fiveYearVision', label: '5 Years' },
-  { id: 'tenYearVision', label: '10 Years' },
+const visionHorizons: { id: VisionHorizon; label: string; description: string }[] = [
+  { id: 'twoYearVision', label: '2 Years', description: 'Short-term goals. What do you want to achieve soon?' },
+  { id: 'fiveYearVision', label: '5 Years', description: 'Mid-term ambitions. Where do you see yourself in the medium term?' },
+  { id: 'tenYearVision', label: '10 Years', description: 'Long-term aspirations. What is your ultimate legacy?' },
 ];
 
 type VisionCategory = 'career' | 'health' | 'relationships' | 'legacy';
-const visionCategories: { id: VisionCategory; label: string }[] = [
-  { id: 'career', label: 'Career' },
-  { id: 'health', label: 'Health' },
-  { id: 'relationships', label: 'Relationships' },
-  { id: 'legacy', label: 'Legacy' },
+const visionCategories: { id: VisionCategory; label: string; placeholder: string }[] = [
+  { id: 'career', label: 'Career', placeholder: 'e.g., "Become a senior software engineer at a top tech company."' },
+  { id: 'health', label: 'Health', placeholder: 'e.g., "Run a half-marathon and meal prep consistently."' },
+  { id: 'relationships', label: 'Relationships', placeholder: 'e.g., "Nurture deeper connections with my family and friends."' },
+  { id: 'legacy', label: 'Legacy', placeholder: 'e.g., "Mentor young developers and contribute to open-source projects."' },
 ];
 
 export function VisionForm() {
@@ -73,52 +78,48 @@ export function VisionForm() {
 
   return (
     <div>
-      <Card className="bg-[hsl(var(--card)/0.6)] backdrop-blur-xl border-[hsl(var(--border)/0.3)]">
+      <Card className="bg-card/80 backdrop-blur-lg border-white/10">
         <CardContent className="p-4 sm:p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <Tabs defaultValue={visionHorizons[0].id} className="w-full">
-                <TabsList className="grid w-full grid-cols-3 bg-secondary/50">
-                  {visionHorizons.map((horizon) => (
-                    <TabsTrigger key={horizon.id} value={horizon.id}>
-                      {horizon.label}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+              <Accordion type="multiple" defaultValue={['twoYearVision']} className="w-full space-y-4">
                 {visionHorizons.map((horizon) => (
-                  <TabsContent key={horizon.id} value={horizon.id} className="mt-6">
-                    <Tabs defaultValue={visionCategories[0].id} className="w-full">
-                      <TabsList variant="pills" className="grid w-full grid-cols-2 sm:grid-cols-4">
+                  <AccordionItem key={horizon.id} value={horizon.id} className="border-border/50 rounded-lg bg-secondary/30">
+                    <AccordionTrigger className="p-4 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline">
+                      <div className="flex flex-col items-start text-left">
+                        <span>{horizon.label}</span>
+                         <p className="text-sm font-normal text-muted-foreground">{horizon.description}</p>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="p-4 pt-0">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {visionCategories.map((category) => (
-                          <TabsTrigger variant="pills" key={category.id} value={category.id}>
-                            {category.label}
-                          </TabsTrigger>
-                        ))}
-                      </TabsList>
-                      {visionCategories.map((category) => (
-                        <TabsContent key={category.id} value={category.id} className="mt-4">
                           <FormField
+                            key={category.id}
                             control={form.control}
                             name={`${horizon.id}.${category.id}`}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="sr-only">{`${horizon.label} ${category.label} Vision`}</FormLabel>
+                                <FormLabel className="flex items-center gap-2 mb-2 text-foreground/80">
+                                  <Sparkles className="h-4 w-4 text-accent"/>
+                                  {category.label}
+                                </FormLabel>
                                 <FormControl>
                                   <Textarea
-                                    placeholder={`My vision for my ${category.label.toLowerCase()} in ${horizon.label.toLowerCase()} is...`}
-                                    className="min-h-[200px] resize-none bg-background/80 text-base"
+                                    placeholder={category.placeholder}
+                                    className="min-h-[120px] resize-none bg-background/80 text-base"
                                     {...field}
                                   />
                                 </FormControl>
                               </FormItem>
                             )}
                           />
-                        </TabsContent>
-                      ))}
-                    </Tabs>
-                  </TabsContent>
+                        ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
                 ))}
-              </Tabs>
+              </Accordion>
               <div className="flex justify-center">
                 <Button type="submit" size="lg" disabled={isLoading} className="font-bold">
                   {isLoading ? (
