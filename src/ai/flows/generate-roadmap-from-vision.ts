@@ -53,8 +53,6 @@ const prompt = ai.definePrompt({
   - 2-Year Vision: Career: {{{twoYearVision.career}}}, Health: {{{twoYearVision.health}}}, Relationships: {{{twoYearVision.relationships}}}, Legacy: {{{twoYearVision.legacy}}}
   - 5-Year Vision: Career: {{{fiveYearVision.career}}}, Health: {{{fiveYearVision.health}}}, Relationships: {{{fiveYearVision.relationships}}}, Legacy: {{{fiveYearVision.legacy}}}
   - 10-Year Vision: Career: {{{tenYearVision.career}}}, Health: {{{tenYearVision.health}}}, Relationships: {{{tenYearVision.relationships}}}, Legacy: {{{tenYearVision.legacy}}}
-  
-  Please provide the output in a valid JSON format that adheres to the specified output schema.
   `,
 });
 
