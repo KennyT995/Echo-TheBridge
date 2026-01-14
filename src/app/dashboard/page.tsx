@@ -125,7 +125,7 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent className="flex-grow">
                    <p className="text-sm text-muted-foreground line-clamp-3">
-                    {vision.twoYearVision?.career || 'No career goal set for 2 years.'}
+                    {vision.goal || 'No goal description provided.'}
                    </p>
                 </CardContent>
                 <div className="p-6 pt-0">

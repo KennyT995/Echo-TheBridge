@@ -78,12 +78,7 @@ export default function VisionDetailPage() {
 
   const getCombinedVisionText = () => {
       if (!vision) return '';
-      let text = '';
-      text += `Title: ${vision.title}\n\n`;
-      text += `2 Year Career: ${vision.twoYearVision.career}\n`;
-      text += `5 Year Career: ${vision.fiveYearVision.career}\n`;
-      text += `10 Year Career: ${vision.tenYearVision.career}\n`;
-      return text;
+      return `Title: ${vision.title}\n\nGoal: ${vision.goal}`;
   }
 
   return (

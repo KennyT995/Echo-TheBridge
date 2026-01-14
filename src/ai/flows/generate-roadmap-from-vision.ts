@@ -1,9 +1,9 @@
 'use server';
 
 /**
- * @fileOverview Generates a roadmap from user-defined visions for 2, 5, and 10-year horizons.
+ * @fileOverview Generates a roadmap from a single, user-defined goal.
  *
- * - generateRoadmapFromVision - A function that generates a roadmap from the user's vision.
+ * - generateRoadmapFromVision - A function that generates a roadmap from the user's goal.
  * - GenerateRoadmapFromVisionInput - The input type for the generateRoadmapFromVision function.
  * - GenerateRoadmapFromVisionOutput - The return type for the generateRoadmapFromVision function.
  */
@@ -11,18 +11,9 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const VisionCategorySchema = z.object({
-  career: z.string().optional().default(''),
-  health: z.string().optional().default(''),
-  relationships: z.string().optional().default(''),
-  legacy: z.string().optional().default(''),
-});
-
 const GenerateRoadmapFromVisionInputSchema = z.object({
   title: z.string().optional().default(''),
-  twoYearVision: VisionCategorySchema,
-  fiveYearVision: VisionCategorySchema,
-  tenYearVision: VisionCategorySchema,
+  goal: z.string().describe("The user's primary goal or vision."),
 });
 export type GenerateRoadmapFromVisionInput = z.infer<typeof GenerateRoadmapFromVisionInputSchema>;
 
@@ -44,16 +35,14 @@ const prompt = ai.definePrompt({
   name: 'generateRoadmapFromVisionPrompt',
   input: {schema: GenerateRoadmapFromVisionInputSchema},
   output: {schema: GenerateRoadmapFromVisionOutputSchema},
-  prompt: `You are an expert life coach specializing in reverse-engineering long-term visions into actionable roadmaps.
+  prompt: `You are an expert life coach and strategist specializing in reverse-engineering long-term visions into actionable roadmaps.
 
-  Based on the user's visions, create a structured roadmap that bridges the gap between their long-term goals and daily actions.
-
-  The user's vision is titled: {{{title}}}
+  The user's goal is titled: {{{title}}}
   
-  Here are the user's visions:
-  - 2-Year Vision: Career: {{{twoYearVision.career}}}, Health: {{{twoYearVision.health}}}, Relationships: {{{twoYearVision.relationships}}}, Legacy: {{{twoYearVision.legacy}}}
-  - 5-Year Vision: Career: {{{fiveYearVision.career}}}, Health: {{{fiveYearVision.health}}}, Relationships: {{{fiveYearVision.relationships}}}, Legacy: {{{fiveYearVision.legacy}}}
-  - 10-Year Vision: Career: {{{tenYearVision.career}}}, Health: {{{tenYearVision.health}}}, Relationships: {{{tenYearVision.relationships}}}, Legacy: {{{tenYearVision.legacy}}}
+  Here is the user's core goal:
+  "{{{goal}}}"
+
+  Based on this goal, create a comprehensive, structured roadmap that bridges the gap between their ambition and daily actions. Break it down into yearly milestones, monthly sprints, weekly tactics, and daily habits.
   `,
 });
 

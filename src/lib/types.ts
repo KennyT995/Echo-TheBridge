@@ -2,18 +2,9 @@ import { z } from 'zod';
 import type { GenerateRoadmapFromVisionOutput } from '@/ai/flows/generate-roadmap-from-vision';
 import { serverTimestamp } from 'firebase/firestore';
 
-const VisionCategorySchema = z.object({
-  career: z.string().min(1, 'Career vision is required.'),
-  health: z.string().min(1, 'Health vision is required.'),
-  relationships: z.string().min(1, 'Relationships vision is required.'),
-  legacy: z.string().min(1, 'Legacy vision is required.'),
-});
-
 export const VisionFormSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters.'),
-  twoYearVision: VisionCategorySchema,
-  fiveYearVision: VisionCategorySchema,
-  tenYearVision: VisionCategorySchema,
+  goal: z.string().min(10, 'Your goal should be at least 10 characters long to provide enough context for the AI.'),
 });
 
 export type VisionFormValues = z.infer<typeof VisionFormSchema>;
@@ -24,10 +15,8 @@ export interface Vision {
   id: string;
   userId: string;
   title: string;
+  goal: string;
   createdAt: ReturnType<typeof serverTimestamp>;
-  twoYearVision: z.infer<typeof VisionCategorySchema>;
-  fiveYearVision: z.infer<typeof VisionCategorySchema>;
-  tenYearVision: z.infer<typeof VisionCategorySchema>;
 }
 
 export interface UserData {
