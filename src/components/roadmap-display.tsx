@@ -9,7 +9,9 @@ import type { Roadmap, RoadmapItem } from '@/lib/types';
 import { CheckCircle2, CircleDot, GanttChartSquare, CalendarDays } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { DocumentReference, updateDoc } from 'firebase/firestore';
+import { DocumentReference } from 'firebase/firestore';
+import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+
 
 interface RoadmapDisplayProps {
   roadmap: Roadmap;
@@ -47,31 +49,23 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
   const handleCheckChange = async (section: RoadmapSectionKey, index: number, checked: boolean) => {
     if (!roadmapRef) return;
 
-    // Create a deep copy of the roadmap to avoid direct mutation
     const newRoadmapData = { ...roadmap };
     const newSection = [...newRoadmapData[section]];
     
-    // Ensure the item exists before trying to update it
     if(newSection[index]) {
       newSection[index] = { ...newSection[index], completed: checked };
       
-      // Use dot notation to update only the specific section array in Firestore
-      await updateDoc(roadmapRef, {
-        [section]: newSection
-      }).catch(error => {
-        // In a real app, you might want to show a toast notification on error
-        console.error("Failed to update roadmap item:", error);
-      });
+      updateDocumentNonBlocking(roadmapRef, { [section]: newSection });
     }
   };
 
   return (
-    <Card className="w-full bg-card/80 backdrop-blur-lg border-white/10">
+    <Card className="w-full">
       <CardContent className="p-4 sm:p-6">
         <Accordion type="multiple" defaultValue={['yearlyMilestones']} className="w-full space-y-4">
           {roadmapSections.map((section) => (
             roadmap[section.key] && roadmap[section.key].length > 0 && (
-              <AccordionItem key={section.key} value={section.key} className="border-border/50 rounded-lg bg-secondary/30">
+              <AccordionItem key={section.key} value={section.key} className="border-border/50 rounded-lg bg-card/50">
                 <AccordionTrigger className="p-4 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline">
                   <div className="flex items-center gap-3">
                     <section.icon className="h-5 w-5 text-accent" />

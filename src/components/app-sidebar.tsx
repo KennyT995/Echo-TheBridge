@@ -7,9 +7,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
   SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
 import { usePathname } from 'next/navigation';
@@ -19,6 +16,12 @@ import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebas
 import { collection, query, orderBy } from 'firebase/firestore';
 import type { Vision } from '@/lib/types';
 import { useEffect, useState } from 'react';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 const menuItems = [
   {
@@ -85,12 +88,8 @@ export default function AppSidebar() {
         </SidebarMenu>
       </SidebarGroup>
       
-      <SidebarGroup className="mt-auto">
-        <SidebarGroupLabel className="flex items-center">
-            <Rocket className="mr-2" />
-            My Visions
-        </SidebarGroupLabel>
-         <SidebarMenu>
+      <SidebarGroup className="mt-auto p-0">
+         <SidebarMenu className='p-2'>
           <ClientOnly>
             {visionsLoading && (
               <>
@@ -99,30 +98,39 @@ export default function AppSidebar() {
               </>
             )}
           </ClientOnly>
+          </SidebarMenu>
+
           {visions && visions.length > 0 && (
-             <SidebarMenuItem>
-                <SidebarMenuButton
-                    isCollapsible={false}
-                    className="group/sub-trigger"
-                >
-                    <Rocket />
-                    <span>My Visions</span>
-                </SidebarMenuButton>
-                <SidebarMenuSub>
-                {visions.map((vision) => (
-                    <SidebarMenuSubItem key={vision.id}>
-                        <Link href={`/vision/${vision.id}`} passHref>
-                            <SidebarMenuSubButton as="a" isActive={pathname === `/vision/${vision.id}`}>
-                                {vision.title}
-                            </SidebarMenuSubButton>
-                        </Link>
-                    </SidebarMenuSubItem>
-                ))}
-                </SidebarMenuSub>
-             </SidebarMenuItem>
+            <Accordion type="single" collapsible className="w-full" defaultValue='my-visions'>
+              <AccordionItem value="my-visions" className='border-none'>
+                <AccordionTrigger className="p-2 text-sm font-medium text-sidebar-foreground/90 hover:text-sidebar-foreground hover:no-underline hover:bg-sidebar-accent rounded-md [&[data-state=open]]:bg-sidebar-accent">
+                    <div className="flex items-center gap-2">
+                        <Rocket className="w-4 h-4"/>
+                        <span>My Visions</span>
+                    </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                    <ul className='space-y-1 pl-8 pr-2 py-2'>
+                        {visions.map((vision) => (
+                            <li key={vision.id}>
+                                <Link href={`/vision/${vision.id}`} passHref>
+                                    <a className={cn("block text-sm rounded-md p-2 hover:bg-sidebar-accent", pathname === `/vision/${vision.id}` && 'bg-sidebar-accent font-semibold')}>
+                                        {vision.title}
+                                    </a>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           )}
-         </SidebarMenu>
+         
       </SidebarGroup>
     </SidebarContent>
   );
+}
+
+function cn(...classes: string[]) {
+    return classes.filter(Boolean).join(' ');
 }
