@@ -2,14 +2,13 @@
 
 import {
   generateRoadmapFromVision,
-  type GenerateRoadmapFromVisionOutput,
 } from '@/ai/flows/generate-roadmap-from-vision';
 import {
   analyzeAndReflectOnUserInput,
   type AnalyzeAndReflectOnUserInputOutput,
 } from '@/ai/flows/analyze-and-reflect-on-user-input';
 import { VisionFormSchema, type VisionFormValues } from '@/lib/types';
-import { getFirestore, doc, setDoc, serverTimestamp, type Firestore } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
