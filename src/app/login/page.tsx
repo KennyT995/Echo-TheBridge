@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -56,6 +56,14 @@ export default function LoginPage() {
     },
   });
 
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      router.push('/');
+    }
+  }, [user, router]);
+
+
   const onSubmit = (values: LoginFormValues, action: 'login' | 'signup') => {
     setIsSubmitting(true);
     setActiveAction(action);
@@ -66,7 +74,7 @@ export default function LoginPage() {
       } else {
         initiateEmailSignUp(auth, values.email, values.password);
       }
-      // Non-blocking, so we don't await. Redirection is handled by the effect below.
+      // Non-blocking, so we don't await. Redirection is handled by the effect above.
     } catch (error: any) {
         toast({
             variant: "destructive",
@@ -79,17 +87,12 @@ export default function LoginPage() {
   };
 
 
-  if (isUserLoading) {
+  if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
       </div>
     );
-  }
-
-  if (user) {
-    router.push('/');
-    return null;
   }
 
   return (
