@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2, Zap } from 'lucide-react';
-import { useUser } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { nanoid } from 'nanoid';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,9 +19,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { generateAndSaveRoadmap } from '@/app/actions';
+import { generateRoadmap } from '@/app/actions';
 import { VisionFormSchema, type VisionFormValues } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+
 
 interface VisionFormProps {
     onVisionCreated: (visionId: string) => void;
@@ -29,6 +33,7 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { user } = useUser();
+  const firestore = useFirestore();
 
   const form = useForm<VisionFormValues>({
     resolver: zodResolver(VisionFormSchema),
@@ -48,17 +53,46 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
         return;
     }
     setIsLoading(true);
-    const result = await generateAndSaveRoadmap(values, user.uid);
+    
+    // 1. Generate roadmap from the server action
+    const result = await generateRoadmap(values);
 
-    if (result.error) {
+    if (result.error || !result.roadmap) {
       toast({
         variant: 'destructive',
         title: 'Error Generating Roadmap',
-        description: result.error,
+        description: result.error || 'An unknown error occurred.',
       });
-    } else if (result.visionId) {
-        onVisionCreated(result.visionId);
+      setIsLoading(false);
+      return;
     }
+
+    // 2. Save the vision and roadmap to Firestore from the client
+    const visionId = nanoid();
+
+    const visionData = {
+      ...values,
+      id: visionId,
+      userId: user.uid,
+      createdAt: serverTimestamp(),
+    };
+
+    const roadmapData = {
+      ...result.roadmap,
+      id: visionId,
+      visionId: visionId,
+      userId: user.uid,
+    };
+
+    const visionRef = doc(firestore, 'users', user.uid, 'visions', visionId);
+    setDocumentNonBlocking(visionRef, visionData, {});
+
+    const roadmapRef = doc(firestore, 'users', user.uid, 'roadmaps', visionId);
+    setDocumentNonBlocking(roadmapRef, roadmapData, {});
+    
+    // We don't wait for the writes to finish, we optimistically navigate.
+    // The non-blocking writers will emit global errors if they fail.
+    onVisionCreated(visionId);
     setIsLoading(false);
   }
 
