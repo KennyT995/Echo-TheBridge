@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-background",
+      "description": "Abstract background image for the hero section.",
+      "imageUrl": "https://images.unsplash.com/photo-1557264322-b44d383a2906?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGRhcmt8ZW58MHx8fHwxNzY4MzgwMzI2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract dark"
+    },
+    {
+      "id": "feature-vision",
+      "description": "Image representing the vision creation feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1721244653652-268631ec049a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwbGFubmluZyUyMGZ1dHVyZXxlbnwwfHx8fDE3Njg0MjcyMzV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "planning future"
+    },
+    {
+      "id": "feature-roadmap",
+      "description": "Image representing the AI-generated roadmap feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1767122226087-4d4b42507eb1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxwYXRoJTIwbWFwfGVufDB8fHx8MTc2ODQyNzIzNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "path map"
+    },
+    {
+      "id": "feature-coach",
+      "description": "Image representing the AI coach feature.",
+      "imageUrl": "https://images.unsplash.com/photo-1766113492981-c8b53d76c0f8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxndWlkYW5jZSUyMGhlbHB8ZW58MHx8fHwxNzY4NDI3MjM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "guidance help"
+    }
+  ]
 }

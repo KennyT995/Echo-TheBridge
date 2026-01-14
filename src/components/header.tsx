@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { SidebarTrigger } from './ui/sidebar';
+import { Rocket } from 'lucide-react';
 
 export default function Header() {
   const { user, isUserLoading } = useUser();
@@ -19,10 +20,11 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
-         <div className="mr-4 flex">
+         <div className="mr-4 flex items-center">
           <SidebarTrigger className="md:hidden"/>
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <span className="hidden font-bold sm:inline-block">
+            <Rocket className="h-6 w-6 text-primary" />
+            <span className="font-bold sm:inline-block font-headline">
               Vision Bridge
             </span>
           </Link>
@@ -31,16 +33,16 @@ export default function Header() {
           {!isUserLoading &&
             (user ? (
               <>
-                <span className="text-sm text-foreground/80 hidden sm:inline-block">
-                  {user.email}
-                </span>
+                <Button variant="ghost" asChild>
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
                 <Button variant="outline" onClick={handleLogout}>
                   Logout
                 </Button>
               </>
             ) : (
               <Button asChild>
-                <Link href="/login">Login</Link>
+                <Link href="/login">Login / Sign Up</Link>
               </Button>
             ))}
         </div>
