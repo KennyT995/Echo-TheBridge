@@ -51,6 +51,7 @@ service cloud.firestore {
     }
 
     function hasImmutableUserId() {
+      // On update, the incoming resource 'id' must not change.
       return request.resource.data.id == resource.data.id;
     }
     
@@ -92,9 +93,7 @@ service cloud.firestore {
     match /plan_tiers/{planTierId} {
       allow get: if isSignedIn();
       allow list: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if false;
-      allow delete: if false;
+      allow create, update, delete: if false;
     }
   }
 }
