@@ -87,10 +87,10 @@ export function VisionForm() {
                 </TabsList>
                 {visionHorizons.map((horizon) => (
                   <TabsContent key={horizon.id} value={horizon.id} className="mt-6">
-                    <Tabs defaultValue={visionCategories[0].id} className="w-full" variant="pills">
-                      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+                    <Tabs defaultValue={visionCategories[0].id} className="w-full">
+                      <TabsList variant="pills" className="grid w-full grid-cols-2 sm:grid-cols-4">
                         {visionCategories.map((category) => (
-                          <TabsTrigger key={category.id} value={category.id}>
+                          <TabsTrigger variant="pills" key={category.id} value={category.id}>
                             {category.label}
                           </TabsTrigger>
                         ))}
@@ -147,42 +147,4 @@ export function VisionForm() {
       )}
     </div>
   );
-}
-
-// Add a new variant to Tabs component if it doesn't exist
-const originalTabsTrigger = require('@/components/ui/tabs').TabsTrigger;
-const cn = require('@/lib/utils').cn;
-import * as React from 'react';
-import * as TabsPrimitive from "@radix-ui/react-tabs"
-
-const NewTabsTrigger = React.forwardRef<
-  React.ElementRef<typeof TabsPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger> & { variant?: 'default' | 'pills' }
->(({ className, variant, ...props }, ref) => (
-    <TabsPrimitive.Trigger
-    ref={ref}
-    className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-        variant === 'pills' && 'rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg',
-        className
-    )}
-    {...props}
-    />
-));
-NewTabsTrigger.displayName = TabsPrimitive.Trigger.displayName;
-
-// This is a bit of a hack to augment the existing component without being able to modify the file
-if (TabsPrimitive.Trigger.displayName === originalTabsTrigger.displayName) {
-    (TabsPrimitive as any).Trigger = NewTabsTrigger;
-}
-
-const NewTabs = React.forwardRef<
-    React.ElementRef<typeof TabsPrimitive.Root>,
-    React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root> & { variant?: 'default' | 'pills' }
-    // @ts-ignore
->(({ variant, ...props }, ref) => <TabsPrimitive.Root ref={ref} {...props} />);
-NewTabs.displayName = TabsPrimitive.Root.displayName;
-
-if (TabsPrimitive.Root.displayName === require('@/components/ui/tabs').Tabs.displayName) {
-    (TabsPrimitive as any).Root = NewTabs;
 }
