@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import type { Vision } from '@/lib/types';
+import { useEffect, useState } from 'react';
 
 const menuItems = [
   {
@@ -31,6 +32,21 @@ const menuItems = [
     icon: Gem,
   },
 ];
+
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  if (!hasMounted) {
+    return null;
+  }
+
+  return <>{children}</>;
+}
+
 
 export default function AppSidebar() {
   const pathname = usePathname();
@@ -75,12 +91,14 @@ export default function AppSidebar() {
             My Visions
         </SidebarGroupLabel>
          <SidebarMenu>
-          {visionsLoading && (
-            <>
-                <SidebarMenuSkeleton showIcon />
-                <SidebarMenuSkeleton showIcon />
-            </>
-          )}
+          <ClientOnly>
+            {visionsLoading && (
+              <>
+                  <SidebarMenuSkeleton showIcon />
+                  <SidebarMenuSkeleton showIcon />
+              </>
+            )}
+          </ClientOnly>
           {visions && visions.length > 0 && (
              <SidebarMenuItem>
                 <SidebarMenuButton
