@@ -50,9 +50,9 @@ service cloud.firestore {
       return request.resource.data.id == userId;
     }
 
-    function hasImmutableUserId() {
-      // On update, the incoming resource 'id' must not change.
-      return request.resource.data.id == resource.data.id;
+    function isAttemptingToChangeId() {
+      // The 'id' field in the incoming data must not differ from the existing one.
+      return 'id' in request.resource.data && request.resource.data.id != resource.data.id;
     }
     
     function canCreateVision(userId) {
@@ -73,7 +73,7 @@ service cloud.firestore {
       allow get: if isOwner(userId);
       allow list: if false;
       allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-      allow update: if isExistingOwner(userId) && hasImmutableUserId();
+      allow update: if isExistingOwner(userId) && !isAttemptingToChangeId();
       allow delete: if isExistingOwner(userId);
 
       // Visions Subcollection
