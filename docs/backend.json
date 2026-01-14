@@ -72,6 +72,94 @@
         "price",
         "features"
       ]
+    },
+    "Vision": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Vision",
+      "type": "object",
+      "description": "Represents a user's vision, including different time horizons.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the vision."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who owns this vision."
+        },
+        "title": {
+          "type": "string",
+          "description": "A user-defined title for the vision."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the vision was created."
+        },
+        "twoYearVision": {
+          "type": "object",
+          "properties": {
+            "career": { "type": "string" },
+            "health": { "type": "string" },
+            "relationships": { "type": "string" },
+            "legacy": { "type": "string" }
+          }
+        },
+        "fiveYearVision": {
+          "type": "object",
+          "properties": {
+            "career": { "type": "string" },
+            "health": { "type": "string" },
+            "relationships": { "type": "string" },
+            "legacy": { "type": "string" }
+          }
+        },
+        "tenYearVision": {
+          "type": "object",
+          "properties": {
+            "career": { "type": "string" },
+            "health": { "type": "string" },
+            "relationships": { "type": "string" },
+            "legacy": { "type": "string" }
+          }
+        }
+      },
+      "required": ["id", "userId", "title", "createdAt"]
+    },
+    "Roadmap": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Roadmap",
+      "type": "object",
+      "description": "Represents the AI-generated roadmap for a specific vision.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the roadmap, same as the vision ID."
+        },
+        "visionId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "yearlyMilestones": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "monthlySprints": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "weeklyTactics": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dailyHabits": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["id", "visionId", "userId", "yearlyMilestones", "monthlySprints", "weeklyTactics", "dailyHabits"]
     }
   },
   "auth": {
@@ -110,6 +198,34 @@
               "name": "planTierId",
               "description": "The unique identifier for the plan tier."
             }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/visions/{visionId}",
+        "definition": {
+          "entityName": "Vision",
+          "schema": {
+            "$ref": "#/backend/entities/Vision"
+          },
+          "description": "Stores visions created by a user. Subcollection of users.",
+          "params": [
+            { "name": "userId", "description": "The user's unique ID." },
+            { "name": "visionId", "description": "The vision's unique ID." }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/roadmaps/{roadmapId}",
+        "definition": {
+          "entityName": "Roadmap",
+          "schema": {
+            "$ref": "#/backend/entities/Roadmap"
+          },
+          "description": "Stores roadmaps generated for a user's vision. Subcollection of users.",
+          "params": [
+            { "name": "userId", "description": "The user's unique ID." },
+            { "name": "roadmapId", "description": "The roadmap's unique ID, same as visionId." }
           ]
         }
       }

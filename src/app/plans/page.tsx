@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 type PlanTier = {
   id: string;
@@ -42,7 +44,7 @@ const defaultPlans: PlanTier[] = [
       features: [
         '5 Visions',
         'Advanced AI-Powered Roadmap',
-        'Strategic Briefings',
+        'AI-Powered Strategic Briefings',
         'Email Support',
       ],
     },
@@ -50,12 +52,12 @@ const defaultPlans: PlanTier[] = [
       id: 'visionary',
       name: 'Visionary',
       price: 45,
-      maxVisions: Infinity,
+      maxVisions: 999, // Effectively unlimited
       aiFeaturesEnabled: true,
       features: [
         'Unlimited Visions',
         'Advanced AI-Powered Roadmap',
-        'Strategic Briefings',
+        'AI-Powered Strategic Briefings',
         'Priority Support',
         'Legacy Planning',
       ],
@@ -77,6 +79,7 @@ export default function PlansPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const { toast } = useToast();
   const [isSeeding, setIsSeeding] = useState(true);
 
   const plansQuery = useMemoFirebase(() => {
@@ -84,12 +87,11 @@ export default function PlansPage() {
     return collection(firestore, 'plan_tiers');
   }, [firestore]);
 
-  const { data: plans, isLoading: plansLoading, error } = useCollection<PlanTier>(plansQuery);
+  const { data: plans, isLoading: plansLoading } = useCollection<PlanTier>(plansQuery);
 
   useEffect(() => {
     async function handleSeeding() {
         if (firestore) {
-            // Check if plans exist, if not, seed them.
             if (plans && plans.length === 0 && !plansLoading && !isSeeding) {
               try {
                 await seedDefaultPlans(firestore);
@@ -97,7 +99,6 @@ export default function PlansPage() {
                 console.error("Error seeding plans:", e)
               }
             }
-            // Add a small delay to prevent flickering if seeding is fast
             setTimeout(() => setIsSeeding(false), 500);
         }
     }
@@ -117,10 +118,14 @@ export default function PlansPage() {
     }
   }, [user, isUserLoading, router]);
 
-  const handleSelectPlan = async (planTierId: string) => {
+  const handleSelectPlan = (planTierId: string) => {
     if (userDocRef) {
-      await updateDoc(userDocRef, { planTierId });
-      router.push('/');
+      updateDocumentNonBlocking(userDocRef, { planTierId });
+       toast({
+        title: "Plan Updated!",
+        description: "Your plan has been successfully updated.",
+      });
+      router.push('/dashboard');
     }
   };
 
@@ -135,7 +140,7 @@ export default function PlansPage() {
   return (
     <>
       <Header />
-      <main className="container mx-auto min-h-screen px-4 py-12 md:py-20">
+      <main className="container mx-auto px-4 py-12 md:py-20">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl md:text-6xl">
             Choose Your Plan
@@ -145,11 +150,11 @@ export default function PlansPage() {
           </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
-          {plans?.map((plan) => (
+          {(plans && plans.length > 0 ? plans : defaultPlans)?.map((plan) => (
             <Card
               key={plan.id}
               className={cn(
-                'flex flex-col',
+                'flex flex-col border-border/50',
                 userData?.planTierId === plan.id && 'border-primary ring-2 ring-primary'
               )}
             >

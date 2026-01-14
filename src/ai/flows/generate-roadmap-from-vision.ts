@@ -11,17 +11,18 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const VisionSchema = z.object({
-  career: z.string().optional(),
-  health: z.string().optional(),
-  relationships: z.string().optional(),
-  legacy: z.string().optional(),
+const VisionCategorySchema = z.object({
+  career: z.string().optional().default(''),
+  health: z.string().optional().default(''),
+  relationships: z.string().optional().default(''),
+  legacy: z.string().optional().default(''),
 });
 
 const GenerateRoadmapFromVisionInputSchema = z.object({
-  twoYearVision: VisionSchema.describe('Vision for 2-year horizon.'),
-  fiveYearVision: VisionSchema.describe('Vision for 5-year horizon.'),
-  tenYearVision: VisionSchema.describe('Vision for 10-year horizon.'),
+  title: z.string().optional().default(''),
+  twoYearVision: VisionCategorySchema,
+  fiveYearVision: VisionCategorySchema,
+  tenYearVision: VisionCategorySchema,
 });
 export type GenerateRoadmapFromVisionInput = z.infer<typeof GenerateRoadmapFromVisionInputSchema>;
 
@@ -47,12 +48,15 @@ const prompt = ai.definePrompt({
 
   Based on the user's visions, create a structured roadmap that bridges the gap between their long-term goals and daily actions.
 
+  The user's vision is titled: {{{title}}}
+  
   Here are the user's visions:
   - 2-Year Vision: Career: {{{twoYearVision.career}}}, Health: {{{twoYearVision.health}}}, Relationships: {{{twoYearVision.relationships}}}, Legacy: {{{twoYearVision.legacy}}}
   - 5-Year Vision: Career: {{{fiveYearVision.career}}}, Health: {{{fiveYearVision.health}}}, Relationships: {{{fiveYearVision.relationships}}}, Legacy: {{{fiveYearVision.legacy}}}
   - 10-Year Vision: Career: {{{tenYearVision.career}}}, Health: {{{tenYearVision.health}}}, Relationships: {{{tenYearVision.relationships}}}, Legacy: {{{tenYearVision.legacy}}}
   `,
 });
+
 
 const generateRoadmapFromVisionFlow = ai.defineFlow(
   {

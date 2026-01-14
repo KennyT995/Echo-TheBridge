@@ -58,10 +58,10 @@ export default function LoginPage() {
 
   // Redirect if user is already logged in
   useEffect(() => {
-    if (user) {
-      router.push('/');
+    if (!isUserLoading && user) {
+      router.push('/dashboard');
     }
-  }, [user, router]);
+  }, [user, isUserLoading, router]);
 
   const handleAuthError = (error: any) => {
     let message = 'An unknown error occurred.';
