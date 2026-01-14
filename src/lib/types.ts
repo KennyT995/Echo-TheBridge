@@ -2,10 +2,10 @@ import { z } from 'zod';
 import type { GenerateRoadmapFromVisionOutput } from '@/ai/flows/generate-roadmap-from-vision';
 
 const VisionCategorySchema = z.object({
-  career: z.string(),
-  health: z.string(),
-  relationships: z.string(),
-  legacy: z.string(),
+  career: z.string().optional(),
+  health: z.string().optional(),
+  relationships: z.string().optional(),
+  legacy: z.string().optional(),
 });
 
 export const VisionFormSchema = z.object({

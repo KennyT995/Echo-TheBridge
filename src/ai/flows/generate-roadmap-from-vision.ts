@@ -12,10 +12,10 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const VisionSchema = z.object({
-  career: z.string().describe('Vision for career in the specified horizon.'),
-  health: z.string().describe('Vision for health in the specified horizon.'),
-  relationships: z.string().describe('Vision for relationships in the specified horizon.'),
-  legacy: z.string().describe('Vision for legacy in the specified horizon.'),
+  career: z.string().optional(),
+  health: z.string().optional(),
+  relationships: z.string().optional(),
+  legacy: z.string().optional(),
 });
 
 const GenerateRoadmapFromVisionInputSchema = z.object({
@@ -45,9 +45,7 @@ const prompt = ai.definePrompt({
   output: {schema: GenerateRoadmapFromVisionOutputSchema},
   prompt: `You are an expert life coach specializing in reverse-engineering long-term visions into actionable roadmaps.
 
-  Based on the user's 2-year, 5-year, and 10-year visions, create a structured roadmap that bridges the gap between their long-term goals and daily actions.
-
-  Consider how each element builds towards the longer-term vision.  Ensure that the weekly tactics and daily habits contribute directly to the monthly sprints and yearly milestones.
+  Based on the user's visions, create a structured roadmap that bridges the gap between their long-term goals and daily actions.
 
   Here are the user's visions:
   - 2-Year Vision: Career: {{{twoYearVision.career}}}, Health: {{{twoYearVision.health}}}, Relationships: {{{twoYearVision.relationships}}}, Legacy: {{{twoYearVision.legacy}}}
