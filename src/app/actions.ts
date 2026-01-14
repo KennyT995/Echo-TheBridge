@@ -29,17 +29,18 @@ export async function generateAndSaveRoadmap(
   userId: string
 ): Promise<{ visionId?: string; error?: string }> {
   const validatedFields = VisionFormSchema.safeParse(values);
-  const db = getDb();
-
   if (!validatedFields.success) {
     return {
-      error:
-        'Invalid fields. Please ensure all vision statements are filled out.',
+      error: 'Invalid fields. Please ensure your goal is descriptive enough.',
     };
   }
 
+  const db = getDb();
+  const visionId = nanoid();
+
   try {
-    const visionId = nanoid();
+    const roadmap = await generateRoadmapFromVision(validatedFields.data);
+
     const visionData = {
       ...validatedFields.data,
       id: visionId,
@@ -47,38 +48,48 @@ export async function generateAndSaveRoadmap(
       createdAt: serverTimestamp(),
     };
 
-    // Generate Roadmap
-    const roadmap = await generateRoadmapFromVision(validatedFields.data);
-
-    // Save Vision
-    const visionRef = doc(db, 'users', userId, 'visions', visionId);
-    await setDoc(visionRef, visionData);
-    
-
-    // Save Roadmap
     const roadmapData = {
       ...roadmap,
       id: visionId,
       visionId: visionId,
       userId: userId,
     };
-    const roadmapRef = doc(db, 'users', userId, 'roadmaps', visionId);
-    await setDoc(roadmapRef, roadmapData);
 
-    return { visionId: visionId };
-  } catch (error: any) {
-    console.error('Roadmap generation or save failed:', error);
-    if (error.code === 'permission-denied' || error.message?.includes('permission-denied')) {
-       // This is a Firestore security rule error.
-       // We can provide a more specific message for plan limits.
-       return { error: 'You have reached the maximum number of visions for your current plan. Please upgrade your plan to create more.' };
-    }
+    const visionRef = doc(db, 'users', userId, 'visions', visionId);
+    const roadmapRef = doc(db, 'users', userId, 'roadmaps', visionId);
+
+    // Perform writes non-blockingly and handle errors
+    setDoc(visionRef, visionData).catch((error) => {
+      console.error('Error saving vision:', error);
+      const permissionError = new FirestorePermissionError({
+        path: visionRef.path,
+        operation: 'create',
+        requestResourceData: visionData,
+      });
+      // This will be caught by the FirebaseErrorListener on the client
+      errorEmitter.emit('permission-error', permissionError);
+    });
+
+    setDoc(roadmapRef, roadmapData).catch((error) => {
+      console.error('Error saving roadmap:', error);
+      const permissionError = new FirestorePermissionError({
+        path: roadmapRef.path,
+        operation: 'create',
+        requestResourceData: roadmapData,
+      });
+      errorEmitter.emit('permission-error', permissionError);
+    });
+
+    return { visionId };
+  } catch (error) {
+    console.error('Roadmap generation AI flow failed:', error);
     return {
       error:
-        'An unexpected error occurred while generating your roadmap. Please try again later.',
+        'An unexpected error occurred while generating your roadmap with the AI. Please try again later.',
     };
   }
 }
+
 
 export async function getReflection(
   userInput: string,
