@@ -9,27 +9,28 @@ import {
   type AnalyzeAndReflectOnUserInputOutput,
 } from '@/ai/flows/analyze-and-reflect-on-user-input';
 import { VisionFormSchema, type VisionFormValues } from '@/lib/types';
-import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { getApps, initializeApp } from 'firebase/app';
-import { firebaseConfig } from '@/firebase/config';
+import { getFirestore, doc, setDoc, serverTimestamp, type Firestore } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { firebaseConfig } from '@/firebase/config';
 
-// Helper to initialize Firebase Admin SDK
-let db: any;
-if (!getApps().length) {
-  const firebaseApp = initializeApp(firebaseConfig);
-  db = getFirestore(firebaseApp);
-} else {
-  db = getFirestore();
+
+function getDb() {
+  if (getApps().length === 0) {
+    return getFirestore(initializeApp(firebaseConfig));
+  }
+  return getFirestore(getApp());
 }
+
 
 export async function generateAndSaveRoadmap(
   values: VisionFormValues,
   userId: string
 ): Promise<{ visionId?: string; error?: string }> {
   const validatedFields = VisionFormSchema.safeParse(values);
+  const db = getDb();
 
   if (!validatedFields.success) {
     return {
@@ -52,7 +53,7 @@ export async function generateAndSaveRoadmap(
 
     // Save Vision
     const visionRef = doc(db, 'users', userId, 'visions', visionId);
-    await setDoc(visionRef, visionData).catch(error => {
+    setDoc(visionRef, visionData).catch(error => {
       errorEmitter.emit(
         'permission-error',
         new FirestorePermissionError({
@@ -61,7 +62,7 @@ export async function generateAndSaveRoadmap(
           requestResourceData: visionData,
         })
       );
-      throw error; // Re-throw to be caught by the outer try-catch
+      // We don't rethrow here to avoid unhandled promise rejection on the client
     });
 
     // Save Roadmap
@@ -72,7 +73,7 @@ export async function generateAndSaveRoadmap(
       userId: userId,
     };
     const roadmapRef = doc(db, 'users', userId, 'roadmaps', visionId);
-    await setDoc(roadmapRef, roadmapData).catch(error => {
+    setDoc(roadmapRef, roadmapData).catch(error => {
       errorEmitter.emit(
         'permission-error',
         new FirestorePermissionError({
@@ -81,14 +82,12 @@ export async function generateAndSaveRoadmap(
           requestResourceData: roadmapData,
         })
       );
-      throw error; // Re-throw to be caught by the outer try-catch
     });
 
     return { visionId: visionId };
   } catch (error: any) {
     console.error('Roadmap generation or save failed:', error);
-    // Provide a more specific error if it's a permission issue from our rules
-    if (error.message.includes('permission-denied') || error.name === 'FirebaseError') {
+    if (error.code === 'permission-denied' || error.message?.includes('permission-denied')) {
        return { error: 'You have reached the maximum number of visions for your current plan. Please upgrade your plan to create more.' };
     }
     return {
