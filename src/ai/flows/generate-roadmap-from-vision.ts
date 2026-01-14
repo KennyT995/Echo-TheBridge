@@ -49,19 +49,12 @@ const prompt = ai.definePrompt({
 
   Consider how each element builds towards the longer-term vision.  Ensure that the weekly tactics and daily habits contribute directly to the monthly sprints and yearly milestones.
 
-  Output the roadmap in JSON format:
-  {
-    yearlyMilestones: [ // Key achievements for the current year ],
-    monthlySprints: [ // Focus for the next 12 months ],
-    weeklyTactics: [ // Actions needed this week ],
-    dailyHabits: [ // Atomic units of action required daily ]
-  }
-
   Here are the user's visions:
-
-  2-Year Vision: Career: {{{twoYearVision.career}}}, Health: {{{twoYearVision.health}}}, Relationships: {{{twoYearVision.relationships}}}, Legacy: {{{twoYearVision.legacy}}}
-  5-Year Vision: Career: {{{fiveYearVision.career}}}, Health: {{{fiveYearVision.health}}}, Relationships: {{{fiveYearVision.relationships}}}, Legacy: {{{fiveYearVision.legacy}}}
-  10-Year Vision: Career: {{{tenYearVision.career}}}, Health: {{{tenYearVision.health}}}, Relationships: {{{tenYearVision.relationships}}}, Legacy: {{{tenYearVision.legacy}}}
+  - 2-Year Vision: Career: {{{twoYearVision.career}}}, Health: {{{twoYearVision.health}}}, Relationships: {{{twoYearVision.relationships}}}, Legacy: {{{twoYearVision.legacy}}}
+  - 5-Year Vision: Career: {{{fiveYearVision.career}}}, Health: {{{fiveYearVision.health}}}, Relationships: {{{fiveYearVision.relationships}}}, Legacy: {{{fiveYearVision.legacy}}}
+  - 10-Year Vision: Career: {{{tenYearVision.career}}}, Health: {{{tenYearVision.health}}}, Relationships: {{{tenYearVision.relationships}}}, Legacy: {{{tenYearVision.legacy}}}
+  
+  Please provide the output in a valid JSON format that adheres to the specified output schema.
   `,
 });
 
