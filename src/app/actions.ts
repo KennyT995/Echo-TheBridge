@@ -52,17 +52,8 @@ export async function generateAndSaveRoadmap(
 
     // Save Vision
     const visionRef = doc(db, 'users', userId, 'visions', visionId);
-    setDoc(visionRef, visionData).catch(error => {
-      errorEmitter.emit(
-        'permission-error',
-        new FirestorePermissionError({
-          path: visionRef.path,
-          operation: 'create',
-          requestResourceData: visionData,
-        })
-      );
-      // We don't rethrow here to avoid unhandled promise rejection on the client
-    });
+    await setDoc(visionRef, visionData);
+    
 
     // Save Roadmap
     const roadmapData = {
@@ -72,21 +63,14 @@ export async function generateAndSaveRoadmap(
       userId: userId,
     };
     const roadmapRef = doc(db, 'users', userId, 'roadmaps', visionId);
-    setDoc(roadmapRef, roadmapData).catch(error => {
-      errorEmitter.emit(
-        'permission-error',
-        new FirestorePermissionError({
-          path: roadmapRef.path,
-          operation: 'create',
-          requestResourceData: roadmapData,
-        })
-      );
-    });
+    await setDoc(roadmapRef, roadmapData);
 
     return { visionId: visionId };
   } catch (error: any) {
     console.error('Roadmap generation or save failed:', error);
     if (error.code === 'permission-denied' || error.message?.includes('permission-denied')) {
+       // This is a Firestore security rule error.
+       // We can provide a more specific message for plan limits.
        return { error: 'You have reached the maximum number of visions for your current plan. Please upgrade your plan to create more.' };
     }
     return {
