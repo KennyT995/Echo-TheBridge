@@ -7,10 +7,17 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ListTodo, Gem, Rocket } from 'lucide-react';
+import { LayoutDashboard, Gem, Rocket } from 'lucide-react';
 import Link from 'next/link';
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
+import type { Vision } from '@/lib/types';
 
 const menuItems = [
   {
@@ -27,6 +34,18 @@ const menuItems = [
 
 export default function AppSidebar() {
   const pathname = usePathname();
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const visionsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(
+      collection(firestore, 'users', user.uid, 'visions'),
+      orderBy('createdAt', 'desc')
+    );
+  }, [user, firestore]);
+
+  const { data: visions, isLoading: visionsLoading } = useCollection<Vision>(visionsQuery);
 
   return (
     <SidebarContent>
@@ -48,6 +67,43 @@ export default function AppSidebar() {
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
+      </SidebarGroup>
+      
+      <SidebarGroup className="mt-auto">
+        <SidebarGroupLabel className="flex items-center">
+            <Rocket className="mr-2" />
+            My Visions
+        </SidebarGroupLabel>
+         <SidebarMenu>
+          {visionsLoading && (
+            <>
+                <SidebarMenuSkeleton showIcon />
+                <SidebarMenuSkeleton showIcon />
+            </>
+          )}
+          {visions && visions.length > 0 && (
+             <SidebarMenuItem>
+                <SidebarMenuButton
+                    isCollapsible={false}
+                    className="group/sub-trigger"
+                >
+                    <Rocket />
+                    <span>My Visions</span>
+                </SidebarMenuButton>
+                <SidebarMenuSub>
+                {visions.map((vision) => (
+                    <SidebarMenuSubItem key={vision.id}>
+                        <Link href={`/vision/${vision.id}`} passHref>
+                            <SidebarMenuSubButton as="a" isActive={pathname === `/vision/${vision.id}`}>
+                                {vision.title}
+                            </SidebarMenuSubButton>
+                        </Link>
+                    </SidebarMenuSubItem>
+                ))}
+                </SidebarMenuSub>
+             </SidebarMenuItem>
+          )}
+         </SidebarMenu>
       </SidebarGroup>
     </SidebarContent>
   );
