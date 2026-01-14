@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { GenerateRoadmapFromVisionOutput } from '@/ai/flows/generate-roadmap-from-vision';
 import { serverTimestamp } from 'firebase/firestore';
 
 export const VisionFormSchema = z.object({
@@ -8,7 +7,27 @@ export const VisionFormSchema = z.object({
 });
 
 export type VisionFormValues = z.infer<typeof VisionFormSchema>;
-export type Roadmap = GenerateRoadmapFromVisionOutput;
+
+// New structure for a single roadmap item
+export const RoadmapItemSchema = z.object({
+  text: z.string(),
+  completed: z.boolean(),
+});
+export type RoadmapItem = z.infer<typeof RoadmapItemSchema>;
+
+// Updated Roadmap schema
+export const RoadmapSchema = z.object({
+  yearlyMilestones: z.array(RoadmapItemSchema),
+  monthlySprints: z.array(RoadmapItemSchema),
+  weeklyTactics: z.array(RoadmapItemSchema),
+  dailyHabits: z.array(RoadmapItemSchema),
+});
+export type Roadmap = z.infer<typeof RoadmapSchema> & {
+    id: string;
+    visionId: string;
+    userId: string;
+};
+
 
 // Firestore Document Types
 export interface Vision {

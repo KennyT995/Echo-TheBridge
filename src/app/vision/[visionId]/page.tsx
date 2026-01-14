@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import Loading from '@/app/loading';
 import Header from '@/components/header';
-import { doc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import type { Vision, Roadmap, PlanTier, UserData } from '@/lib/types';
 import { RoadmapDisplay } from '@/components/roadmap-display';
 import { Button } from '@/components/ui/button';
@@ -96,7 +96,7 @@ export default function VisionDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-                <RoadmapDisplay roadmap={roadmap} />
+                <RoadmapDisplay roadmap={roadmap} roadmapRef={roadmapRef} />
             </div>
             <div>
                 <Card>

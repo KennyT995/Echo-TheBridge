@@ -91,40 +91,17 @@
           "type": "string",
           "description": "A user-defined title for the vision."
         },
+        "goal": {
+          "type": "string",
+          "description": "The user's primary goal or vision."
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time",
           "description": "Timestamp when the vision was created."
-        },
-        "twoYearVision": {
-          "type": "object",
-          "properties": {
-            "career": { "type": "string" },
-            "health": { "type": "string" },
-            "relationships": { "type": "string" },
-            "legacy": { "type": "string" }
-          }
-        },
-        "fiveYearVision": {
-          "type": "object",
-          "properties": {
-            "career": { "type": "string" },
-            "health": { "type": "string" },
-            "relationships": { "type": "string" },
-            "legacy": { "type": "string" }
-          }
-        },
-        "tenYearVision": {
-          "type": "object",
-          "properties": {
-            "career": { "type": "string" },
-            "health": { "type": "string" },
-            "relationships": { "type": "string" },
-            "legacy": { "type": "string" }
-          }
         }
       },
-      "required": ["id", "userId", "title", "createdAt"]
+      "required": ["id", "userId", "title", "goal", "createdAt"]
     },
     "Roadmap": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -144,19 +121,47 @@
         },
         "yearlyMilestones": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": { "type": "string" },
+              "completed": { "type": "boolean" }
+            },
+            "required": ["text", "completed"]
+          }
         },
         "monthlySprints": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": { "type": "string" },
+              "completed": { "type": "boolean" }
+            },
+            "required": ["text", "completed"]
+          }
         },
         "weeklyTactics": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": { "type": "string" },
+              "completed": { "type": "boolean" }
+            },
+            "required": ["text", "completed"]
+          }
         },
         "dailyHabits": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "object",
+            "properties": {
+              "text": { "type": "string" },
+              "completed": { "type": "boolean" }
+            },
+            "required": ["text", "completed"]
+          }
         }
       },
       "required": ["id", "visionId", "userId", "yearlyMilestones", "monthlySprints", "weeklyTactics", "dailyHabits"]

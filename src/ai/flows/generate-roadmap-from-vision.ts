@@ -17,11 +17,16 @@ const GenerateRoadmapFromVisionInputSchema = z.object({
 });
 export type GenerateRoadmapFromVisionInput = z.infer<typeof GenerateRoadmapFromVisionInputSchema>;
 
+const RoadmapItemSchema = z.object({
+  text: z.string().describe("The actionable text for the roadmap item."),
+  completed: z.boolean().default(false).describe("Whether the item is completed. This should always be false by default."),
+});
+
 const RoadmapSchema = z.object({
-  yearlyMilestones: z.array(z.string()).describe('Key achievements for the current year.'),
-  monthlySprints: z.array(z.string()).describe('Focus for the next 12 months.'),
-  weeklyTactics: z.array(z.string()).describe('Actions needed this week.'),
-  dailyHabits: z.array(z.string()).describe('Atomic units of action required daily.'),
+  yearlyMilestones: z.array(RoadmapItemSchema).describe('Key achievements for the current year.'),
+  monthlySprints: z.array(RoadmapItemSchema).describe('Focus for the next 12 months.'),
+  weeklyTactics: z.array(RoadmapItemSchema).describe('Actions needed this week.'),
+  dailyHabits: z.array(RoadmapItemSchema).describe('Atomic units of action required daily.'),
 });
 
 const GenerateRoadmapFromVisionOutputSchema = RoadmapSchema.describe('A structured roadmap with yearly milestones, monthly sprints, weekly tactics, and daily habits.');
@@ -42,7 +47,7 @@ const prompt = ai.definePrompt({
   Here is the user's core goal:
   "{{{goal}}}"
 
-  Based on this goal, create a comprehensive, structured roadmap that bridges the gap between their ambition and daily actions. Break it down into yearly milestones, monthly sprints, weekly tactics, and daily habits.
+  Based on this goal, create a comprehensive, structured roadmap that bridges the gap between their ambition and daily actions. Break it down into yearly milestones, monthly sprints, weekly tactics, and daily habits. Each item in the roadmap should be an object with a 'text' field and a 'completed' field, with 'completed' set to false.
   `,
 });
 
