@@ -4,7 +4,6 @@ import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
 import Footer from '@/components/layout/footer';
 import Header from '@/components/layout/header';
-import { SidebarProvider } from '@/components/ui/sidebar';
 
 export const metadata: Metadata = {
   title: 'Echo: The Bridge',
@@ -40,13 +39,11 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <FirebaseClientProvider>
-          <SidebarProvider>
             <div className="flex flex-col min-h-screen w-full">
               <Header />
-              <main className="flex-1 flex">{children}</main>
+              <main className="flex-1 flex flex-col">{children}</main>
               <Footer />
             </div>
-          </SidebarProvider>
         </FirebaseClientProvider>
       </body>
     </html>
