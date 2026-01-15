@@ -29,6 +29,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -90,9 +91,12 @@ export default function LoginPage() {
     setActiveAction(null);
   }
 
-  const onSubmit = (values: LoginFormValues, action: 'login' | 'signup') => {
+  const onSubmit = (values: LoginFormValues) => {
+    // Determine action based on which button was clicked, or default to login
+    const action = activeAction || 'login';
     setIsSubmitting(true);
     setActiveAction(action);
+
     if (action === 'login') {
       initiateEmailSignIn(auth, values.email, values.password, handleAuthError);
     } else {
@@ -101,7 +105,7 @@ export default function LoginPage() {
   };
 
 
-  if (isUserLoading || user) {
+  if (user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin text-primary" suppressHydrationWarning />
@@ -111,7 +115,7 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm">
+      <Card className={cn("w-full max-w-sm transition-opacity", isUserLoading && "opacity-50")}>
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">Welcome</CardTitle>
           <CardDescription>
@@ -121,7 +125,7 @@ export default function LoginPage() {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={form.handleSubmit(onSubmit)}
               className="grid gap-4"
             >
               <FormField
@@ -135,6 +139,7 @@ export default function LoginPage() {
                         placeholder="m@example.com"
                         {...field}
                         type="email"
+                        disabled={isUserLoading}
                       />
                     </FormControl>
                     <FormMessage />
@@ -148,7 +153,7 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" />
+                      <Input {...field} type="password" disabled={isUserLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -156,11 +161,12 @@ export default function LoginPage() {
               />
               <div className="flex flex-col gap-4 pt-2">
                 <Button
-                    onClick={form.handleSubmit((values) => onSubmit(values, 'signup'))}
-                    disabled={isSubmitting}
+                    onClick={() => setActiveAction('signup')}
+                    type="submit"
+                    disabled={isSubmitting || isUserLoading}
                     className="w-full"
                 >
-                    {isSubmitting && activeAction === 'signup' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {(isSubmitting && activeAction === 'signup') || isUserLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Create Account
                 </Button>
                 <div className="relative">
@@ -174,8 +180,9 @@ export default function LoginPage() {
                     </div>
                 </div>
                 <Button
-                    onClick={form.handleSubmit((values) => onSubmit(values, 'login'))}
-                    disabled={isSubmitting}
+                    onClick={() => setActiveAction('login')}
+                    type="submit"
+                    disabled={isSubmitting || isUserLoading}
                     variant="secondary"
                     className="w-full"
                 >

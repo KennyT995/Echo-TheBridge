@@ -341,11 +341,16 @@ export default function VisionDetailPage() {
                   />
                   <Button onClick={handleReflection} disabled={isReflecting || !userInput || !plan?.aiFeaturesEnabled} className="w-full">
                     {isReflecting ? (
-                      <Loader2 className="animate-spin mr-2" />
+                      <>
+                        <Loader2 className="animate-spin mr-2" />
+                        Getting Reflection...
+                      </>
                     ) : (
-                      <Wand2 className="mr-2" />
+                      <>
+                        <Wand2 className="mr-2" />
+                        Get Reflection
+                      </>
                     )}
-                    Get Reflection
                   </Button>
                   {reflection && (
                     <Alert className="mt-4">

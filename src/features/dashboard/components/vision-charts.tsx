@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import type { Vision, Roadmap, RoadmapItem } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell } from 'recharts';
 import { visionCategories } from '@/lib/types';
 
@@ -91,7 +91,7 @@ export function VisionCharts({ visions, roadmaps }: VisionChartsProps) {
                                     <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
                                 ))}
                             </Pie>
-                            <ChartLegend content={<ChartTooltipContent nameKey="name" />} />
+                            <ChartLegend content={<ChartLegendContent nameKey="name" />} />
                         </PieChart>
                     </ChartContainer>
                 </CardContent>

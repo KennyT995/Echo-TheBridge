@@ -124,7 +124,7 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
             const progress = calculateProgress(items);
 
             return (
-              <AccordionItem key={section.key} value={section.key} className="border-border/60 rounded-xl bg-card/40 overflow-hidden">
+              <AccordionItem key={section.key} value={section.key} className="border border-border/60 rounded-xl overflow-hidden">
                 <div className="flex flex-col">
                   <AccordionTrigger className="px-4 py-3 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline hover:bg-muted/30 transition-colors">
                     <div className="flex items-center gap-3">
