@@ -36,21 +36,6 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
-        {isDashboardRoute && (
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:mr-2">
-                <Menu className="h-5 w-5" suppressHydrationWarning />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-[300px]">
-                <SidebarProvider>
-                    <AppSidebar />
-                </SidebarProvider>
-            </SheetContent>
-          </Sheet>
-        )}
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Image
@@ -92,8 +77,22 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
                 )
             ))}
 
-          {/* Mobile Menu for non-dashboard routes */}
-          {!isDashboardRoute && (
+          {/* Mobile/Dashboard Menu */}
+          { isDashboardRoute ? (
+             <Sheet>
+                <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" suppressHydrationWarning />
+                    <span className="sr-only">Toggle menu</span>
+                </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="p-0 w-[300px]">
+                    <SidebarProvider>
+                        <AppSidebar />
+                    </SidebarProvider>
+                </SheetContent>
+            </Sheet>
+          ) : (
              <Sheet>
                 <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
