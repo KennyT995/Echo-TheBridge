@@ -113,9 +113,9 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Create an account</CardTitle>
+          <CardTitle className="text-2xl">Welcome</CardTitle>
           <CardDescription>
-            Enter your details below to start building your vision.
+            Enter your details to create an account or log in.
           </CardDescription>
         </CardHeader>
         <CardContent>

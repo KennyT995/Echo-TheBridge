@@ -9,6 +9,8 @@ import {
 import { doc, setDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 type ErrorCallback = (error: any) => void;
 
@@ -34,8 +36,14 @@ const createUserProfile = async (userCredential: UserCredential) => {
   
   // This is a non-blocking write. We don't wait for it to complete.
   setDoc(userRef, userData).catch(error => {
-      // In a real app, you'd want better error handling here, maybe using a global error emitter.
-      console.error("Failed to create user profile:", error);
+    errorEmitter.emit(
+      'permission-error',
+      new FirestorePermissionError({
+        path: userRef.path,
+        operation: 'create',
+        requestResourceData: userData,
+      })
+    );
   });
 };
 

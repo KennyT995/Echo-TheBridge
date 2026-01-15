@@ -44,7 +44,7 @@ export default function Footer() {
                                 <Link href="/plans" className="hover:text-primary transition-colors">Pricing</Link>
                             </li>
                             <li>
-                                <Link href="/vision/new" className="hover:text-primary transition-colors">Create Vision</Link>
+                                <Link href="/dashboard" className="hover:text-primary transition-colors">Create Vision</Link>
                             </li>
                         </ul>
                     </div>
