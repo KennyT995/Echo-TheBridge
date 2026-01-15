@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: 'Echo: The Bridge',
   description: 'Bridge the gap between long-term vision and daily action.',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/logo.png',
     apple: '/logo.png',
   },
 };
