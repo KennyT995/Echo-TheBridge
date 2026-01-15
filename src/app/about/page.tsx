@@ -1,5 +1,5 @@
-
 import Image from 'next/image';
+import placeholderData from '@/app/lib/placeholder-images.json';
 
 export default function AboutPage() {
     return (
@@ -20,10 +20,11 @@ export default function AboutPage() {
                     <div className="grid md:grid-cols-2 gap-12 items-center mb-24">
                         <div className="relative h-[400px] rounded-lg overflow-hidden">
                             <Image
-                                src="https://picsum.photos/seed/vision-team/800/600"
+                                src={placeholderData.about.team}
                                 alt="Our team brainstorming"
                                 fill
                                 className="object-cover"
+                                data-ai-hint="team brainstorming office"
                             />
                         </div>
                         <div className="space-y-6">
@@ -40,11 +41,7 @@ export default function AboutPage() {
                     <div className="text-center mb-16">
                         <h2 className="text-3xl font-bold font-headline mb-12">The Minds Behind the Bridge</h2>
                         <div className="grid md:grid-cols-3 gap-8">
-                            {[
-                                { name: 'Alex Rivera', role: 'Founder & CEO', img: 'https://picsum.photos/seed/alex/300/300' },
-                                { name: 'Sarah Chen', role: 'Chief AI Architect', img: 'https://picsum.photos/seed/sarah/300/300' },
-                                { name: 'Marcus Johnson', role: 'Head of Strategy', img: 'https://picsum.photos/seed/marcus/300/300' }
-                            ].map((member, i) => (
+                            {placeholderData.about.members.map((member, i) => (
                                 <div key={i} className="flex flex-col items-center">
                                     <div className="relative w-48 h-48 rounded-full overflow-hidden mb-4 border-4 border-primary/20">
                                         <Image
@@ -52,6 +49,7 @@ export default function AboutPage() {
                                             alt={member.name}
                                             fill
                                             className="object-cover"
+                                            data-ai-hint={`professional headshot ${member.role.split(' ')[0]}`}
                                         />
                                     </div>
                                     <h3 className="text-xl font-bold">{member.name}</h3>

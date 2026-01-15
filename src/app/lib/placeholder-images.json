@@ -1,0 +1,40 @@
+{
+    "hero": {
+        "imageUrl": "https://picsum.photos/seed/bridge-abstract/1920/1080",
+        "imageHint": "abstract bridge"
+    },
+    "features": [
+        {
+            "image": "https://picsum.photos/seed/vision-feature/800/600",
+            "hint": "defining vision telescope"
+        },
+        {
+            "image": "https://picsum.photos/seed/roadmap-feature/800/600",
+            "hint": "strategic roadmap timeline"
+        },
+        {
+            "image": "https://picsum.photos/seed/coach-feature/800/600",
+            "hint": "ai coach robot"
+        }
+    ],
+    "about": {
+        "team": "https://picsum.photos/seed/vision-team/800/600",
+        "members": [
+            {
+                "name": "Alex Rivera",
+                "role": "Founder & CEO",
+                "img": "https://picsum.photos/seed/alex/300/300"
+            },
+            {
+                "name": "Sarah Chen",
+                "role": "Chief AI Architect",
+                "img": "https://picsum.photos/seed/sarah/300/300"
+            },
+            {
+                "name": "Marcus Johnson",
+                "role": "Head of Strategy",
+                "img": "https://picsum.photos/seed/marcus/300/300"
+            }
+        ]
+    }
+}

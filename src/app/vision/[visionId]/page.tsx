@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -31,7 +30,7 @@ import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
-function usePlan(userData: UserData | null) {
+function usePlan(userData: UserData | null | undefined) {
     const firestore = useFirestore();
 
     const planRef = useMemoFirebase(() => {
@@ -127,7 +126,7 @@ export default function VisionDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             {[1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-16 w-full rounded-xl" />
+              <Skeleton key={i} className="h-32 w-full rounded-xl" />
             ))}
           </div>
           <div>

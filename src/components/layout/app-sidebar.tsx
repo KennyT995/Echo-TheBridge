@@ -22,6 +22,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { cn } from '@/lib/utils';
 
 const menuItems = [
   {
@@ -89,18 +90,16 @@ export default function AppSidebar() {
       </SidebarGroup>
 
       <SidebarGroup className="mt-auto p-0">
-        <SidebarMenu className='p-2'>
-          <ClientOnly>
-            {visionsLoading && (
-              <>
-                <SidebarMenuSkeleton showIcon />
-                <SidebarMenuSkeleton showIcon />
-              </>
-            )}
-          </ClientOnly>
-        </SidebarMenu>
+        <ClientOnly>
+          {visionsLoading && (
+            <div className="p-2">
+              <SidebarMenuSkeleton showIcon />
+              <SidebarMenuSkeleton showIcon />
+            </div>
+          )}
+        </ClientOnly>
 
-        {visions && visions.length > 0 && (
+        {!visionsLoading && visions && visions.length > 0 && (
           <Accordion type="single" collapsible className="w-full" defaultValue='my-visions'>
             <AccordionItem value="my-visions" className='border-none'>
               <AccordionTrigger className="p-2 text-sm font-medium text-sidebar-foreground/90 hover:text-sidebar-foreground hover:no-underline hover:bg-sidebar-accent rounded-md [&[data-state=open]]:bg-sidebar-accent">
@@ -130,8 +129,4 @@ export default function AppSidebar() {
       </SidebarGroup>
     </SidebarContent>
   );
-}
-
-function cn(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
 }

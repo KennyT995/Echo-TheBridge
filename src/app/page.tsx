@@ -1,35 +1,34 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-
-import { Rocket, Target, BrainCircuit, CheckCircle } from 'lucide-react';
-// Removed placeholder imports
+import { Rocket, Target, BrainCircuit } from 'lucide-react';
+import placeholderData from '@/app/lib/placeholder-images.json';
 
 const featureData = [
   {
     icon: Target,
     title: 'Define Your Vision',
     description: 'Structure your long-term aspirations across different life categories and time horizons, from 2 to 10 years.',
-    image: "/images/feature-vision.png",
-    hint: 'defining vision telescope'
+    image: placeholderData.features[0].image,
+    hint: placeholderData.features[0].hint
   },
   {
     icon: Rocket,
     title: 'Generate Your Roadmap',
     description: 'Our AI reverse-engineers your vision into a concrete, actionable plan with yearly, monthly, weekly, and daily goals.',
-    image: "/images/feature-roadmap.png",
-    hint: 'strategic roadmap timeline'
+    image: placeholderData.features[1].image,
+    hint: placeholderData.features[1].hint
   },
   {
     icon: BrainCircuit,
     title: 'Stay on Track with AI Coach',
     description: "Check in with your AI coach to analyze progress, celebrate wins, and get strategic advice to overcome obstacles.",
-    image: "/images/feature-coach.png",
-    hint: 'ai coach robot'
+    image: placeholderData.features[2].image,
+    hint: placeholderData.features[2].hint
   },
 ];
 
-const heroImage = { imageUrl: "/images/hero-background.png", imageHint: 'abstract bridge' };
+const heroImage = { imageUrl: placeholderData.hero.imageUrl, imageHint: placeholderData.hero.imageHint };
 
 export default function HomePage() {
   return (
