@@ -181,67 +181,29 @@
     ]
   },
   "firestore": {
-    "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "User",
-          "schema": {
-            "$ref": "#/backend/entities/User"
-          },
-          "description": "Stores user profile data. Secured by path-based ownership, where only the user with the matching userId can access the document. Includes denormalized 'planTierId' for authorization independence.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the user."
-            }
-          ]
-        }
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
       },
-      {
-        "path": "/plan_tiers/{planTierId}",
-        "definition": {
-          "entityName": "PlanTier",
-          "schema": {
-            "$ref": "#/backend/entities/PlanTier"
-          },
-          "description": "Stores plan tier information. Access control should be set up to restrict editing to admin users.",
-          "params": [
-            {
-              "name": "planTierId",
-              "description": "The unique identifier for the plan tier."
-            }
-          ]
-        }
+      "description": "Stores user profile data. Secured by path-based ownership, where only the user with the matching userId can access their own document."
+    },
+    "/plan_tiers/{planTierId}": {
+      "schema": {
+        "$ref": "#/entities/PlanTier"
       },
-      {
-        "path": "/users/{userId}/visions/{visionId}",
-        "definition": {
-          "entityName": "Vision",
-          "schema": {
-            "$ref": "#/backend/entities/Vision"
-          },
-          "description": "Stores visions created by a user. Subcollection of users.",
-          "params": [
-            { "name": "userId", "description": "The user's unique ID." },
-            { "name": "visionId", "description": "The vision's unique ID." }
-          ]
-        }
+      "description": "Stores plan tier information. This data is publicly readable by all users but is not writable from the client-side to protect its integrity."
+    },
+    "/users/{userId}/visions/{visionId}": {
+      "schema": {
+        "$ref": "#/entities/Vision"
       },
-      {
-        "path": "/users/{userId}/roadmaps/{roadmapId}",
-        "definition": {
-          "entityName": "Roadmap",
-          "schema": {
-            "$ref": "#/backend/entities/Roadmap"
-          },
-          "description": "Stores roadmaps generated for a user's vision. Subcollection of users.",
-          "params": [
-            { "name": "userId", "description": "The user's unique ID." },
-            { "name": "roadmapId", "description": "The roadmap's unique ID, same as visionId." }
-          ]
-        }
-      }
-    ]
+      "description": "Stores the visions created by a user as a subcollection. Access is restricted to the owner unless the vision is explicitly marked as public."
+    },
+    "/users/{userId}/roadmaps/{roadmapId}": {
+      "schema": {
+        "$ref": "#/entities/Roadmap"
+      },
+      "description": "Stores the AI-generated roadmaps for a user's vision. Access is restricted to the owner, or public if the corresponding vision is public."
+    }
   }
 }

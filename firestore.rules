@@ -1,30 +1,25 @@
 /**
- * Core Philosophy: This ruleset enforces a strict user-ownership model for all user-specific data,
- * ensuring that users can only access their own information. Publicly readable data, such as
- * subscription plan details, is segregated into its own collection. The default security posture
- * is to deny access unless explicitly granted.
+ * Core Philosophy: This ruleset enforces a strict user-ownership model and validates data schemas
+ * on write operations to ensure data integrity. The default security posture is to deny all access
+ * unless explicitly granted.
  *
- * Data Structure: The data is organized into several collections:
- * - /users/{userId}: Contains private user profile information. Access is strictly controlled
- *   by matching the authenticated user's ID with the document's ID in the path.
- * - /plan_tiers/{planTierId}: Contains public reference data about subscription plans.
- *   This data is readable by any authenticated user but is not writable from the client-side
- *   to protect its integrity.
- * - /users/{userId}/visions/{visionId}: Subcollection storing a user's visions.
- * - /users/{userId}/roadmaps/{roadmapId}: Subcollection storing generated roadmaps.
+ * Data Structure & Validation:
+ * - /users/{userId}: Private user profiles. On creation and update, rules verify that the document
+ *   ID matches the user's UID and that the UID cannot be changed.
+ * - /plan_tiers/{planTierId}: Publicly readable plan details. Client-side writes are disabled.
+ * - /users/{userId}/visions/{visionId}: User-owned visions. On creation, a helper function
+ *   `incomingVisionDataIsValid()` validates the entire data schema (e.g., `title` is a string,
+ *   `isPublic` is a boolean). On update, immutable fields like `userId` and `id` are protected.
+ * - /users/{userId}/roadmaps/{roadmapId}: User-owned roadmaps. Schema is validated on creation,
+ *   and immutable fields are protected on update.
  *
  * Key Security Decisions:
- * - User Enumeration is Disabled: A `list` operation on the top-level `/users` collection is
- *   explicitly forbidden (`allow list: if false;`). This is a critical security measure to
- *   prevent malicious actors from downloading a list of all application users.
- * - Admin-Only Data is Read-Only: The `/plan_tiers` collection is treated as administrative
- *   data. To ensure its integrity, all client-side write operations are disabled.
- *   This data must be managed through a trusted server-side environment.
- * - Self-Creation of User Profile: A user is permitted to create their own user document in
- *   `/users/{userId}` only if the document ID matches their authentication UID.
- * - Plan-Based Limitations: Creating a new vision is currently only enforced on the client-side.
- *   A scalable backend solution (like a Cloud Function trigger) would be required to securely enforce
- *   the `maxVisions` limit from plan tiers.
+ * - Schema Enforcement: Write operations are protected by functions that validate the incoming
+ *   `request.resource.data` against the expected data types and structure. This prevents
+ *   malformed or malicious data from being saved.
+ * - Immutability: Key identifiers (`id`, `userId`, `visionId`) are locked down after creation,
+ *   preventing documents from being re-associated.
+ * - User Enumeration Disabled: `list` on `/users` is forbidden to prevent scraping user data.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -41,18 +36,28 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-    
-    function isExistingOwner(userId) {
-      return isOwner(userId) && resource != null;
+
+    function incomingVisionDataIsValid(userId, visionId) {
+      let data = request.resource.data;
+      let validCategories = ["Career", "Health", "Financial", "Personal Growth", "Relationships", "Legacy"];
+      return data.id == visionId &&
+             data.userId == userId &&
+             data.title is string && data.title.size() > 0 &&
+             data.goal is string && data.goal.size() > 0 &&
+             data.category is string && data.category in validCategories &&
+             data.isPublic is bool &&
+             data.createdAt == request.time;
     }
 
-    function hasValidUserIdOnCreate(userId) {
-      return request.resource.data.id == userId;
-    }
-
-    function isAttemptingToChangeId() {
-      // The 'id' field in the incoming data must not differ from the existing one.
-      return 'id' in request.resource.data && request.resource.data.id != resource.data.id;
+    function incomingRoadmapDataIsValid(userId, roadmapId) {
+      let data = request.resource.data;
+      return data.id == roadmapId &&
+             data.visionId == roadmapId &&
+             data.userId == userId &&
+             data.yearlyMilestones is list &&
+             data.monthlySprints is list &&
+             data.weeklyTactics is list &&
+             data.dailyHabits is list;
     }
 
     //-------------------------------------------------------------------------
@@ -62,25 +67,26 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false; // Prevent user enumeration
-      allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
-      allow update: if isExistingOwner(userId) && !isAttemptingToChangeId();
-      allow delete: if isExistingOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isOwner(userId);
 
       // Visions Subcollection
       match /visions/{visionId} {
-        // Public read if isPublic is true
-        allow get: if (isOwner(userId) || (get(/databases/$(database)/documents/users/$(userId)/visions/$(visionId)).data.isPublic == true));
+        allow get: if isOwner(userId) || (get(/databases/$(database)/documents/users/$(userId)/visions/$(visionId)).data.isPublic == true);
         allow list: if isOwner(userId);
-        allow create: if isOwner(userId);
-        allow update, delete: if isOwner(userId);
+        allow create: if isOwner(userId) && incomingVisionDataIsValid(userId, visionId);
+        allow update: if isOwner(userId) && request.resource.data.id == resource.data.id && request.resource.data.userId == resource.data.userId;
+        allow delete: if isOwner(userId);
       }
 
       // Roadmaps Subcollection
       match /roadmaps/{roadmapId} {
-        // Public read if the corresponding vision is public
-        allow get: if (isOwner(userId) || (get(/databases/$(database)/documents/users/$(userId)/visions/$(roadmapId)).data.isPublic == true));
+        allow get: if isOwner(userId) || (get(/databases/$(database)/documents/users/$(userId)/visions/$(roadmapId)).data.isPublic == true);
         allow list: if isOwner(userId);
-        allow create, update, delete: if isOwner(userId);
+        allow create: if isOwner(userId) && incomingRoadmapDataIsValid(userId, roadmapId);
+        allow update: if isOwner(userId) && request.resource.data.id == resource.data.id && request.resource.data.userId == resource.data.userId && request.resource.data.visionId == resource.data.visionId;
+        allow delete: if isOwner(userId);
       }
     }
 
