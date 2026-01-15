@@ -17,16 +17,17 @@ import Link from 'next/link';
 import { CreditCard, LayoutDashboard, LogOut, Settings, User } from 'lucide-react';
 
 export function UserNav() {
-    const { user } = useUser();
+    const { user, isUserLoading } = useUser();
     const auth = useAuth();
     const router = useRouter();
 
     const handleLogout = async () => {
+        if (!auth) return;
         await auth.signOut();
         router.push('/login');
     };
 
-    if (!user) return null;
+    if (isUserLoading || !user) return null;
 
     return (
         <DropdownMenu>
@@ -41,7 +42,7 @@ export function UserNav() {
             <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">{user.displayName || 'User'}</p>
+                        <p className="text-sm font-medium leading-none">{user.displayName || user.email}</p>
                         <p className="text-xs leading-none text-muted-foreground">
                             {user.email}
                         </p>
@@ -53,6 +54,12 @@ export function UserNav() {
                         <Link href="/dashboard" className="w-full cursor-pointer">
                             <LayoutDashboard className="mr-2 h-4 w-4" />
                             <span>Dashboard</span>
+                        </Link>
+                    </DropdownMenuItem>
+                     <DropdownMenuItem asChild>
+                        <Link href="/account" className="w-full cursor-pointer">
+                            <User className="mr-2 h-4 w-4" />
+                            <span>My Account</span>
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

@@ -36,6 +36,13 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
+    
+    function incomingUserDataIsValid(data) {
+        return data.id == request.auth.uid &&
+               data.email == request.auth.token.email &&
+               data.displayName is string && data.displayName.size() > 0 &&
+               data.planTierId is string;
+    }
 
     function incomingVisionDataIsValid(userId, visionId) {
       let data = request.resource.data;
@@ -67,8 +74,8 @@ service cloud.firestore {
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false; // Prevent user enumeration
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id;
+      allow create: if isOwner(userId) && incomingUserDataIsValid(request.resource.data);
+      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id && request.resource.data.email == resource.data.email;
       allow delete: if isOwner(userId);
 
       // Visions Subcollection

@@ -8,18 +8,27 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
+import { updateProfile } from 'firebase/auth';
 
 type ErrorCallback = (error: any) => void;
 
 // Function to create a user profile document
-const createUserProfile = (userCredential: UserCredential) => {
+const createUserProfile = async (userCredential: UserCredential) => {
   const user = userCredential.user;
   if (!user) return;
   
+  const displayName = user.displayName || user.email?.split('@')[0] || 'User';
+
+  // We want to update the auth user profile as well
+  if (!user.displayName) {
+    await updateProfile(user, { displayName }).catch(e => console.error("Failed to update auth profile", e));
+  }
+
   const userRef = doc(getFirestore(), 'users', user.uid);
   const userData = {
     id: user.uid,
     email: user.email,
+    displayName: displayName,
     planTierId: 'trailblazer', // Default plan
   };
   
