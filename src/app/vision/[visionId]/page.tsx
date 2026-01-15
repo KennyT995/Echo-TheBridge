@@ -10,7 +10,7 @@ import type { Vision, Roadmap, PlanTier, UserData, RoadmapItem } from '@/lib/typ
 import { RoadmapDisplay } from '@/features/roadmaps/components/roadmap-display';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Wand2, Trash2, Share2, Copy } from 'lucide-react';
+import { Loader2, Wand2, Trash2, Share2, Copy, RefreshCw } from 'lucide-react';
 import { getReflection } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -69,6 +69,8 @@ export default function VisionDetailPage() {
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   
   const shareUrl = typeof window !== 'undefined' && user ? `${window.location.origin}/share/${user.uid}/${visionId}` : '';
+  const [deleteConfirmationInput, setDeleteConfirmationInput] = useState('');
+  const deleteConfirmationPhrase = "I want to delete this vision";
 
 
   // Memoize Firestore references
@@ -200,26 +202,48 @@ export default function VisionDetailPage() {
               <Button variant="outline" onClick={() => setShareModalOpen(true)}>
                   <Share2 className="mr-2 h-4 w-4" /> Share
               </Button>
-              <AlertDialog>
+              <AlertDialog onOpenChange={() => setDeleteConfirmationInput('')}>
                   <AlertDialogTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
                       <Trash2 className="h-5 w-5" />
                   </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
-                  <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your vision and its roadmap from the database.
-                      </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                      Delete Vision
-                      </AlertDialogAction>
-                  </AlertDialogFooter>
-                  </AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                        Sometimes a vision changes. Instead of deleting, consider revising your goals. If you're certain, please confirm below.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+
+                    <div className="py-2 space-y-4">
+                        <Label htmlFor="delete-confirm">To confirm, type: "{deleteConfirmationPhrase}"</Label>
+                        <Input 
+                            id="delete-confirm"
+                            value={deleteConfirmationInput}
+                            onChange={(e) => setDeleteConfirmationInput(e.target.value)}
+                            placeholder={deleteConfirmationPhrase}
+                            className="border-destructive/50 focus:ring-destructive/50"
+                        />
+                    </div>
+
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction asChild>
+                            <Button variant="outline">
+                                <RefreshCw className="mr-2 h-4 w-4" />
+                                Revise Vision
+                            </Button>
+                        </AlertDialogAction>
+                        <AlertDialogAction 
+                            onClick={handleDelete} 
+                            disabled={deleteConfirmationInput !== deleteConfirmationPhrase}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                            Delete Vision
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
               </AlertDialog>
             </div>
           </div>
