@@ -11,7 +11,7 @@ import { RoadmapDisplay } from '@/features/roadmaps/components/roadmap-display';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Wand2, Trash2, Share2, Copy, RefreshCw } from 'lucide-react';
-import { getReflection } from '@/app/actions';
+import { getReflection, generateRoadmap } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -67,6 +67,7 @@ export default function VisionDetailPage() {
   const [reflection, setReflection] = useState('');
   const [isReflecting, setIsReflecting] = useState(false);
   const [isShareModalOpen, setShareModalOpen] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   
   const shareUrl = typeof window !== 'undefined' && user ? `${window.location.origin}/share/${user.uid}/${visionId}` : '';
   const [deleteConfirmationInput, setDeleteConfirmationInput] = useState('');
@@ -115,6 +116,45 @@ export default function VisionDetailPage() {
     }
     setIsReflecting(false);
   };
+
+  const handleRegenerate = async () => {
+    if (!vision || !roadmapRef || !visionRef) return;
+    setIsRegenerating(true);
+  
+    const result = await generateRoadmap({ title: vision.title, goal: vision.goal, category: vision.category, isPublic: vision.isPublic });
+  
+    if (result.error || !result.roadmap || !result.correctedGoal) {
+      toast({
+        variant: 'destructive',
+        title: 'Error Regenerating Roadmap',
+        description: result.error || 'An unknown error occurred.',
+      });
+      setIsRegenerating(false);
+      return;
+    }
+  
+    // Update the vision if the goal text was corrected by the AI
+    if (vision.goal !== result.correctedGoal) {
+      updateDocumentNonBlocking(visionRef, { goal: result.correctedGoal });
+    }
+  
+    // Overwrite the existing roadmap with the newly generated tasks
+    const newRoadmapData = {
+      yearlyMilestones: result.roadmap.yearlyMilestones,
+      monthlySprints: result.roadmap.monthlySprints,
+      weeklyTactics: result.roadmap.weeklyTactics,
+      dailyHabits: result.roadmap.dailyHabits,
+    };
+    updateDocumentNonBlocking(roadmapRef, newRoadmapData);
+  
+    toast({
+      title: "Roadmap Regenerated!",
+      description: "Your new set of tasks is ready.",
+    });
+  
+    setIsRegenerating(false);
+  };
+
 
   const handleDelete = () => {
     if (visionRef && roadmapRef) {
@@ -199,6 +239,28 @@ export default function VisionDetailPage() {
               <Badge variant="secondary" className="mt-2">{vision.category}</Badge>
             </div>
             <div className="flex gap-2 flex-shrink-0">
+               <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" disabled={isRegenerating}>
+                    {isRegenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                    Regenerate
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Regenerate Roadmap?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will replace your current roadmap with a new set of AI-generated tasks. Any progress on your existing tasks will be lost. Are you sure you want to continue?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleRegenerate}>
+                      Yes, Regenerate
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <Button variant="outline" onClick={() => setShareModalOpen(true)}>
                   <Share2 className="mr-2 h-4 w-4" /> Share
               </Button>
@@ -212,12 +274,12 @@ export default function VisionDetailPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                         <AlertDialogDescription>
-                        Sometimes a vision changes. Instead of deleting, consider revising your goals. If you're certain, please confirm below.
+                        This will permanently delete your vision and its entire roadmap. This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
 
                     <div className="py-2 space-y-4">
-                        <Label htmlFor="delete-confirm">To confirm, type: "{deleteConfirmationPhrase}"</Label>
+                        <Label htmlFor="delete-confirm">To confirm, type: <span className="font-mono text-primary/90">"{deleteConfirmationPhrase}"</span></Label>
                         <Input 
                             id="delete-confirm"
                             value={deleteConfirmationInput}
@@ -229,12 +291,6 @@ export default function VisionDetailPage() {
 
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction asChild>
-                            <Button variant="outline">
-                                <RefreshCw className="mr-2 h-4 w-4" />
-                                Revise Vision
-                            </Button>
-                        </AlertDialogAction>
                         <AlertDialogAction 
                             onClick={handleDelete} 
                             disabled={deleteConfirmationInput !== deleteConfirmationPhrase}
