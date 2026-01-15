@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Accordion,
   AccordionContent,
@@ -6,14 +7,15 @@ import {
 } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Roadmap, RoadmapItem } from '@/lib/types';
-import { CheckCircle2, CircleDot, GanttChartSquare, CalendarDays } from 'lucide-react';
+import { CheckCircle2, CircleDot, GanttChartSquare, CalendarDays, Pencil } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { DocumentReference } from 'firebase/firestore';
 import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import confetti from 'canvas-confetti';
-
 
 interface RoadmapDisplayProps {
   roadmap: Roadmap;
@@ -46,6 +48,8 @@ const roadmapSections = [
 ] as const;
 
 export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
+  const [editing, setEditing] = useState<{ section: RoadmapSectionKey; index: number; text: string } | null>(null);
+
   if (!roadmap) return null;
 
   const calculateProgress = (items: RoadmapItem[]) => {
@@ -66,7 +70,7 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
     confetti({
       ...config,
       disableForReducedMotion: true,
-      colors: ['#22c55e', '#ec4899', '#3b82f6', '#eab308'], // Green, Pink, Blue, Yellow
+      colors: ['#22c55e', '#ec4899', '#3b82f6', '#eab308'],
     });
   };
 
@@ -79,12 +83,33 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
     if (newSection[index]) {
       newSection[index] = { ...newSection[index], completed: checked };
 
-      // Fire confetti if checking (not unchecking)
       if (checked) {
         triggerCelebration(section);
       }
 
       updateDocumentNonBlocking(roadmapRef, { [section]: newSection });
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!roadmapRef || !editing) return;
+
+    const { section, index, text } = editing;
+    const newRoadmapData = { ...roadmap };
+    const newSection = [...newRoadmapData[section]];
+
+    if (newSection[index] && newSection[index].text !== text) {
+      newSection[index] = { ...newSection[index], text: text };
+      updateDocumentNonBlocking(roadmapRef, { [section]: newSection });
+    }
+    setEditing(null);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSaveEdit();
+    } else if (e.key === 'Escape') {
+      setEditing(null);
     }
   };
 
@@ -109,8 +134,6 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
                       <span>{section.title}</span>
                     </div>
                   </AccordionTrigger>
-
-                  {/* Progress Bar always visible in header area */}
                   <div className="px-4 pb-4">
                     <div className="flex justify-between items-center mb-1.5">
                       <span className="text-xs font-medium text-muted-foreground">
@@ -123,25 +146,53 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
 
                 <AccordionContent className="p-0">
                   <ul className="divide-y divide-border/50">
-                    {items.map((item: RoadmapItem, index: number) => (
-                      <li key={index} className="flex items-start gap-3 p-4 hover:bg-muted/20 transition-colors">
-                        <Checkbox
-                          id={`${section.key}-${index}`}
-                          checked={item.completed}
-                          onCheckedChange={(checked) => handleCheckChange(section.key, index, !!checked)}
-                          className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                        />
-                        <label
-                          htmlFor={`${section.key}-${index}`}
-                          className={cn(
-                            "text-sm sm:text-base text-foreground/90 cursor-pointer flex-1 leading-relaxed",
-                            item.completed && "line-through text-muted-foreground opacity-70"
-                          )}
-                        >
-                          {item.text}
-                        </label>
-                      </li>
-                    ))}
+                    {items.map((item: RoadmapItem, index: number) => {
+                      const isEditing = editing?.section === section.key && editing.index === index;
+                      const uniqueId = `${section.key}-${index}`;
+                      return (
+                        <li key={index} className="group flex items-start gap-3 p-4 hover:bg-muted/20 transition-colors">
+                          <Checkbox
+                            id={`check-${uniqueId}`}
+                            checked={item.completed}
+                            onCheckedChange={(checked) => handleCheckChange(section.key, index, !!checked)}
+                            className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                          />
+                          <div className="flex-1">
+                            {isEditing ? (
+                              <Input
+                                id={`input-${uniqueId}`}
+                                value={editing.text}
+                                onChange={(e) => setEditing({ ...editing, text: e.target.value })}
+                                onBlur={handleSaveEdit}
+                                onKeyDown={handleInputKeyDown}
+                                autoFocus
+                                className="text-base h-8"
+                              />
+                            ) : (
+                              <label
+                                htmlFor={`check-${uniqueId}`}
+                                className={cn(
+                                  "text-sm sm:text-base text-foreground/90 cursor-pointer flex-1 leading-relaxed",
+                                  item.completed && "line-through text-muted-foreground opacity-70"
+                                )}
+                              >
+                                {item.text}
+                              </label>
+                            )}
+                          </div>
+                           {!item.completed && !isEditing && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="ml-auto h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                                onClick={() => setEditing({ section: section.key, index, text: item.text })}
+                            >
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                           )}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </AccordionContent>
               </AccordionItem>
