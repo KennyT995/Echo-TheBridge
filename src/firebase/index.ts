@@ -12,20 +12,22 @@ export function initializeFirebase() {
   let firestore: Firestore;
 
   if (getApps().length === 0) {
-    try {
-      // Important! initializeApp() is called without any arguments because Firebase App Hosting
-      // integrates with the initializeApp() function to provide the environment variables needed to
-      // populate the FirebaseOptions in production. It is critical that we attempt to call initializeApp()
-      // without arguments.
-      firebaseApp = initializeApp();
-    } catch (e) {
-      if (process.env.NODE_ENV === 'production') {
-        console.warn(
-          'Automatic initialization failed. Falling back to firebase config object.',
-          e
-        );
-      }
+    // When not in production, always use the explicit firebaseConfig.
+    // In production, App Hosting provides the configuration automatically.
+    if (process.env.NODE_ENV !== 'production') {
       firebaseApp = initializeApp(firebaseConfig);
+    } else {
+        try {
+          // In production, try auto-initialization first.
+          firebaseApp = initializeApp();
+        } catch (e) {
+          console.warn(
+            'Automatic initialization failed. Falling back to firebase config object.',
+            e
+          );
+          // Fallback to explicit config if auto-init fails even in production.
+          firebaseApp = initializeApp(firebaseConfig);
+        }
     }
   } else {
     firebaseApp = getApp();
