@@ -70,7 +70,7 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
     });
   };
 
-  const handleCheckChange = async (section: RoadmapSectionKey, index: number, checked: boolean) => {
+  const handleCheckChange = (section: RoadmapSectionKey, index: number, checked: boolean) => {
     if (!roadmapRef) return;
 
     const newRoadmapData = { ...roadmap };
