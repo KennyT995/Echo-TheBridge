@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import { UserNav } from './user-nav';
 import AppSidebar from './app-sidebar';
+import { cn } from '@/lib/utils';
 
 interface HeaderClientProps {
   isDashboardRoute: boolean;
@@ -21,35 +22,6 @@ interface HeaderClientProps {
 
 export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
   const { user, isUserLoading } = useUser();
-
-  const desktopNav = (
-    <nav className="hidden md:flex items-center gap-4 text-sm font-medium xl:gap-6">
-      <Link
-        href="/about"
-        className="transition-colors hover:text-foreground/80 text-foreground/60"
-      >
-        About
-      </Link>
-      <Link
-        href="/plans"
-        className="transition-colors hover:text-foreground/80 text-foreground/60"
-      >
-        Plans
-      </Link>
-      <Link
-        href="/faq"
-        className="transition-colors hover:text-foreground/80 text-foreground/60"
-      >
-        FAQ
-      </Link>
-      <Link
-        href="/contact"
-        className="transition-colors hover:text-foreground/80 text-foreground/60"
-      >
-        Contact
-      </Link>
-    </nav>
-  );
 
   const authSection = (
     <div className="flex items-center gap-2">
@@ -65,26 +37,25 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
     </div>
   );
 
-  const dashboardMenu = (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle Menu</span>
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] p-0">
-        <SheetHeader className="p-4 border-b">
-          <SheetTitle>Menu</SheetTitle>
-        </SheetHeader>
-        <AppSidebar />
-      </SheetContent>
-    </Sheet>
-  );
-
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
+        {isDashboardRoute && user && (
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden mr-4">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] p-0">
+              <SheetHeader className="p-4 border-b">
+                <SheetTitle>Menu</SheetTitle>
+              </SheetHeader>
+              <AppSidebar />
+            </SheetContent>
+          </Sheet>
+        )}
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Image
@@ -93,18 +64,41 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
               width={32}
               height={32}
               className="object-contain"
-              suppressHydrationWarning
             />
             <span className="font-bold hidden sm:inline-block font-headline">
               Echo: The Bridge
             </span>
           </Link>
-          {!isDashboardRoute && desktopNav}
+          <nav className={cn("hidden md:flex items-center gap-4 text-sm font-medium xl:gap-6", isDashboardRoute && 'hidden')}>
+            <Link
+              href="/about"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              About
+            </Link>
+            <Link
+              href="/plans"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Plans
+            </Link>
+            <Link
+              href="/faq"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              FAQ
+            </Link>
+            <Link
+              href="/contact"
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
+            >
+              Contact
+            </Link>
+          </nav>
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
           {authSection}
-          {isDashboardRoute && user && dashboardMenu}
         </div>
       </div>
     </header>
