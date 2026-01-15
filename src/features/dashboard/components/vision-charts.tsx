@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import type { Vision, Roadmap, RoadmapItem } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell } from 'recharts';
 import { visionCategories } from '@/lib/types';
 
@@ -63,6 +63,16 @@ export function VisionCharts({ visions, roadmaps }: VisionChartsProps) {
     return null;
   }
 
+  const pieChartConfig = useMemo(() => {
+    return categoryDistribution.reduce((acc, category, index) => {
+        acc[category.name] = {
+            label: category.name,
+            color: chartColors[index % chartColors.length]
+        };
+        return acc;
+    }, {});
+  }, [categoryDistribution]);
+
   return (
     <div className="mb-8">
         <h2 className="text-2xl font-bold tracking-tighter mb-6">Progress Overview</h2>
@@ -73,14 +83,15 @@ export function VisionCharts({ visions, roadmaps }: VisionChartsProps) {
                     <CardDescription>How your visions are spread across different life areas.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ChartContainer config={{}} className="h-[250px] w-full">
+                    <ChartContainer config={pieChartConfig} className="h-[250px] w-full">
                          <PieChart>
-                            <ChartTooltip content={<ChartTooltipContent nameKey="name" hideLabel />} />
-                            <Pie data={categoryDistribution} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                            <ChartTooltip content={<ChartTooltipContent nameKey="count" hideLabel />} />
+                            <Pie data={categoryDistribution} dataKey="count" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80}>
                                 {categoryDistribution.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
                                 ))}
                             </Pie>
+                            <ChartLegend content={<ChartTooltipContent nameKey="name" />} />
                         </PieChart>
                     </ChartContainer>
                 </CardContent>

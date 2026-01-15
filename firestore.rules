@@ -22,9 +22,9 @@
  *   This data must be managed through a trusted server-side environment.
  * - Self-Creation of User Profile: A user is permitted to create their own user document in
  *   `/users/{userId}` only if the document ID matches their authentication UID.
- * - Plan-Based Limitations: Creating a new vision is only allowed if the user has not
- *   exceeded the `maxVisions` limit defined by their current plan tier. This is checked
- *   using `get()` calls to the user's profile and the plan tier documents.
+ * - Plan-Based Limitations: Creating a new vision is currently only enforced on the client-side.
+ *   A scalable backend solution (like a Cloud Function trigger) would be required to securely enforce
+ *   the `maxVisions` limit from plan tiers.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -54,13 +54,6 @@ service cloud.firestore {
       // The 'id' field in the incoming data must not differ from the existing one.
       return 'id' in request.resource.data && request.resource.data.id != resource.data.id;
     }
-    
-    function canCreateVision(userId) {
-      // FIXME: Implement a scalable counter or Cloud Function to enforce limits. 
-      // 'get' on a collection is not supported in rules.
-      return true;
-    }
-
 
     //-------------------------------------------------------------------------
     // Collection Rules
@@ -78,7 +71,7 @@ service cloud.firestore {
         // Public read if isPublic is true
         allow get: if (isOwner(userId) || (get(/databases/$(database)/documents/users/$(userId)/visions/$(visionId)).data.isPublic == true));
         allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && canCreateVision(userId);
+        allow create: if isOwner(userId);
         allow update, delete: if isOwner(userId);
       }
 

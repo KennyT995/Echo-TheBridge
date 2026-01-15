@@ -112,10 +112,10 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">Welcome</CardTitle>
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl">Create an account</CardTitle>
           <CardDescription>
-            Login or create an account to start building your vision.
+            Enter your details below to start building your vision.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -154,21 +154,33 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-4 pt-2">
                 <Button
-                  onClick={form.handleSubmit((values) => onSubmit(values, 'login'))}
-                  disabled={isSubmitting}
-                  variant="outline"
+                    onClick={form.handleSubmit((values) => onSubmit(values, 'signup'))}
+                    disabled={isSubmitting}
+                    className="w-full"
                 >
-                  {isSubmitting && activeAction === 'login' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Login
+                    {isSubmitting && activeAction === 'signup' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create Account
                 </Button>
+                <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">
+                            Already have an account?
+                        </span>
+                    </div>
+                </div>
                 <Button
-                  onClick={form.handleSubmit((values) => onSubmit(values, 'signup'))}
-                  disabled={isSubmitting}
+                    onClick={form.handleSubmit((values) => onSubmit(values, 'login'))}
+                    disabled={isSubmitting}
+                    variant="secondary"
+                    className="w-full"
                 >
-                  {isSubmitting && activeAction === 'signup' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign Up
+                    {isSubmitting && activeAction === 'login' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Login
                 </Button>
               </div>
             </form>

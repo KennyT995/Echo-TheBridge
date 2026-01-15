@@ -1,17 +1,17 @@
 'use client';
 
-import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
 import Loading from '../loading';
 
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Eye, Zap } from 'lucide-react';
+import { PlusCircle, Eye, Zap, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { formatDistanceToNow } from 'date-fns';
-import type { Vision, Roadmap } from '@/lib/types';
+import type { Vision, Roadmap, UserData, PlanTier } from '@/lib/types';
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,20 @@ import { VisionForm } from '@/features/visions/components/vision-form';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VisionCharts } from '@/features/dashboard/components/vision-charts';
+
+function usePlan(userData: UserData | null | undefined) {
+    const firestore = useFirestore();
+
+    const planRef = useMemoFirebase(() => {
+        if (!firestore || !userData?.planTierId) return null;
+        return doc(firestore, 'plan_tiers', userData.planTierId);
+    }, [userData, firestore]);
+
+    const { data: planData, isLoading: isPlanLoading } = useDoc<PlanTier>(planRef);
+
+    return { plan: planData, isPlanLoading };
+}
+
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -43,8 +57,17 @@ export default function DashboardPage() {
     return collection(firestore, 'users', user.uid, 'roadmaps');
   }, [user, firestore]);
 
+  const userDocRef = useMemoFirebase(() => {
+    if (!user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [user, firestore]);
+
+
   const { data: visions, isLoading: visionsLoading } = useCollection<Vision>(visionsQuery);
   const { data: roadmaps, isLoading: roadmapsLoading } = useCollection<Roadmap>(roadmapsQuery);
+  const { data: userData, isLoading: isUserDataLoading } = useDoc<UserData>(userDocRef);
+  const { plan, isPlanLoading } = usePlan(userData);
+
 
   const roadmapsById = useMemo(() => {
     return roadmaps?.reduce((acc, roadmap) => {
@@ -69,11 +92,16 @@ export default function DashboardPage() {
     router.push(`/vision/${visionId}`);
   };
 
-  if (isUserLoading || !user) {
+  const isLoading = isUserLoading || visionsLoading || roadmapsLoading || isUserDataLoading || isPlanLoading;
+
+  if (isLoading || !user) {
     return <Loading />;
   }
 
-  const isLoading = visionsLoading || roadmapsLoading;
+  const visionCount = visions?.length ?? 0;
+  const visionLimit = plan?.maxVisions ?? 0;
+  const isLimitReached = visionCount >= visionLimit;
+
 
   const renderVisionsSkeletons = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -107,9 +135,9 @@ export default function DashboardPage() {
               An overview of your life's aspirations.
             </p>
           </div>
-          <Button onClick={() => setCreateVisionOpen(true)}>
-            <PlusCircle className="mr-2" />
-            New Vision
+           <Button onClick={() => isLimitReached ? router.push('/plans') : setCreateVisionOpen(true)} disabled={isLoading}>
+            {isLimitReached ? 'Vision Limit Reached' : 'New Vision'}
+            {isLimitReached ? <ArrowRight className="ml-2" /> : <PlusCircle className="ml-2" />}
           </Button>
         </div>
 
@@ -158,9 +186,9 @@ export default function DashboardPage() {
                 <p className="mt-2 text-sm text-muted-foreground">
                   Start by creating a new vision for your future.
                 </p>
-                <Button className="mt-6" onClick={() => setCreateVisionOpen(true)}>
-                  <PlusCircle className="mr-2" />
-                  Create Your First Vision
+                <Button className="mt-6" onClick={() => setCreateVisionOpen(true)} disabled={isLoading || isLimitReached}>
+                    {isLimitReached ? 'Upgrade to Create More' : 'Create Your First Vision'}
+                    {isLimitReached ? <ArrowRight className="ml-2" /> : <PlusCircle className="ml-2" />}
                 </Button>
               </div>
             )}
