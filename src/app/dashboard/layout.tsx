@@ -2,6 +2,7 @@ import AppSidebar from '@/components/layout/app-sidebar';
 import {
   Sidebar,
   SidebarInset,
+  SidebarProvider,
 } from '@/components/ui/sidebar';
 
 export default function DashboardLayout({
@@ -10,6 +11,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
+    <SidebarProvider>
       <div className="flex w-full">
         <Sidebar>
           <AppSidebar />
@@ -18,5 +20,6 @@ export default function DashboardLayout({
           {children}
         </SidebarInset>
       </div>
+    </SidebarProvider>
   );
 }

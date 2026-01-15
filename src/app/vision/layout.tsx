@@ -2,6 +2,7 @@ import AppSidebar from '@/components/layout/app-sidebar';
 import {
     Sidebar,
     SidebarInset,
+    SidebarProvider,
 } from '@/components/ui/sidebar';
 
 export default function VisionLayout({
@@ -10,13 +11,15 @@ export default function VisionLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="flex w-full">
-            <Sidebar>
-                <AppSidebar />
-            </Sidebar>
-            <SidebarInset>
-                {children}
-            </SidebarInset>
-        </div>
+        <SidebarProvider>
+            <div className="flex w-full">
+                <Sidebar>
+                    <AppSidebar />
+                </Sidebar>
+                <SidebarInset>
+                    {children}
+                </SidebarInset>
+            </div>
+        </SidebarProvider>
     );
 }
