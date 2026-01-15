@@ -16,7 +16,7 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { UserNav } from './user-nav';
-import { SidebarTrigger } from '../ui/sidebar';
+import AppSidebar from './app-sidebar';
 
 interface HeaderClientProps {
   isDashboardRoute: boolean;
@@ -36,9 +36,17 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         {isDashboardRoute && (
-          <div className="md:hidden mr-2">
-            <SidebarTrigger />
-          </div>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:mr-2">
+                <Menu className="h-5 w-5" suppressHydrationWarning />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-[300px]">
+                <AppSidebar />
+            </SheetContent>
+          </Sheet>
         )}
         <div className="mr-4 flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
@@ -55,9 +63,6 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
             </span>
           </Link>
         </div>
-
-        {isDashboardRoute && <div className="hidden md:block"><SidebarTrigger /></div>}
-
 
         {/* Desktop Nav for non-dashboard routes */}
         {!isDashboardRoute && (
