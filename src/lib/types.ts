@@ -5,6 +5,10 @@ export interface UserData {
   id: string;
   email: string;
   planTierId: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  stripePriceId?: string;
+  stripeCurrentPeriodEnd?: Date;
 }
 
 export interface PlanTier {
@@ -14,4 +18,5 @@ export interface PlanTier {
   aiFeaturesEnabled: boolean;
   price: number;
   features: string[];
+  stripePriceId: string | null;
 }
