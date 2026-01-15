@@ -83,9 +83,10 @@ export default function PlansPage() {
   const [isSeeding, setIsSeeding] = useState(true);
 
   const plansQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    // Only construct the query if we have a firestore instance AND a user.
+    if (!firestore || !user) return null;
     return collection(firestore, 'plan_tiers');
-  }, [firestore]);
+  }, [firestore, user]);
 
   const { data: plans, isLoading: plansLoading } = useCollection<PlanTier>(plansQuery);
 
@@ -129,7 +130,7 @@ export default function PlansPage() {
     }
   };
 
-  if (isUserLoading || plansLoading || isSeeding) {
+  if (isUserLoading || (user && (plansLoading || isSeeding))) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
