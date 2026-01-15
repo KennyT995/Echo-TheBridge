@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/sheet';
 import { UserNav } from './user-nav';
 import AppSidebar from './app-sidebar';
+import { SidebarProvider } from '../ui/sidebar';
 
 interface HeaderClientProps {
   isDashboardRoute: boolean;
@@ -44,7 +45,9 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-[300px]">
-                <AppSidebar />
+                <SidebarProvider>
+                    <AppSidebar />
+                </SidebarProvider>
             </SheetContent>
           </Sheet>
         )}
