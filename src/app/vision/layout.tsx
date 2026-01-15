@@ -1,8 +1,23 @@
+'use client';
+
+import AppSidebar from '@/components/layout/app-sidebar';
+import {
+  Sidebar,
+  SidebarInset,
+  SidebarProvider,
+} from '@/components/ui/sidebar';
 
 export default function VisionLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    return <div className="w-full">{children}</div>;
+  return (
+    <SidebarProvider>
+      <Sidebar>
+        <AppSidebar />
+      </Sidebar>
+      <SidebarInset>{children}</SidebarInset>
+    </SidebarProvider>
+  );
 }
