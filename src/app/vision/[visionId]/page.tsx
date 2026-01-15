@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import Loading from '@/app/loading';
 
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import type { Vision, Roadmap, PlanTier, UserData, RoadmapItem } from '@/lib/types';
 import { RoadmapDisplay } from '@/features/roadmaps/components/roadmap-display';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
-    DialogClose,
+    DialogFooter,
   } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -72,6 +72,12 @@ export default function VisionDetailPage() {
   const shareUrl = typeof window !== 'undefined' && user ? `${window.location.origin}/share/${user.uid}/${visionId}` : '';
   const [deleteConfirmationInput, setDeleteConfirmationInput] = useState('');
   const deleteConfirmationPhrase = "I want to delete this vision";
+
+  const [isRefocusModalOpen, setRefocusModalOpen] = useState(false);
+  const [yearlyFocus, setYearlyFocus] = useState('');
+  const [monthlyFocus, setMonthlyFocus] = useState('');
+  const [weeklyFocus, setWeeklyFocus] = useState('');
+  const [dailyFocus, setDailyFocus] = useState('');
 
 
   // Memoize Firestore references
@@ -118,41 +124,51 @@ export default function VisionDetailPage() {
   };
 
   const handleRegenerate = async () => {
-    if (!vision || !roadmapRef || !visionRef) return;
+    if (!vision || !roadmapRef || !visionRef || !roadmap) return;
     setIsRegenerating(true);
   
-    const result = await generateRoadmap({ title: vision.title, goal: vision.goal, category: vision.category, isPublic: vision.isPublic });
+    const completedTasks = [
+      ...roadmap.yearlyMilestones,
+      ...roadmap.monthlySprints,
+      ...roadmap.weeklyTactics,
+      ...roadmap.dailyHabits,
+    ].filter(task => task.completed).map(task => task.text);
   
-    if (result.error || !result.roadmap || !result.correctedGoal) {
+    const result = await generateRoadmap({
+      title: vision.title,
+      goal: vision.goal,
+      category: vision.category,
+      isPublic: vision.isPublic,
+      yearlyFocus,
+      monthlyFocus,
+      weeklyFocus,
+      dailyFocus,
+      completedTasks,
+    });
+  
+    setIsRegenerating(false);
+    setRefocusModalOpen(false);
+    setYearlyFocus('');
+    setMonthlyFocus('');
+    setWeeklyFocus('');
+    setDailyFocus('');
+  
+    if (result.error || !result.roadmap) {
       toast({
         variant: 'destructive',
         title: 'Error Regenerating Roadmap',
         description: result.error || 'An unknown error occurred.',
       });
-      setIsRegenerating(false);
       return;
     }
   
-    // Update the vision if the goal text was corrected by the AI
-    if (vision.goal !== result.correctedGoal) {
-      updateDocumentNonBlocking(visionRef, { goal: result.correctedGoal });
-    }
-  
-    // Overwrite the existing roadmap with the newly generated tasks
-    const newRoadmapData = {
-      yearlyMilestones: result.roadmap.yearlyMilestones,
-      monthlySprints: result.roadmap.monthlySprints,
-      weeklyTactics: result.roadmap.weeklyTactics,
-      dailyHabits: result.roadmap.dailyHabits,
-    };
+    const newRoadmapData = { ...result.roadmap };
     updateDocumentNonBlocking(roadmapRef, newRoadmapData);
   
     toast({
       title: "Roadmap Regenerated!",
-      description: "Your new set of tasks is ready.",
+      description: "Your new, focused set of tasks is ready.",
     });
-  
-    setIsRegenerating(false);
   };
 
 
@@ -239,28 +255,10 @@ export default function VisionDetailPage() {
               <Badge variant="secondary" className="mt-2">{vision.category}</Badge>
             </div>
             <div className="flex gap-2 flex-shrink-0">
-               <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" disabled={isRegenerating}>
-                    {isRegenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-                    Regenerate
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Regenerate Roadmap?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will replace your current roadmap with a new set of AI-generated tasks. Any progress on your existing tasks will be lost. Are you sure you want to continue?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleRegenerate}>
-                      Yes, Regenerate
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+               <Button variant="outline" disabled={isRegenerating} onClick={() => setRefocusModalOpen(true)}>
+                {isRegenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
+                Regenerate
+              </Button>
               <Button variant="outline" onClick={() => setShareModalOpen(true)}>
                   <Share2 className="mr-2 h-4 w-4" /> Share
               </Button>
@@ -389,6 +387,42 @@ export default function VisionDetailPage() {
                         </div>
                     )}
                 </div>
+            </DialogContent>
+        </Dialog>
+
+        <Dialog open={isRefocusModalOpen} onOpenChange={setRefocusModalOpen}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Refocus & Regenerate Roadmap</DialogTitle>
+                    <DialogDescription>
+                        Provide focus areas for the AI to generate a more tailored roadmap. Completed tasks will be remembered.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="py-4 space-y-4 max-h-[70vh] overflow-y-auto">
+                    <div className="space-y-2">
+                      <Label>Yearly Focus</Label>
+                      <Textarea placeholder="e.g., Secure major funding round." value={yearlyFocus} onChange={(e) => setYearlyFocus(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Monthly Focus</Label>
+                      <Textarea placeholder="e.g., Onboard first 100 paying customers." value={monthlyFocus} onChange={(e) => setMonthlyFocus(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Weekly Focus</Label>
+                      <Textarea placeholder="e.g., Ship two new feature updates." value={weeklyFocus} onChange={(e) => setWeeklyFocus(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Daily Focus</Label>
+                      <Textarea placeholder="e.g., Stick to a consistent morning routine." value={dailyFocus} onChange={(e) => setDailyFocus(e.target.value)} />
+                    </div>
+                </div>
+                <DialogFooter>
+                    <Button variant="ghost" onClick={() => setRefocusModalOpen(false)}>Cancel</Button>
+                    <Button onClick={handleRegenerate} disabled={isRegenerating}>
+                        {isRegenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Regenerate with Focus
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     </>

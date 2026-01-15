@@ -3,6 +3,7 @@
 import {
   generateRoadmapFromVision,
   GenerateRoadmapFromVisionOutput,
+  GenerateRoadmapFromVisionInput,
 } from '@/ai/flows/generate-roadmap-from-vision';
 import {
   analyzeAndReflectOnUserInput,
@@ -17,7 +18,7 @@ import { correctGrammarAndSpelling } from '@/ai/flows/correct-grammar-and-spelli
 
 
 export async function generateRoadmap(
-  values: VisionFormValues,
+  values: VisionFormValues & Partial<GenerateRoadmapFromVisionInput>,
 ): Promise<{ roadmap?: GenerateRoadmapFromVisionOutput; correctedGoal?: string; error?: string }> {
   const validatedFields = VisionFormSchema.safeParse(values);
   if (!validatedFields.success) {
@@ -33,8 +34,13 @@ export async function generateRoadmap(
 
     // Then, generate the roadmap with the corrected goal.
     const roadmap = await generateRoadmapFromVision({
-        ...validatedFields.data,
+        title: validatedFields.data.title,
         goal: correctedGoal,
+        yearlyFocus: values.yearlyFocus,
+        monthlyFocus: values.monthlyFocus,
+        weeklyFocus: values.weeklyFocus,
+        dailyFocus: values.dailyFocus,
+        completedTasks: values.completedTasks,
     });
     return { roadmap, correctedGoal };
   } catch (error: unknown) {

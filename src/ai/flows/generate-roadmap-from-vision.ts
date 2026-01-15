@@ -9,11 +9,16 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const GenerateRoadmapFromVisionInputSchema = z.object({
   title: z.string().optional().default(''),
   goal: z.string().describe("The user's primary goal or vision."),
+  yearlyFocus: z.string().optional().describe("User's specific focus for yearly milestones."),
+  monthlyFocus: z.string().optional().describe("User's specific focus for monthly sprints."),
+  weeklyFocus: z.string().optional().describe("User's specific focus for weekly tactics."),
+  dailyFocus: z.string().optional().describe("User's specific focus for daily habits."),
+  completedTasks: z.array(z.string()).optional().describe("A list of tasks the user has already completed."),
 });
 export type GenerateRoadmapFromVisionInput = z.infer<typeof GenerateRoadmapFromVisionInputSchema>;
 
@@ -42,22 +47,46 @@ const prompt = ai.definePrompt({
   output: { schema: GenerateRoadmapFromVisionOutputSchema },
   prompt: `You are a world-class Strategy Architect and Chief Vision Officer, capable of reverse-engineering ambitious dreams into inevitable realities.
   
-  The user has defined a vision titled: "{{{title}}}"
-  The goal description is: "{{{goal}}}"
-  
-  Your task: Breakdown this vision into a "Physics of Progress" roadmap.
-  1. Yearly Milestones: The "Big Rocks" that must move.
-  2. Monthly Sprints: The 30-day missions to conquer specific territories.
-  3. Weekly Tactics: The precise maneuvers to execute starting next Monday.
-  4. Daily Habits: The atomic units of behavior that compound into the result.
-  
-  CRITICAL INSTRUCTIONS:
-  - Be uncomfortably specific. Avoid generic filler like "Research market" or "Stay positive".
-  - Instead of "Network", say "Send 5 DMs to industry leaders in [Niche]".
-  - Instead of "Learn code", say "Build a Hello World app in Next.js".
-  - Focus on High-Leverage Activities (80/20 rule).
-  
-  Return ONLY the raw JSON matching the schema.`,
+The user has defined a vision titled: "{{{title}}}"
+The goal description is: "{{{goal}}}"
+
+Your task: Breakdown this vision into a "Physics of Progress" roadmap.
+
+{{#if completedTasks}}
+The user has already completed the following tasks. Do not suggest these again. Instead, build upon these accomplishments to define the next steps.
+Completed Tasks:
+{{#each completedTasks}}
+- {{{this}}}
+{{/each}}
+{{/if}}
+
+The user may have provided specific focus areas to guide generation. If a focus area is provided for a section, prioritize it. Otherwise, generate the best items based on the overall goal.
+{{#if yearlyFocus}}
+Yearly Focus: {{{yearlyFocus}}}
+{{/if}}
+{{#if monthlyFocus}}
+Monthly Focus: {{{monthlyFocus}}}
+{{/if}}
+{{#if weeklyFocus}}
+Weekly Focus: {{{weeklyFocus}}}
+{{/if}}
+{{#if dailyFocus}}
+Daily Focus: {{{dailyFocus}}}
+{{/if}}
+
+Generate the roadmap with these sections:
+1. Yearly Milestones: The "Big Rocks" that must move.
+2. Monthly Sprints: The 30-day missions to conquer specific territories.
+3. Weekly Tactics: The precise maneuvers to execute starting next Monday.
+4. Daily Habits: The atomic units of behavior that compound into the result.
+
+CRITICAL INSTRUCTIONS:
+- Be uncomfortably specific. Avoid generic filler like "Research market" or "Stay positive".
+- Instead of "Network", say "Send 5 DMs to industry leaders in [Niche]".
+- Instead of "Learn code", say "Build a Hello World app in Next.js".
+- Focus on High-Leverage Activities (80/20 rule).
+
+Return ONLY the raw JSON matching the schema.`,
 });
 
 
