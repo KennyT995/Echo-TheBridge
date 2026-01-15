@@ -114,7 +114,7 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
   };
 
   return (
-    <Card className="w-full border-2 border-border/50 shadow-sm">
+    <Card className="w-full shadow-sm">
       <CardContent className="p-4 sm:p-6">
         <Accordion type="multiple" defaultValue={['dailyHabits']} className="w-full space-y-6">
           {roadmapSections.map((section) => {

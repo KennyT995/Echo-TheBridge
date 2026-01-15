@@ -186,7 +186,7 @@ export default function LoginPage() {
                     variant="secondary"
                     className="w-full"
                 >
-                    {isSubmitting && activeAction === 'login' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {(isSubmitting && activeAction === 'login') || isUserLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Login
                 </Button>
               </div>
