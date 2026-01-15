@@ -13,11 +13,12 @@ import {
     type GenerateVisionIdeasOutput
 } from '@/ai/flows/generate-vision-ideas';
 import { VisionFormSchema, type VisionFormValues } from '@/lib/types';
+import { correctGrammarAndSpelling } from '@/ai/flows/correct-grammar-and-spelling';
 
 
 export async function generateRoadmap(
   values: VisionFormValues,
-): Promise<{ roadmap?: GenerateRoadmapFromVisionOutput; error?: string }> {
+): Promise<{ roadmap?: GenerateRoadmapFromVisionOutput; correctedGoal?: string; error?: string }> {
   const validatedFields = VisionFormSchema.safeParse(values);
   if (!validatedFields.success) {
     return {
@@ -26,8 +27,16 @@ export async function generateRoadmap(
   }
 
   try {
-    const roadmap = await generateRoadmapFromVision(validatedFields.data);
-    return { roadmap };
+    // First, correct the grammar of the goal.
+    const correctionResult = await correctGrammarAndSpelling({ text: validatedFields.data.goal });
+    const correctedGoal = correctionResult.correctedText;
+
+    // Then, generate the roadmap with the corrected goal.
+    const roadmap = await generateRoadmapFromVision({
+        ...validatedFields.data,
+        goal: correctedGoal,
+    });
+    return { roadmap, correctedGoal };
   } catch (error: unknown) {
     console.error('Error in generateRoadmap:', error);
     let errorMessage = '';

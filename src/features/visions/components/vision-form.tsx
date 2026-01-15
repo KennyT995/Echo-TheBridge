@@ -122,7 +122,7 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
     
     const result = await generateRoadmap(values);
 
-    if (result.error || !result.roadmap) {
+    if (result.error || !result.roadmap || !result.correctedGoal) {
       toast({
         variant: 'destructive',
         title: 'Error Generating Roadmap',
@@ -136,6 +136,7 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
 
     const visionData = {
       ...values,
+      goal: result.correctedGoal, // Use the corrected goal
       id: visionId,
       userId: user.uid,
       createdAt: serverTimestamp(),
