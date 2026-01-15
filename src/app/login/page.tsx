@@ -23,8 +23,8 @@ import {
 } from '@/components/ui/card';
 import { useAuth, useUser } from '@/firebase';
 import {
-  initiateEmailSignIn,
-  initiateEmailSignUp,
+  signInWithEmail,
+  signUpWithEmail,
 } from '@/firebase/non-blocking-login';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
@@ -76,31 +76,40 @@ export default function LoginPage() {
           message = 'No account found with this email.';
           break;
         case 'auth/email-already-in-use':
-          message = 'This email is already registered.';
+          message = 'This email is already registered. Try logging in instead.';
           break;
         default:
           message = 'An authentication error occurred. Please try again.';
       }
+    } else if (error.message) { // Handle custom errors from our auth actions
+        message = error.message;
     }
+
     toast({
       variant: "destructive",
-      title: "Authentication Error",
+      title: "Authentication Failed",
       description: message,
     });
-    setIsSubmitting(false);
-    setActiveAction(null);
   }
 
-  const onSubmit = (values: LoginFormValues) => {
-    // Determine action based on which button was clicked, or default to login
-    const action = activeAction || 'login';
-    setIsSubmitting(true);
-    setActiveAction(action);
+  const onSubmit = async (values: LoginFormValues) => {
+    const action = activeAction;
+    if (!auth || !action) return;
 
-    if (action === 'login') {
-      initiateEmailSignIn(auth, values.email, values.password, handleAuthError);
-    } else {
-      initiateEmailSignUp(auth, values.email, values.password, handleAuthError);
+    setIsSubmitting(true);
+
+    try {
+      if (action === 'login') {
+        await signInWithEmail(auth, values.email, values.password);
+      } else {
+        await signUpWithEmail(auth, values.email, values.password);
+      }
+      // On successful auth, the `useUser` hook will update, and the `useEffect`
+      // will handle the redirection to the dashboard. We don't need to do anything else here.
+    } catch (error: any) {
+      handleAuthError(error);
+      setIsSubmitting(false); // Only reset on error
+      setActiveAction(null);
     }
   };
 
@@ -139,7 +148,7 @@ export default function LoginPage() {
                         placeholder="m@example.com"
                         {...field}
                         type="email"
-                        disabled={isUserLoading}
+                        disabled={isSubmitting || isUserLoading}
                       />
                     </FormControl>
                     <FormMessage />
@@ -153,7 +162,7 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input {...field} type="password" disabled={isUserLoading} />
+                      <Input {...field} type="password" disabled={isSubmitting || isUserLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

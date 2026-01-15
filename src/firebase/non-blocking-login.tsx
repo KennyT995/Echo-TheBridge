@@ -1,7 +1,6 @@
 'use client';
 import {
   Auth,
-  signInAnonymously,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   UserCredential,
@@ -9,21 +8,18 @@ import {
 import { doc, setDoc } from 'firebase/firestore';
 import { getFirestore } from 'firebase/firestore';
 import { updateProfile } from 'firebase/auth';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
-type ErrorCallback = (error: any) => void;
-
-// Function to create a user profile document
+// This function is now internal to this module.
 const createUserProfile = async (userCredential: UserCredential) => {
   const user = userCredential.user;
   if (!user) return;
-  
+
   const displayName = user.displayName || user.email?.split('@')[0] || 'User';
 
   // We want to update the auth user profile as well
   if (!user.displayName) {
-    await updateProfile(user, { displayName }).catch(e => console.error("Failed to update auth profile", e));
+    // We don't want to block on this, but we should handle errors.
+    await updateProfile(user, { displayName }).catch(e => console.warn("Failed to update auth profile display name", e));
   }
 
   const userRef = doc(getFirestore(), 'users', user.uid);
@@ -34,32 +30,33 @@ const createUserProfile = async (userCredential: UserCredential) => {
     planTierId: 'trailblazer', // Default plan
   };
   
-  // This is a non-blocking write. We don't wait for it to complete.
-  setDoc(userRef, userData).catch(error => {
-    errorEmitter.emit(
-      'permission-error',
-      new FirestorePermissionError({
-        path: userRef.path,
-        operation: 'create',
-        requestResourceData: userData,
-      })
-    );
-  });
+  // This is a critical step, so we await it and let errors propagate.
+  await setDoc(userRef, userData);
 };
 
-/** Initiate anonymous sign-in (non-blocking). */
-export function initiateAnonymousSignIn(authInstance: Auth, onError?: ErrorCallback): void {
-  signInAnonymously(authInstance).catch(onError);
+/**
+ * Handles email/password sign-up. Creates auth user and user profile document.
+ * If profile creation fails, it deletes the auth user to prevent inconsistent state.
+ */
+export async function signUpWithEmail(auth: Auth, email: string, password: string): Promise<void> {
+  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  try {
+    await createUserProfile(userCredential);
+  } catch (profileError) {
+    // If profile creation fails, delete the auth user to clean up.
+    try {
+      await userCredential.user.delete();
+    } catch (deleteError) {
+      console.error("Failed to clean up orphaned auth user.", deleteError);
+      // Even if cleanup fails, we must inform the user that the process failed.
+      throw new Error('An unexpected error occurred during sign-up. Your account may be in an inconsistent state. Please contact support.');
+    }
+    // Re-throw a more user-friendly error.
+    throw new Error('Account created, but failed to set up user profile. Please try again or contact support.');
+  }
 }
 
-/** Initiate email/password sign-up (non-blocking). */
-export function initiateEmailSignUp(authInstance: Auth, email: string, password: string, onError?: ErrorCallback): void {
-  createUserWithEmailAndPassword(authInstance, email, password)
-    .then(createUserProfile) // Create profile on successful sign-up
-    .catch(onError);
-}
-
-/** Initiate email/password sign-in (non-blocking). */
-export function initiateEmailSignIn(authInstance: Auth, email: string, password: string, onError?: ErrorCallback): void {
-  signInWithEmailAndPassword(authInstance, email, password).catch(onError);
+/** Handles email/password sign-in. */
+export async function signInWithEmail(auth: Auth, email: string, password: string): Promise<void> {
+  await signInWithEmailAndPassword(auth, email, password);
 }
