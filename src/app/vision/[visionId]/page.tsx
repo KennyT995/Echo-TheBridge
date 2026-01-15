@@ -6,7 +6,7 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import Loading from '@/app/loading';
 
 import { doc, updateDoc } from 'firebase/firestore';
-import type { Vision, Roadmap, PlanTier, UserData } from '@/lib/types';
+import type { Vision, Roadmap, PlanTier, UserData, RoadmapItem } from '@/lib/types';
 import { RoadmapDisplay } from '@/features/roadmaps/components/roadmap-display';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,6 +40,8 @@ import { Input } from '@/components/ui/input';
 import { deleteDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
+
 
 function usePlan(userData: UserData | null | undefined) {
     const firestore = useFirestore();
@@ -135,6 +137,21 @@ export default function VisionDetailPage() {
     toast({ title: 'Copied!', description: 'Share link copied to clipboard.' });
   };
 
+  const calculateOverallProgress = (roadmap: Roadmap): number => {
+    const allItems: RoadmapItem[] = [
+      ...(roadmap.yearlyMilestones || []),
+      ...(roadmap.monthlySprints || []),
+      ...(roadmap.weeklyTactics || []),
+      ...(roadmap.dailyHabits || []),
+    ];
+
+    if (allItems.length === 0) {
+      return 0;
+    }
+
+    const completedItems = allItems.filter(item => item.completed).length;
+    return (completedItems / allItems.length) * 100;
+  };
 
   const isLoading = isUserLoading || isVisionLoading || isRoadmapLoading || isUserDataLoading || isPlanLoading;
 
@@ -166,45 +183,57 @@ export default function VisionDetailPage() {
     );
   }
 
+  const overallProgress = calculateOverallProgress(roadmap);
+
   return (
     <>
       <main className="container mx-auto px-4 py-8 md:py-12">
-        <div className="mb-8 flex items-start justify-between gap-4">
-          <div>
-            <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl">
-              {vision.title}
-            </h1>
-            <div className="mt-2 flex items-center gap-4">
-                <Badge variant="secondary">{vision.category}</Badge>
-                <p className="text-muted-foreground">Your dynamically generated path to achieving your vision.</p>
+        <div className="mb-8">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl">
+                {vision.title}
+              </h1>
+              <Badge variant="secondary" className="mt-2">{vision.category}</Badge>
+            </div>
+            <div className="flex gap-2 flex-shrink-0">
+              <Button variant="outline" onClick={() => setShareModalOpen(true)}>
+                  <Share2 className="mr-2 h-4 w-4" /> Share
+              </Button>
+              <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                  <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                      <Trash2 className="h-5 w-5" />
+                  </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                  <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete your vision and its roadmap from the database.
+                      </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                      Delete Vision
+                      </AlertDialogAction>
+                  </AlertDialogFooter>
+                  </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setShareModalOpen(true)}>
-                <Share2 className="mr-2 h-4 w-4" /> Share
-            </Button>
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
-                    <Trash2 className="h-5 w-5" />
-                </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your vision and its roadmap from the database.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Delete Vision
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+          
+          <p className="text-lg text-muted-foreground max-w-3xl mb-6">{vision.goal}</p>
+
+          <div>
+              <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-sm font-medium text-muted-foreground">Overall Vision Progress</span>
+                  <span className="text-sm font-bold text-primary">{Math.round(overallProgress)}%</span>
+              </div>
+              <Progress value={overallProgress} className="h-3 w-full" />
           </div>
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
