@@ -39,7 +39,9 @@ function usePlan(userData: UserData | null) {
         return doc(firestore, 'plan_tiers', userData.planTierId);
     }, [userData, firestore]);
 
-    return useDoc<PlanTier>(planRef);
+    const { data: planData, isLoading: isPlanLoading } = useDoc<PlanTier>(planRef);
+
+    return { plan: planData, isPlanLoading };
 }
 
 export default function VisionDetailPage() {
@@ -71,10 +73,10 @@ export default function VisionDetailPage() {
 
   const { data: vision, isLoading: isVisionLoading } = useDoc<Vision>(visionRef);
   const { data: roadmap, isLoading: isRoadmapLoading } = useDoc<Roadmap>(roadmapRef);
-  const { data: userData } = useDoc<UserData>(userRef);
+  const { data: userData, isLoading: isUserDataLoading } = useDoc<UserData>(userRef);
 
   // Conditionally fetch the plan only when userData is available
-  const { data: plan } = usePlan(userData);
+  const { plan, isPlanLoading } = usePlan(userData);
 
 
   useEffect(() => {
@@ -108,10 +110,12 @@ export default function VisionDetailPage() {
     }
   };
 
-  if (isUserLoading || !user) {
+  const isLoading = isUserLoading || isVisionLoading || isRoadmapLoading || isUserDataLoading || isPlanLoading;
+
+  if (isLoading || !user) {
     return <Loading />;
   }
-
+  
   // Skeleton State
   if (isVisionLoading || isRoadmapLoading || !vision || !roadmap) {
     return (

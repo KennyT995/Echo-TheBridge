@@ -18,7 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { VisionForm } from '@/features/visions/components/vision-form';
 import { useToast } from '@/hooks/use-toast';
@@ -145,7 +144,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <Dialog open={isCreateVisionOpen} onOpenChange={setCreateVisionOpen} modal={false}>
+        <Dialog open={isCreateVisionOpen} onOpenChange={setCreateVisionOpen}>
           <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle>Create a New Vision</DialogTitle>

@@ -68,7 +68,8 @@ export default function LoginPage() {
     if (error.code) {
       switch (error.code) {
         case 'auth/wrong-password':
-          message = 'Incorrect password. Please try again.';
+        case 'auth/invalid-credential':
+          message = 'Incorrect password or email. Please try again.';
           break;
         case 'auth/user-not-found':
           message = 'No account found with this email.';
@@ -77,7 +78,7 @@ export default function LoginPage() {
           message = 'This email is already registered.';
           break;
         default:
-          message = error.message;
+          message = 'An authentication error occurred. Please try again.';
       }
     }
     toast({
