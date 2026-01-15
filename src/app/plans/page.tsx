@@ -3,7 +3,7 @@
 import { useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { useFirestore, useUser } from '@/firebase';
 
-import { collection, doc, updateDoc, writeBatch } from 'firebase/firestore';
+import { collection, doc, writeBatch } from 'firebase/firestore';
 import { Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { updateDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 type PlanTier = {
   id: string;
@@ -83,10 +83,9 @@ export default function PlansPage() {
   const [isSeeding, setIsSeeding] = useState(true);
 
   const plansQuery = useMemoFirebase(() => {
-    // Only construct the query if we have a firestore instance AND a user.
-    if (!firestore || !user) return null;
+    if (!firestore) return null;
     return collection(firestore, 'plan_tiers');
-  }, [firestore, user]);
+  }, [firestore]);
 
   const { data: plans, isLoading: plansLoading } = useCollection<PlanTier>(plansQuery);
 
@@ -113,14 +112,12 @@ export default function PlansPage() {
   }, [firestore, user]);
   const { data: userData } = useDoc<UserData>(userDocRef);
 
-  useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/login');
-    }
-  }, [user, isUserLoading, router]);
-
   const handleSelectPlan = (planTierId: string) => {
-    if (userDocRef && user) {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    if (userDocRef) {
       setDocumentNonBlocking(userDocRef, { id: user.uid, planTierId }, { merge: true });
       toast({
         title: "Plan Updated!",
@@ -130,17 +127,18 @@ export default function PlansPage() {
     }
   };
 
-  if (isUserLoading || (user && (plansLoading || isSeeding))) {
+  if (plansLoading || isSeeding) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />
       </div>
     );
   }
+  
+  const displayedPlans = plans && plans.length > 0 ? plans : defaultPlans;
 
   return (
     <>
-
       <main className="container mx-auto px-4 py-12 md:py-20">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl md:text-6xl">
@@ -151,7 +149,7 @@ export default function PlansPage() {
           </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
-          {(plans && plans.length > 0 ? plans : defaultPlans)?.map((plan) => (
+          {displayedPlans.map((plan) => (
             <Card
               key={plan.id}
               className={cn(
@@ -179,9 +177,9 @@ export default function PlansPage() {
                 <Button
                   className="w-full"
                   onClick={() => handleSelectPlan(plan.id)}
-                  disabled={userData?.planTierId === plan.id}
+                  disabled={!!user && userData?.planTierId === plan.id}
                 >
-                  {userData?.planTierId === plan.id ? 'Current Plan' : 'Select Plan'}
+                  {user && userData?.planTierId === plan.id ? 'Current Plan' : 'Select Plan'}
                 </Button>
               </CardFooter>
             </Card>

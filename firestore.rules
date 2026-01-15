@@ -88,9 +88,8 @@ service cloud.firestore {
     }
 
     match /plan_tiers/{planTierId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create, update, delete: if isSignedIn();
+      allow get, list: if true;
+      allow write: if false;
     }
   }
 }
