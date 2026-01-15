@@ -4,7 +4,7 @@ import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebas
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import Loading from '../loading';
-import Header from '@/components/header';
+
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Eye, Zap } from 'lucide-react';
 import Link from 'next/link';
@@ -20,7 +20,7 @@ import {
   DialogDescription,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { VisionForm } from '@/components/vision-form';
+import { VisionForm } from '@/features/visions/components/vision-form';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -82,7 +82,7 @@ export default function DashboardPage() {
 
   return (
     <>
-      <Header />
+
       <main className="container mx-auto px-4 py-8 md:py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -93,25 +93,10 @@ export default function DashboardPage() {
               An overview of your life's aspirations.
             </p>
           </div>
-           <Dialog open={isCreateVisionOpen} onOpenChange={setCreateVisionOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <PlusCircle className="mr-2" />
-                New Vision
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-4xl">
-              <DialogHeader>
-                <DialogTitle>Create a New Vision</DialogTitle>
-                <DialogDescription>
-                  Define your future. We'll architect the path.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="max-h-[80vh] overflow-y-auto p-1">
-                <VisionForm onVisionCreated={onVisionCreated} />
-              </div>
-            </DialogContent>
-          </Dialog>
+          <Button onClick={() => setCreateVisionOpen(true)}>
+            <PlusCircle className="mr-2" />
+            New Vision
+          </Button>
         </div>
 
         {visionsLoading && renderVisionsSkeletons()}
@@ -125,21 +110,21 @@ export default function DashboardPage() {
                   <CardDescription>
                     Created{' '}
                     {vision.createdAt
-                      ? formatDistanceToNow(vision.createdAt.toDate(), { addSuffix: true })
+                      ? formatDistanceToNow((vision.createdAt as any).toDate(), { addSuffix: true })
                       : 'just now'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">
-                   <p className="text-sm text-muted-foreground line-clamp-3">
+                  <p className="text-sm text-muted-foreground line-clamp-3">
                     {vision.goal || 'No goal description provided.'}
-                   </p>
+                  </p>
                 </CardContent>
                 <div className="p-6 pt-0">
-                    <Button asChild className="w-full">
-                        <Link href={`/vision/${vision.id}`}>
-                            <Eye className="mr-2" /> View Vision
-                        </Link>
-                    </Button>
+                  <Button asChild className="w-full">
+                    <Link href={`/vision/${vision.id}`}>
+                      <Eye className="mr-2" /> View Vision
+                    </Link>
+                  </Button>
                 </div>
               </Card>
             ))}
@@ -153,27 +138,26 @@ export default function DashboardPage() {
             <p className="mt-2 text-sm text-muted-foreground">
               Start by creating a new vision for your future.
             </p>
-             <Dialog open={isCreateVisionOpen} onOpenChange={setCreateVisionOpen}>
-                <DialogTrigger asChild>
-                    <Button className="mt-6">
-                        <PlusCircle className="mr-2" />
-                        Create Your First Vision
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl">
-                <DialogHeader>
-                    <DialogTitle>Create a New Vision</DialogTitle>
-                    <DialogDescription>
-                    Define your future. We'll architect the path.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="max-h-[80vh] overflow-y-auto p-1">
-                    <VisionForm onVisionCreated={onVisionCreated} />
-                </div>
-                </DialogContent>
-            </Dialog>
+            <Button className="mt-6" onClick={() => setCreateVisionOpen(true)}>
+              <PlusCircle className="mr-2" />
+              Create Your First Vision
+            </Button>
           </div>
         )}
+
+        <Dialog open={isCreateVisionOpen} onOpenChange={setCreateVisionOpen} modal={false}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Create a New Vision</DialogTitle>
+              <DialogDescription>
+                Define your future. We'll architect the path.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="max-h-[80vh] overflow-y-auto p-1">
+              <VisionForm onVisionCreated={onVisionCreated} />
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </>
   );

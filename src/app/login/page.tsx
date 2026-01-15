@@ -66,24 +66,24 @@ export default function LoginPage() {
   const handleAuthError = (error: any) => {
     let message = 'An unknown error occurred.';
     if (error.code) {
-        switch (error.code) {
-            case 'auth/wrong-password':
-                message = 'Incorrect password. Please try again.';
-                break;
-            case 'auth/user-not-found':
-                message = 'No account found with this email.';
-                break;
-            case 'auth/email-already-in-use':
-                message = 'This email is already registered.';
-                break;
-            default:
-                message = error.message;
-        }
+      switch (error.code) {
+        case 'auth/wrong-password':
+          message = 'Incorrect password. Please try again.';
+          break;
+        case 'auth/user-not-found':
+          message = 'No account found with this email.';
+          break;
+        case 'auth/email-already-in-use':
+          message = 'This email is already registered.';
+          break;
+        default:
+          message = error.message;
+      }
     }
     toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: message,
+      variant: "destructive",
+      title: "Authentication Error",
+      description: message,
     });
     setIsSubmitting(false);
     setActiveAction(null);
@@ -103,7 +103,7 @@ export default function LoginPage() {
   if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        <Loader2 className="h-16 w-16 animate-spin text-primary" suppressHydrationWarning />
       </div>
     );
   }

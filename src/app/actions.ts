@@ -24,14 +24,18 @@ export async function generateRoadmap(
   try {
     const roadmap = await generateRoadmapFromVision(validatedFields.data);
     return { roadmap };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in generateRoadmap:', error);
+    let errorMessage = '';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
     // Check for AI flow related errors
-    if (error.message.includes('AI') || error.message.includes('flow') || error.message.includes('genkit') ) {
-         return {
-            error:
-            'An unexpected error occurred while generating your roadmap with the AI. Please try again later.',
-        };
+    if (errorMessage.includes('AI') || errorMessage.includes('flow') || errorMessage.includes('genkit')) {
+      return {
+        error:
+          'An unexpected error occurred while generating your roadmap with the AI. Please try again later.',
+      };
     }
     // Generic fallback error
     return {

@@ -8,8 +8,8 @@
  * - GenerateRoadmapFromVisionOutput - The return type for the generateRoadmapFromVision function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const GenerateRoadmapFromVisionInputSchema = z.object({
   title: z.string().optional().default(''),
@@ -38,9 +38,26 @@ export async function generateRoadmapFromVision(input: GenerateRoadmapFromVision
 
 const prompt = ai.definePrompt({
   name: 'generateRoadmapFromVisionPrompt',
-  input: {schema: GenerateRoadmapFromVisionInputSchema},
-  output: {schema: GenerateRoadmapFromVisionOutputSchema},
-  prompt: `You are an expert life coach and strategist specializing in reverse-engineering long-term visions into actionable roadmaps. Based on the user's goal titled "{{{title}}}" with the description "{{{goal}}}", create a comprehensive, structured roadmap. This roadmap must include yearly milestones, monthly sprints, weekly tactics, and daily habits. For each item, only generate the 'text' field describing the actionable step.`,
+  input: { schema: GenerateRoadmapFromVisionInputSchema },
+  output: { schema: GenerateRoadmapFromVisionOutputSchema },
+  prompt: `You are a world-class Strategy Architect and Chief Vision Officer, capable of reverse-engineering ambitious dreams into inevitable realities.
+  
+  The user has defined a vision titled: "{{{title}}}"
+  The goal description is: "{{{goal}}}"
+  
+  Your task: Breakdown this vision into a "Physics of Progress" roadmap.
+  1. Yearly Milestones: The "Big Rocks" that must move.
+  2. Monthly Sprints: The 30-day missions to conquer specific territories.
+  3. Weekly Tactics: The precise maneuvers to execute starting next Monday.
+  4. Daily Habits: The atomic units of behavior that compound into the result.
+  
+  CRITICAL INSTRUCTIONS:
+  - Be uncomfortably specific. Avoid generic filler like "Research market" or "Stay positive".
+  - Instead of "Network", say "Send 5 DMs to industry leaders in [Niche]".
+  - Instead of "Learn code", say "Build a Hello World app in Next.js".
+  - Focus on High-Leverage Activities (80/20 rule).
+  
+  Return ONLY the raw JSON matching the schema.`,
 });
 
 
@@ -51,7 +68,7 @@ const generateRoadmapFromVisionFlow = ai.defineFlow(
     outputSchema: GenerateRoadmapFromVisionOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const { output } = await prompt(input);
     return output!;
   }
 );

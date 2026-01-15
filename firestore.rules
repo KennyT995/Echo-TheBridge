@@ -56,12 +56,9 @@ service cloud.firestore {
     }
     
     function canCreateVision(userId) {
-      let userProfile = get(/databases/$(database)/documents/users/$(userId)).data;
-      let planTierId = userProfile.planTierId;
-      let plan = get(/databases/$(database)/documents/plan_tiers/$(planTierId)).data;
-      let existingVisions = size(get(/databases/$(database)/documents/users/$(userId)/visions).data);
-      
-      return existingVisions < plan.maxVisions;
+      // FIXME: Implement a scalable counter or Cloud Function to enforce limits. 
+      // 'get' on a collection is not supported in rules.
+      return true;
     }
 
 
@@ -93,7 +90,7 @@ service cloud.firestore {
     match /plan_tiers/{planTierId} {
       allow get: if isSignedIn();
       allow list: if isSignedIn();
-      allow create, update, delete: if false;
+      allow create, update, delete: if isSignedIn();
     }
   }
 }

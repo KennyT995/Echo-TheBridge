@@ -73,64 +73,65 @@ export default function AppSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.path}>
-              <Link href={item.path} passHref>
-                <SidebarMenuButton
-                  as="a"
-                  isActive={pathname === item.path}
-                  tooltip={item.label}
-                >
-                  <item.icon />
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === item.path}
+                tooltip={item.label}
+              >
+                <Link href={item.path}>
+                  <item.icon suppressHydrationWarning />
                   <span>{item.label}</span>
-                </SidebarMenuButton>
-              </Link>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
       </SidebarGroup>
-      
+
       <SidebarGroup className="mt-auto p-0">
-         <SidebarMenu className='p-2'>
+        <SidebarMenu className='p-2'>
           <ClientOnly>
             {visionsLoading && (
               <>
-                  <SidebarMenuSkeleton showIcon />
-                  <SidebarMenuSkeleton showIcon />
+                <SidebarMenuSkeleton showIcon />
+                <SidebarMenuSkeleton showIcon />
               </>
             )}
           </ClientOnly>
-          </SidebarMenu>
+        </SidebarMenu>
 
-          {visions && visions.length > 0 && (
-            <Accordion type="single" collapsible className="w-full" defaultValue='my-visions'>
-              <AccordionItem value="my-visions" className='border-none'>
-                <AccordionTrigger className="p-2 text-sm font-medium text-sidebar-foreground/90 hover:text-sidebar-foreground hover:no-underline hover:bg-sidebar-accent rounded-md [&[data-state=open]]:bg-sidebar-accent">
-                    <div className="flex items-center gap-2">
-                        <Rocket className="w-4 h-4"/>
-                        <span>My Visions</span>
-                    </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                    <ul className='space-y-1 pl-8 pr-2 py-2'>
-                        {visions.map((vision) => (
-                            <li key={vision.id}>
-                                <Link href={`/vision/${vision.id}`} passHref>
-                                    <a className={cn("block text-sm rounded-md p-2 hover:bg-sidebar-accent", pathname === `/vision/${vision.id}` && 'bg-sidebar-accent font-semibold')}>
-                                        {vision.title}
-                                    </a>
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          )}
-         
+        {visions && visions.length > 0 && (
+          <Accordion type="single" collapsible className="w-full" defaultValue='my-visions'>
+            <AccordionItem value="my-visions" className='border-none'>
+              <AccordionTrigger className="p-2 text-sm font-medium text-sidebar-foreground/90 hover:text-sidebar-foreground hover:no-underline hover:bg-sidebar-accent rounded-md [&[data-state=open]]:bg-sidebar-accent">
+                <div className="flex items-center gap-2">
+                  <Rocket className="w-4 h-4" suppressHydrationWarning />
+                  <span>My Visions</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <ul className='space-y-1 pl-8 pr-2 py-2'>
+                  {visions.map((vision) => (
+                    <li key={vision.id}>
+                      <Link
+                        href={`/vision/${vision.id}`}
+                        className={cn("block text-sm rounded-md p-2 hover:bg-sidebar-accent", pathname === `/vision/${vision.id}` ? 'bg-sidebar-accent font-semibold' : '')}
+                      >
+                        {vision.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        )}
+
       </SidebarGroup>
     </SidebarContent>
   );
 }
 
 function cn(...classes: string[]) {
-    return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(' ');
 }

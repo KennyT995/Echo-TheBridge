@@ -2,7 +2,7 @@
 
 import { useCollection, useDoc, useMemoFirebase } from '@/firebase';
 import { useFirestore, useUser } from '@/firebase';
-import Header from '@/components/header';
+
 import { collection, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { Loader2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { updateDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 type PlanTier = {
   id: string;
@@ -23,55 +23,55 @@ type PlanTier = {
 };
 
 type UserData = {
-    planTierId: string;
+  planTierId: string;
 }
 
 const defaultPlans: PlanTier[] = [
-    {
-      id: 'trailblazer',
-      name: 'Trailblazer',
-      price: 0,
-      maxVisions: 1,
-      aiFeaturesEnabled: false,
-      features: ['1 Vision', 'Basic Roadmap Generation', 'Community Support'],
-    },
-    {
-      id: 'pathfinder',
-      name: 'Pathfinder',
-      price: 15,
-      maxVisions: 5,
-      aiFeaturesEnabled: true,
-      features: [
-        '5 Visions',
-        'Advanced AI-Powered Roadmap',
-        'AI-Powered Strategic Briefings',
-        'Email Support',
-      ],
-    },
-    {
-      id: 'visionary',
-      name: 'Visionary',
-      price: 45,
-      maxVisions: 999, // Effectively unlimited
-      aiFeaturesEnabled: true,
-      features: [
-        'Unlimited Visions',
-        'Advanced AI-Powered Roadmap',
-        'AI-Powered Strategic Briefings',
-        'Priority Support',
-        'Legacy Planning',
-      ],
-    },
-  ];
+  {
+    id: 'trailblazer',
+    name: 'Trailblazer',
+    price: 0,
+    maxVisions: 1,
+    aiFeaturesEnabled: false,
+    features: ['1 Vision', 'Basic Roadmap Generation', 'Community Support'],
+  },
+  {
+    id: 'pathfinder',
+    name: 'Pathfinder',
+    price: 15,
+    maxVisions: 5,
+    aiFeaturesEnabled: true,
+    features: [
+      '5 Visions',
+      'Advanced AI-Powered Roadmap',
+      'AI-Powered Strategic Briefings',
+      'Email Support',
+    ],
+  },
+  {
+    id: 'visionary',
+    name: 'Visionary',
+    price: 45,
+    maxVisions: 999, // Effectively unlimited
+    aiFeaturesEnabled: true,
+    features: [
+      'Unlimited Visions',
+      'Advanced AI-Powered Roadmap',
+      'AI-Powered Strategic Briefings',
+      'Priority Support',
+      'Legacy Planning',
+    ],
+  },
+];
 
 async function seedDefaultPlans(db: any) {
-    const plansRef = collection(db, 'plan_tiers');
-    const batch = writeBatch(db);
-    defaultPlans.forEach((plan) => {
-        const docRef = doc(plansRef, plan.id);
-        batch.set(docRef, plan);
-    });
-    await batch.commit();
+  const plansRef = collection(db, 'plan_tiers');
+  const batch = writeBatch(db);
+  defaultPlans.forEach((plan) => {
+    const docRef = doc(plansRef, plan.id);
+    batch.set(docRef, plan);
+  });
+  await batch.commit();
 }
 
 
@@ -91,16 +91,16 @@ export default function PlansPage() {
 
   useEffect(() => {
     async function handleSeeding() {
-        if (firestore) {
-            if (plans && plans.length === 0 && !plansLoading && !isSeeding) {
-              try {
-                await seedDefaultPlans(firestore);
-              } catch (e) {
-                console.error("Error seeding plans:", e)
-              }
-            }
-            setTimeout(() => setIsSeeding(false), 500);
+      if (firestore) {
+        if (plans && plans.length === 0 && !plansLoading && !isSeeding) {
+          try {
+            await seedDefaultPlans(firestore);
+          } catch (e) {
+            console.error("Error seeding plans:", e)
+          }
         }
+        setTimeout(() => setIsSeeding(false), 500);
+      }
     }
     handleSeeding();
   }, [firestore, plans, plansLoading, isSeeding])
@@ -119,9 +119,9 @@ export default function PlansPage() {
   }, [user, isUserLoading, router]);
 
   const handleSelectPlan = (planTierId: string) => {
-    if (userDocRef) {
-      updateDocumentNonBlocking(userDocRef, { planTierId });
-       toast({
+    if (userDocRef && user) {
+      setDocumentNonBlocking(userDocRef, { id: user.uid, planTierId }, { merge: true });
+      toast({
         title: "Plan Updated!",
         description: "Your plan has been successfully updated.",
       });
@@ -139,7 +139,7 @@ export default function PlansPage() {
 
   return (
     <>
-      <Header />
+
       <main className="container mx-auto px-4 py-12 md:py-20">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl md:text-6xl">
