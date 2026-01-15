@@ -5,12 +5,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import Loading from '@/app/loading';
 
-import { doc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import type { Vision, Roadmap, PlanTier, UserData } from '@/lib/types';
 import { RoadmapDisplay } from '@/features/roadmaps/components/roadmap-display';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Wand2, Trash2 } from 'lucide-react';
+import { Loader2, Wand2, Trash2, Share2, Copy } from 'lucide-react';
 import { getReflection } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -26,7 +26,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogClose,
+  } from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { deleteDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -34,7 +45,7 @@ function usePlan(userData: UserData | null | undefined) {
     const firestore = useFirestore();
 
     const planRef = useMemoFirebase(() => {
-        if (!userData?.planTierId) return null;
+        if (!firestore || !userData?.planTierId) return null;
         return doc(firestore, 'plan_tiers', userData.planTierId);
     }, [userData, firestore]);
 
@@ -53,6 +64,10 @@ export default function VisionDetailPage() {
   const [userInput, setUserInput] = useState('');
   const [reflection, setReflection] = useState('');
   const [isReflecting, setIsReflecting] = useState(false);
+  const [isShareModalOpen, setShareModalOpen] = useState(false);
+  
+  const shareUrl = typeof window !== 'undefined' && user ? `${window.location.origin}/share/${user.uid}/${visionId}` : '';
+
 
   // Memoize Firestore references
   const visionRef = useMemoFirebase(() => {
@@ -109,19 +124,33 @@ export default function VisionDetailPage() {
     }
   };
 
+  const handleIsPublicChange = (isPublic: boolean) => {
+    if (visionRef) {
+      updateDocumentNonBlocking(visionRef, { isPublic });
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(shareUrl);
+    toast({ title: 'Copied!', description: 'Share link copied to clipboard.' });
+  };
+
+
   const isLoading = isUserLoading || isVisionLoading || isRoadmapLoading || isUserDataLoading || isPlanLoading;
 
   if (isLoading || !user) {
     return <Loading />;
   }
   
-  // Skeleton State
   if (isVisionLoading || isRoadmapLoading || !vision || !roadmap) {
     return (
       <main className="container mx-auto px-4 py-8 md:py-12">
-        <div className="mb-8 space-y-4">
-          <Skeleton className="h-12 w-3/4 max-w-2xl" />
-          <Skeleton className="h-6 w-1/2 max-w-xl" />
+        <div className="mb-8 space-y-4 flex justify-between items-start">
+            <div className="space-y-4">
+                <Skeleton className="h-12 w-3/4 max-w-2xl" />
+                <Skeleton className="h-6 w-1/2 max-w-xl" />
+            </div>
+            <Skeleton className="h-10 w-10 rounded-md" />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
@@ -140,36 +169,42 @@ export default function VisionDetailPage() {
   return (
     <>
       <main className="container mx-auto px-4 py-8 md:py-12">
-        <div className="mb-8 flex items-start justify-between">
+        <div className="mb-8 flex items-start justify-between gap-4">
           <div>
             <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl">
               {vision.title}
             </h1>
-            <p className="mt-2 text-lg text-muted-foreground">
-              Your dynamically generated path to achieving your vision.
-            </p>
+            <div className="mt-2 flex items-center gap-4">
+                <Badge variant="secondary">{vision.category}</Badge>
+                <p className="text-muted-foreground">Your dynamically generated path to achieving your vision.</p>
+            </div>
           </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
-                <Trash2 className="h-5 w-5" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete your vision and its roadmap from the database.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  Delete Vision
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShareModalOpen(true)}>
+                <Share2 className="mr-2 h-4 w-4" /> Share
+            </Button>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                    <Trash2 className="h-5 w-5" />
+                </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your vision and its roadmap from the database.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Delete Vision
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -219,6 +254,34 @@ export default function VisionDetailPage() {
           </div>
         </div>
       </main>
+
+       <Dialog open={isShareModalOpen} onOpenChange={setShareModalOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Share Your Vision</DialogTitle>
+                    <DialogDescription>
+                        Make your vision public to share it with others. They will only be able to see your vision and yearly milestones.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="py-4 space-y-6">
+                    <div className="flex items-center space-x-2">
+                        <Switch id="public-switch" checked={vision.isPublic} onCheckedChange={handleIsPublicChange} />
+                        <Label htmlFor="public-switch">Make this vision public</Label>
+                    </div>
+                    {vision.isPublic && (
+                         <div className="space-y-2">
+                            <Label htmlFor="share-link">Shareable Link</Label>
+                            <div className="flex gap-2">
+                                <Input id="share-link" value={shareUrl} readOnly />
+                                <Button size="icon" onClick={copyToClipboard} variant="outline">
+                                    <Copy className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </DialogContent>
+        </Dialog>
     </>
   );
 }

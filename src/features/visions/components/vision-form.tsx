@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Zap } from 'lucide-react';
+import { Loader2, Zap, Sparkles } from 'lucide-react';
 import { useFirestore, useUser } from '@/firebase';
 import { doc, serverTimestamp } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,14 +20,78 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { generateRoadmap } from '@/app/actions';
-import { VisionFormSchema, type VisionFormValues } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { generateRoadmap, getVisionIdeas } from '@/app/actions';
+import { VisionFormSchema, type VisionFormValues, visionCategories } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface VisionFormProps {
     onVisionCreated: (visionId: string) => void;
+}
+
+function VisionInspiration({ onSelectIdea }: { onSelectIdea: (idea: string) => void }) {
+    const [isLoading, setIsLoading] = useState(false);
+    const [keywords, setKeywords] = useState('');
+    const [ideas, setIdeas] = useState<string[]>([]);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleGenerateIdeas = async () => {
+        setIsLoading(true);
+        setError(null);
+        setIdeas([]);
+        const result = await getVisionIdeas(keywords);
+        if (result.error) {
+            setError(result.error);
+        } else if (result.ideas) {
+            setIdeas(result.ideas);
+        }
+        setIsLoading(false);
+    };
+
+    return (
+        <Card className="bg-muted/30 border-dashed border-primary/50">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                    <Sparkles className="text-primary h-5 w-5" />
+                    Need Inspiration?
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="space-y-2">
+                    <Label className="text-sm font-medium">Enter some keywords</Label>
+                    <div className="flex gap-2">
+                        <Input
+                            placeholder="e.g., technology, education, community"
+                            value={keywords}
+                            onChange={(e) => setKeywords(e.target.value)}
+                            disabled={isLoading}
+                        />
+                        <Button onClick={handleGenerateIdeas} disabled={isLoading || !keywords} type="button">
+                            {isLoading ? <Loader2 className="animate-spin" /> : 'Inspire Me'}
+                        </Button>
+                    </div>
+                </div>
+                {error && <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>}
+                {ideas.length > 0 && (
+                     <div className="space-y-2">
+                        <h4 className="font-medium">Here are a few ideas:</h4>
+                        <ul className="space-y-2">
+                            {ideas.map((idea, index) => (
+                                <li key={index}>
+                                    <Button variant="link" className="p-0 h-auto text-left whitespace-normal" onClick={() => onSelectIdea(idea)} type="button">
+                                        {idea}
+                                    </Button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </CardContent>
+        </Card>
+    );
 }
 
 export function VisionForm({ onVisionCreated }: VisionFormProps) {
@@ -40,6 +105,7 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
     defaultValues: {
       title: '',
       goal: '',
+      isPublic: false,
     },
   });
 
@@ -54,7 +120,6 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
     }
     setIsLoading(true);
     
-    // 1. Generate roadmap from the server action
     const result = await generateRoadmap(values);
 
     if (result.error || !result.roadmap) {
@@ -67,7 +132,6 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
       return;
     }
 
-    // 2. Save the vision and roadmap to Firestore from the client
     const visionId = nanoid();
 
     const visionData = {
@@ -90,28 +154,52 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
     const roadmapRef = doc(firestore, 'users', user.uid, 'roadmaps', visionId);
     setDocumentNonBlocking(roadmapRef, roadmapData, {});
     
-    // We don't wait for the writes to finish, we optimistically navigate.
-    // The non-blocking writers will emit global errors if they fail.
     onVisionCreated(visionId);
     setIsLoading(false);
   }
 
   return (
+    <div className="space-y-8">
+      <VisionInspiration onSelectIdea={(idea) => form.setValue('goal', idea)} />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-1">
-            <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel className="text-lg">Vision Title</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., Launch a successful SaaS product" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel className="text-lg">Vision Title</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g., Launch a successful SaaS product" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="text-lg">Category</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select a category for your vision" />
+                                </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                    {visionCategories.map(category => (
+                                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
             <FormField
                 control={form.control}
                 name="goal"
@@ -141,5 +229,6 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
           </div>
         </form>
       </Form>
+    </div>
   );
 }

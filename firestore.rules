@@ -68,28 +68,32 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow list: if false;
+      allow list: if false; // Prevent user enumeration
       allow create: if isOwner(userId) && hasValidUserIdOnCreate(userId);
       allow update: if isExistingOwner(userId) && !isAttemptingToChangeId();
       allow delete: if isExistingOwner(userId);
 
       // Visions Subcollection
       match /visions/{visionId} {
-        allow get, list: if isOwner(userId);
+        // Public read if isPublic is true
+        allow get: if (isOwner(userId) || (get(/databases/$(database)/documents/users/$(userId)/visions/$(visionId)).data.isPublic == true));
+        allow list: if isOwner(userId);
         allow create: if isOwner(userId) && canCreateVision(userId);
         allow update, delete: if isOwner(userId);
       }
 
       // Roadmaps Subcollection
       match /roadmaps/{roadmapId} {
-        allow get, list: if isOwner(userId);
+        // Public read if the corresponding vision is public
+        allow get: if (isOwner(userId) || (get(/databases/$(database)/documents/users/$(userId)/visions/$(roadmapId)).data.isPublic == true));
+        allow list: if isOwner(userId);
         allow create, update, delete: if isOwner(userId);
       }
     }
 
     match /plan_tiers/{planTierId} {
       allow get, list: if true;
-      allow write: if false;
+      allow write: if false; // Protect plan data from client-side writes
     }
   }
 }

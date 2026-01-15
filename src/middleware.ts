@@ -14,10 +14,22 @@ async function verifyToken(idToken: string) {
 }
 
 export async function middleware(request: NextRequest) {
-  // Pass through if it's for the Stripe webhook
+  const isCron = request.nextUrl.pathname.startsWith('/api/cron');
+
+  // Pass through if it's for the Stripe webhook or a cron job
   if (request.nextUrl.pathname.startsWith('/api/stripe/webhook')) {
     return NextResponse.next();
   }
+
+  // Secure cron jobs with a secret key
+  if (isCron) {
+    const authHeader = request.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return new NextResponse('Unauthorized', { status: 401 });
+    }
+    return NextResponse.next();
+  }
+
 
   // For other API routes, check for a valid Firebase token
   if (request.nextUrl.pathname.startsWith('/api/')) {

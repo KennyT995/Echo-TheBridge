@@ -95,13 +95,21 @@
           "type": "string",
           "description": "The user's primary goal or vision."
         },
+        "category": {
+          "type": "string",
+          "description": "The category of the vision (e.g., Career, Health)."
+        },
+        "isPublic": {
+          "type": "boolean",
+          "description": "Whether the vision is publicly shareable."
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time",
           "description": "Timestamp when the vision was created."
         }
       },
-      "required": ["id", "userId", "title", "goal", "createdAt"]
+      "required": ["id", "userId", "title", "goal", "category", "isPublic", "createdAt"]
     },
     "Roadmap": {
       "$schema": "http://json-schema.org/draft-07/schema#",

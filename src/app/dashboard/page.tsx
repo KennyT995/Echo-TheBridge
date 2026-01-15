@@ -2,7 +2,7 @@
 
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Loading from '../loading';
 
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { formatDistanceToNow } from 'date-fns';
-import type { Vision } from '@/lib/types';
+import type { Vision, Roadmap } from '@/lib/types';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,7 @@ import {
 import { VisionForm } from '@/features/visions/components/vision-form';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { VisionCharts } from '@/features/dashboard/components/vision-charts';
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -37,8 +38,21 @@ export default function DashboardPage() {
       orderBy('createdAt', 'desc')
     );
   }, [user, firestore]);
+  const roadmapsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return collection(firestore, 'users', user.uid, 'roadmaps');
+  }, [user, firestore]);
 
   const { data: visions, isLoading: visionsLoading } = useCollection<Vision>(visionsQuery);
+  const { data: roadmaps, isLoading: roadmapsLoading } = useCollection<Roadmap>(roadmapsQuery);
+
+  const roadmapsById = useMemo(() => {
+    return roadmaps?.reduce((acc, roadmap) => {
+        acc[roadmap.id] = roadmap;
+        return acc;
+    }, {} as Record<string, Roadmap>) || {};
+}, [roadmaps]);
+
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -58,6 +72,8 @@ export default function DashboardPage() {
   if (isUserLoading || !user) {
     return <Loading />;
   }
+
+  const isLoading = visionsLoading || roadmapsLoading;
 
   const renderVisionsSkeletons = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -81,12 +97,11 @@ export default function DashboardPage() {
 
   return (
     <>
-
       <main className="container mx-auto px-4 py-8 md:py-12">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">
-              Your Visions
+              Dashboard
             </h1>
             <p className="text-muted-foreground mt-1">
               An overview of your life's aspirations.
@@ -98,50 +113,58 @@ export default function DashboardPage() {
           </Button>
         </div>
 
-        {visionsLoading && renderVisionsSkeletons()}
-
-        {!visionsLoading && visions && visions.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {visions.map((vision) => (
-              <Card key={vision.id} className="flex flex-col">
-                <CardHeader>
-                  <CardTitle>{vision.title}</CardTitle>
-                  <CardDescription>
-                    Created{' '}
-                    {vision.createdAt
-                      ? formatDistanceToNow((vision.createdAt as any).toDate(), { addSuffix: true })
-                      : 'just now'}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-sm text-muted-foreground line-clamp-3">
-                    {vision.goal || 'No goal description provided.'}
-                  </p>
-                </CardContent>
-                <div className="p-6 pt-0">
-                  <Button asChild className="w-full">
-                    <Link href={`/vision/${vision.id}`}>
-                      <Eye className="mr-2" /> View Vision
-                    </Link>
-                  </Button>
-                </div>
-              </Card>
-            ))}
+        {isLoading ? (
+          <div className='space-y-8'>
+            <Skeleton className="h-64 w-full" />
+            {renderVisionsSkeletons()}
           </div>
-        )}
+        ) : (
+          <>
+            <VisionCharts visions={visions || []} roadmaps={roadmapsById} />
 
-        {!visionsLoading && (!visions || visions.length === 0) && (
-          <div className="text-center py-20 border-2 border-dashed border-muted-foreground/30 rounded-lg">
-            <Zap className="mx-auto h-12 w-12 text-muted-foreground" />
-            <h3 className="mt-4 text-lg font-semibold">No Visions Yet</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Start by creating a new vision for your future.
-            </p>
-            <Button className="mt-6" onClick={() => setCreateVisionOpen(true)}>
-              <PlusCircle className="mr-2" />
-              Create Your First Vision
-            </Button>
-          </div>
+            <h2 className="text-2xl font-bold tracking-tighter mt-12 mb-6">Your Visions</h2>
+            {visions && visions.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {visions.map((vision) => (
+                  <Card key={vision.id} className="flex flex-col">
+                    <CardHeader>
+                      <CardTitle>{vision.title}</CardTitle>
+                      <CardDescription>
+                        Created{' '}
+                        {vision.createdAt
+                          ? formatDistanceToNow((vision.createdAt as any).toDate(), { addSuffix: true })
+                          : 'just now'}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {vision.goal || 'No goal description provided.'}
+                      </p>
+                    </CardContent>
+                    <div className="p-6 pt-0">
+                      <Button asChild className="w-full">
+                        <Link href={`/vision/${vision.id}`}>
+                          <Eye className="mr-2" /> View Vision
+                        </Link>
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 border-2 border-dashed border-muted-foreground/30 rounded-lg">
+                <Zap className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-semibold">No Visions Yet</h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Start by creating a new vision for your future.
+                </p>
+                <Button className="mt-6" onClick={() => setCreateVisionOpen(true)}>
+                  <PlusCircle className="mr-2" />
+                  Create Your First Vision
+                </Button>
+              </div>
+            )}
+          </>
         )}
 
         <Dialog open={isCreateVisionOpen} onOpenChange={setCreateVisionOpen}>

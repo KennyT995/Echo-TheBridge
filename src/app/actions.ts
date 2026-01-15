@@ -8,6 +8,10 @@ import {
   analyzeAndReflectOnUserInput,
   type AnalyzeAndReflectOnUserInputOutput,
 } from '@/ai/flows/analyze-and-reflect-on-user-input';
+import {
+    generateVisionIdeas,
+    type GenerateVisionIdeasOutput
+} from '@/ai/flows/generate-vision-ideas';
 import { VisionFormSchema, type VisionFormValues } from '@/lib/types';
 
 
@@ -60,4 +64,19 @@ export async function getReflection(
         'An unexpected error occurred while generating your reflection. Please try again.',
     };
   }
+}
+
+export async function getVisionIdeas(keywords: string): Promise<{ ideas?: string[]; error?: string }> {
+    if (!keywords) {
+        return { error: 'Please provide at least one keyword.' };
+    }
+    try {
+        const result: GenerateVisionIdeasOutput = await generateVisionIdeas({ keywords });
+        return { ideas: result.ideas };
+    } catch (error) {
+        console.error('Vision idea generation failed:', error);
+        return {
+            error: 'An unexpected error occurred while generating ideas. Please try again.',
+        };
+    }
 }
