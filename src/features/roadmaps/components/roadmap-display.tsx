@@ -24,14 +24,9 @@ type RoadmapSectionKey = 'yearlyMilestones' | 'monthlySprints' | 'weeklyTactics'
 
 const roadmapSections = [
   {
-    title: 'Yearly Milestones',
-    key: 'yearlyMilestones',
-    icon: GanttChartSquare,
-  },
-  {
-    title: 'Monthly Sprints',
-    key: 'monthlySprints',
-    icon: CalendarDays,
+    title: 'Daily Habits',
+    key: 'dailyHabits',
+    icon: CheckCircle2,
   },
   {
     title: 'Weekly Tactics',
@@ -39,9 +34,14 @@ const roadmapSections = [
     icon: CircleDot,
   },
   {
-    title: 'Daily Habits',
-    key: 'dailyHabits',
-    icon: CheckCircle2,
+    title: 'Monthly Sprints',
+    key: 'monthlySprints',
+    icon: CalendarDays,
+  },
+  {
+    title: 'Yearly Milestones',
+    key: 'yearlyMilestones',
+    icon: GanttChartSquare,
   },
 ] as const;
 
@@ -91,7 +91,7 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
   return (
     <Card className="w-full border-2 border-border/50 shadow-sm">
       <CardContent className="p-4 sm:p-6">
-        <Accordion type="multiple" defaultValue={['yearlyMilestones']} className="w-full space-y-6">
+        <Accordion type="multiple" defaultValue={['dailyHabits']} className="w-full space-y-6">
           {roadmapSections.map((section) => {
             const items = roadmap[section.key];
             if (!items || items.length === 0) return null;
