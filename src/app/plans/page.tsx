@@ -141,14 +141,15 @@ export default function PlansPage() {
 
     // Paid plan, create checkout session
     try {
+      const idToken = await user.getIdToken();
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           priceId: plan.stripePriceId,
-          userId: user.uid,
           userEmail: user.email,
         }),
       });
@@ -181,9 +182,16 @@ export default function PlansPage() {
   };
 
   const handleManageBilling = async () => {
+    if (!user) return;
     setIsProcessing(true);
     try {
-      const response = await fetch('/api/stripe/create-portal-session', { method: 'POST' });
+      const idToken = await user.getIdToken();
+      const response = await fetch('/api/stripe/create-portal-session', { 
+          method: 'POST',
+          headers: {
+              'Authorization': `Bearer ${idToken}`,
+          },
+      });
       const { url } = await response.json();
       window.location.assign(url);
     } catch (error: any) {

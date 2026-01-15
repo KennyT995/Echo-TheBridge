@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
 import { admin } from '@/firebase/admin';
+import { getAuth } from 'firebase-admin/auth';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-06-20',
@@ -10,9 +11,27 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
+async function getUserIdFromRequest(request: Request): Promise<string | null> {
+    const authHeader = headers().get('Authorization');
+    if (authHeader) {
+        const idToken = authHeader.split('Bearer ')[1];
+        if (idToken) {
+            try {
+                const decodedToken = await getAuth(admin.app()).verifyIdToken(idToken);
+                return decodedToken.uid;
+            } catch (error) {
+                console.error("Error verifying ID token:", error);
+                return null;
+            }
+        }
+    }
+    return null;
+}
+
 export async function POST(request: Request) {
   try {
-    const { priceId, userId, userEmail } = await request.json();
+    const { priceId, userEmail } = await request.json();
+    const userId = await getUserIdFromRequest(request);
 
     if (!userId) {
       return new NextResponse(JSON.stringify({ error: { message: 'User not authenticated.' } }), { status: 401 });
