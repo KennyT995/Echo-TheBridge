@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -30,6 +31,17 @@ import { deleteDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
+function usePlan(userData: UserData | null) {
+    const firestore = useFirestore();
+
+    const planRef = useMemoFirebase(() => {
+        if (!userData?.planTierId) return null;
+        return doc(firestore, 'plan_tiers', userData.planTierId);
+    }, [userData, firestore]);
+
+    return useDoc<PlanTier>(planRef);
+}
+
 export default function VisionDetailPage() {
   const { visionId } = useParams();
   const router = useRouter();
@@ -61,12 +73,9 @@ export default function VisionDetailPage() {
   const { data: roadmap, isLoading: isRoadmapLoading } = useDoc<Roadmap>(roadmapRef);
   const { data: userData } = useDoc<UserData>(userRef);
 
-  const planRef = useMemoFirebase(() => {
-    if (!userData) return null;
-    return doc(firestore, 'plan_tiers', userData.planTierId);
-  }, [userData, firestore]);
+  // Conditionally fetch the plan only when userData is available
+  const { data: plan } = usePlan(userData);
 
-  const { data: plan } = useDoc<PlanTier>(planRef);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
