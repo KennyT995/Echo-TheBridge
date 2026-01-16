@@ -96,18 +96,30 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: Roa
 
     if (newSection[index]) {
       newSection[index] = { ...newSection[index], completed: checked };
-
-      // Check for Milestone Completion (All items in section completed)
-      const isSectionComplete = newSection.every((item) => item.completed);
-      const wasSectionComplete = roadmap[section].every((item) => item.completed);
-
+      
       if (checked) {
-        if (isSectionComplete && !wasSectionComplete) {
-          // Trigger MEGA celebration for completing the whole section
-          triggerMilestoneCelebration(section as any, toast);
+        // Temporarily update the full roadmap to check overall status
+        const tempFullRoadmap = { ...roadmap, [section]: newSection };
+
+        const allItems = [
+            ...(tempFullRoadmap.yearlyMilestones || []),
+            ...(tempFullRoadmap.monthlySprints || []),
+            ...(tempFullRoadmap.weeklyTactics || []),
+            ...(tempFullRoadmap.dailyHabits || []),
+        ];
+        const isVisionComplete = allItems.every(item => item.completed);
+
+        if (isVisionComplete) {
+            triggerMilestoneCelebration('vision', toast);
         } else {
-          // Standard small celebration for single task
-          triggerCelebration(section);
+            const isSectionComplete = newSection.every((item) => item.completed);
+            const wasSectionComplete = roadmap[section].every((item) => item.completed);
+
+            if (isSectionComplete && !wasSectionComplete) {
+                triggerMilestoneCelebration(section, toast);
+            } else {
+                triggerCelebration(section);
+            }
         }
       }
 
