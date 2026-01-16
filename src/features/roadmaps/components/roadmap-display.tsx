@@ -16,6 +16,8 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import confetti from 'canvas-confetti';
+import { triggerMilestoneCelebration } from '@/lib/celebrations';
+import { useToast } from '@/hooks/use-toast';
 
 interface RoadmapDisplayProps {
   roadmap: Roadmap;
@@ -50,6 +52,8 @@ const roadmapSections = [
 export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
   const [editing, setEditing] = useState<{ section: RoadmapSectionKey; index: number; text: string } | null>(null);
 
+  const { toast } = useToast();
+
   if (!roadmap) return null;
 
   const calculateProgress = (items: RoadmapItem[]) => {
@@ -59,18 +63,29 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
   };
 
   const triggerCelebration = (sectionKey: RoadmapSectionKey) => {
-    const configs: Record<RoadmapSectionKey, confetti.Options> = {
-      dailyHabits: { particleCount: 30, spread: 50, origin: { y: 0.7 }, scalar: 0.8 },
-      weeklyTactics: { particleCount: 60, spread: 70, origin: { y: 0.65 }, scalar: 1.0 },
-      monthlySprints: { particleCount: 100, spread: 90, origin: { y: 0.6 }, scalar: 1.2 },
-      yearlyMilestones: { particleCount: 200, spread: 120, origin: { y: 0.5 }, scalar: 1.4 },
-    };
+    const baseLine = {
+      dailyHabits: { count: 30, spread: 40, scalar: 0.8 },
+      weeklyTactics: { count: 60, spread: 60, scalar: 1.0 },
+      monthlySprints: { count: 100, spread: 80, scalar: 1.2 },
+      yearlyMilestones: { count: 150, spread: 100, scalar: 1.4 },
+    }[sectionKey];
 
-    const config = configs[sectionKey];
+    // Randomize the parameters slightly to feel organic
+    const randomSpread = baseLine.spread + (Math.random() * 20 - 10);
+    const randomCount = Math.floor(baseLine.count * (0.8 + Math.random() * 0.4)); // +/- 20%
+    const randomOriginX = 0.5 + (Math.random() * 0.2 - 0.1); // Center +/- 0.1
+
     confetti({
-      ...config,
+      particleCount: randomCount,
+      spread: randomSpread,
+      origin: { y: 0.6, x: randomOriginX },
+      scalar: baseLine.scalar,
       disableForReducedMotion: true,
       colors: ['#22c55e', '#ec4899', '#3b82f6', '#eab308'],
+      startVelocity: 30 + Math.random() * 20,
+      gravity: 0.8,
+      drift: Math.random() - 0.5,
+      ticks: 300,
     });
   };
 
@@ -83,8 +98,18 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
     if (newSection[index]) {
       newSection[index] = { ...newSection[index], completed: checked };
 
+      // Check for Milestone Completion (All items in section completed)
+      const isSectionComplete = newSection.every((item) => item.completed);
+      const wasSectionComplete = roadmap[section].every((item) => item.completed);
+
       if (checked) {
-        triggerCelebration(section);
+        if (isSectionComplete && !wasSectionComplete) {
+          // Trigger MEGA celebration for completing the whole section
+          triggerMilestoneCelebration(section as any, toast);
+        } else {
+          // Standard small celebration for single task
+          triggerCelebration(section);
+        }
       }
 
       updateDocumentNonBlocking(roadmapRef, { [section]: newSection });
@@ -180,16 +205,16 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
                               </label>
                             )}
                           </div>
-                           {!item.completed && !isEditing && (
+                          {!item.completed && !isEditing && (
                             <Button
-                                variant="ghost"
-                                size="icon"
-                                className="ml-auto h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
-                                onClick={() => setEditing({ section: section.key, index, text: item.text })}
+                              variant="ghost"
+                              size="icon"
+                              className="ml-auto h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                              onClick={() => setEditing({ section: section.key, index, text: item.text })}
                             >
-                                <Pencil className="h-4 w-4" />
+                              <Pencil className="h-4 w-4" />
                             </Button>
-                           )}
+                          )}
                         </li>
                       );
                     })}

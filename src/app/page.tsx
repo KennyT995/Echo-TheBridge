@@ -42,6 +42,7 @@ export default function HomePage() {
               src={heroImage.imageUrl}
               alt="Abstract background"
               fill
+              sizes="100vw"
               priority
               className="object-cover z-0 opacity-20"
               data-ai-hint={heroImage.imageHint}

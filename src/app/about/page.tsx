@@ -23,6 +23,7 @@ export default function AboutPage() {
                                 src={placeholderData.about.team}
                                 alt="Our team brainstorming"
                                 fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
                                 className="object-cover"
                                 data-ai-hint="team brainstorming office"
                             />
@@ -48,6 +49,7 @@ export default function AboutPage() {
                                             src={member.img}
                                             alt={member.name}
                                             fill
+                                            sizes="192px"
                                             className="object-cover"
                                             data-ai-hint={`professional headshot ${member.role.split(' ')[0]}`}
                                         />

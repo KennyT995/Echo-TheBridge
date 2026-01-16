@@ -34,10 +34,32 @@ const menuItems = [
   },
 ];
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { CreditCard, LogOut, Settings, User as UserIcon } from 'lucide-react';
+import { useAuth } from '@/firebase';
+import { useRouter } from 'next/navigation';
+
 export default function AppSidebar() {
   const pathname = usePathname();
   const { user } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
   const firestore = useFirestore();
+
+  const handleLogout = async () => {
+    if (!auth) return;
+    await auth.signOut();
+    router.push('/login');
+  };
 
   const visionsQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -52,7 +74,27 @@ export default function AppSidebar() {
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
-      <div className="flex-1 p-4">
+      <div className="flex-1 p-4 overflow-y-auto">
+        <nav className="flex flex-col gap-2">
+          <Button asChild variant="ghost" className="justify-start gap-2">
+            <Link href="/about">
+              <span>About</span>
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" className="justify-start gap-2">
+            <Link href="/faq">
+              <span>FAQ</span>
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" className="justify-start gap-2">
+            <Link href="/contact">
+              <span>Contact</span>
+            </Link>
+          </Button>
+        </nav>
+
+        <div className="my-4 border-t border-sidebar-border/50" />
+
         <nav className="flex flex-col gap-2">
           {menuItems.map((item) => (
             <Button
@@ -113,6 +155,66 @@ export default function AppSidebar() {
             </Accordion>
           )}
         </div>
+      </div>
+
+      <div className="p-4 border-t border-sidebar-border">
+        {user && (
+          <div className="flex flex-col gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="w-full justify-start px-2 gap-2 h-auto py-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+                    <AvatarFallback>{(user.displayName?.[0] || user.email?.[0] || 'U').toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col items-start overflow-hidden">
+                    <span className="text-sm font-medium truncate w-full text-left">{user.displayName || 'User'}</span>
+                    <span className="text-xs text-muted-foreground truncate w-full text-left">{user.email}</span>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.displayName || user.email}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <Link href="/account" className="w-full cursor-pointer">
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>My Account</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/plans" className="w-full cursor-pointer">
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      <span>Plans</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 cursor-pointer">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button
+              variant="outline"
+              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

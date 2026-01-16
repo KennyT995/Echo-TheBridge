@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Wand2, Trash2, Share2, Copy, RefreshCw } from 'lucide-react';
 import { getReflection, generateRoadmap } from '@/app/actions';
+import { RoadmapSelectionDialog } from '@/features/roadmaps/components/roadmap-selection-dialog';
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -27,13 +28,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-  } from '@/components/ui/dialog';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -44,16 +45,16 @@ import { Progress } from '@/components/ui/progress';
 
 
 function usePlan(userData: UserData | null | undefined) {
-    const firestore = useFirestore();
+  const firestore = useFirestore();
 
-    const planRef = useMemoFirebase(() => {
-        if (!firestore || !userData?.planTierId) return null;
-        return doc(firestore, 'plan_tiers', userData.planTierId);
-    }, [userData, firestore]);
+  const planRef = useMemoFirebase(() => {
+    if (!firestore || !userData?.planTierId) return null;
+    return doc(firestore, 'plan_tiers', userData.planTierId);
+  }, [userData, firestore]);
 
-    const { data: planData, isLoading: isPlanLoading } = useDoc<PlanTier>(planRef);
+  const { data: planData, isLoading: isPlanLoading } = useDoc<PlanTier>(planRef);
 
-    return { plan: planData, isPlanLoading };
+  return { plan: planData, isPlanLoading };
 }
 
 export default function VisionDetailPage() {
@@ -68,7 +69,8 @@ export default function VisionDetailPage() {
   const [isReflecting, setIsReflecting] = useState(false);
   const [isShareModalOpen, setShareModalOpen] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
-  
+  const [proposedRoadmap, setProposedRoadmap] = useState<Roadmap | null>(null);
+
   const shareUrl = typeof window !== 'undefined' && user ? `${window.location.origin}/share/${user.uid}/${visionId}` : '';
   const [deleteConfirmationInput, setDeleteConfirmationInput] = useState('');
   const deleteConfirmationPhrase = "I want to delete this vision";
@@ -126,14 +128,14 @@ export default function VisionDetailPage() {
   const handleRegenerate = async () => {
     if (!vision || !roadmapRef || !visionRef || !roadmap) return;
     setIsRegenerating(true);
-  
+
     const completedTasks = [
       ...roadmap.yearlyMilestones,
       ...roadmap.monthlySprints,
       ...roadmap.weeklyTactics,
       ...roadmap.dailyHabits,
     ].filter(task => task.completed).map(task => task.text);
-  
+
     const result = await generateRoadmap({
       title: vision.title,
       goal: vision.goal,
@@ -145,14 +147,14 @@ export default function VisionDetailPage() {
       dailyFocus,
       completedTasks,
     });
-  
+
     setIsRegenerating(false);
     setRefocusModalOpen(false);
     setYearlyFocus('');
     setMonthlyFocus('');
     setWeeklyFocus('');
     setDailyFocus('');
-  
+
     if (result.error || !result.roadmap) {
       toast({
         variant: 'destructive',
@@ -161,13 +163,20 @@ export default function VisionDetailPage() {
       });
       return;
     }
-  
+
     const newRoadmapData = { ...result.roadmap };
-    updateDocumentNonBlocking(roadmapRef, newRoadmapData);
-  
+    setProposedRoadmap(newRoadmapData as Roadmap);
+  };
+
+  const handleConfirmRoadmap = async (selectedRoadmap: Roadmap) => {
+    if (!roadmapRef) return;
+
+    await updateDocumentNonBlocking(roadmapRef, selectedRoadmap);
+    setProposedRoadmap(null);
+
     toast({
-      title: "Roadmap Regenerated!",
-      description: "Your new, focused set of tasks is ready.",
+      title: "Roadmap Updated!",
+      description: "Your selection has been saved.",
     });
   };
 
@@ -216,16 +225,16 @@ export default function VisionDetailPage() {
   if (isLoading || !user) {
     return <Loading />;
   }
-  
+
   if (isVisionLoading || isRoadmapLoading || !vision || !roadmap) {
     return (
       <main className="container mx-auto px-4 py-8 md:py-12">
         <div className="mb-8 space-y-4 flex justify-between items-start">
-            <div className="space-y-4">
-                <Skeleton className="h-12 w-3/4 max-w-2xl" />
-                <Skeleton className="h-6 w-1/2 max-w-xl" />
-            </div>
-            <Skeleton className="h-10 w-10 rounded-md" />
+          <div className="space-y-4">
+            <Skeleton className="h-12 w-3/4 max-w-2xl" />
+            <Skeleton className="h-6 w-1/2 max-w-xl" />
+          </div>
+          <Skeleton className="h-10 w-10 rounded-md" />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
@@ -255,61 +264,61 @@ export default function VisionDetailPage() {
               <Badge variant="secondary" className="mt-2">{vision.category}</Badge>
             </div>
             <div className="flex gap-2 flex-shrink-0">
-               <Button variant="outline" disabled={isRegenerating} onClick={() => setRefocusModalOpen(true)}>
+              <Button variant="outline" disabled={isRegenerating} onClick={() => setRefocusModalOpen(true)}>
                 {isRegenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
                 Regenerate
               </Button>
               <Button variant="outline" onClick={() => setShareModalOpen(true)}>
-                  <Share2 className="mr-2 h-4 w-4" /> Share
+                <Share2 className="mr-2 h-4 w-4" /> Share
               </Button>
               <AlertDialog onOpenChange={() => setDeleteConfirmationInput('')}>
-                  <AlertDialogTrigger asChild>
+                <AlertDialogTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10 hover:text-destructive">
-                      <Trash2 className="h-5 w-5" />
+                    <Trash2 className="h-5 w-5" />
                   </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                        This will permanently delete your vision and its entire roadmap. This action cannot be undone.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete your vision and its entire roadmap. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
 
-                    <div className="py-2 space-y-4">
-                        <Label htmlFor="delete-confirm">To confirm, type: <span className="font-mono text-primary/90">"{deleteConfirmationPhrase}"</span></Label>
-                        <Input 
-                            id="delete-confirm"
-                            value={deleteConfirmationInput}
-                            onChange={(e) => setDeleteConfirmationInput(e.target.value)}
-                            placeholder={deleteConfirmationPhrase}
-                            className="border-destructive/50 focus:ring-destructive/50"
-                        />
-                    </div>
+                  <div className="py-2 space-y-4">
+                    <Label htmlFor="delete-confirm">To confirm, type: <span className="font-mono text-primary/90">"{deleteConfirmationPhrase}"</span></Label>
+                    <Input
+                      id="delete-confirm"
+                      value={deleteConfirmationInput}
+                      onChange={(e) => setDeleteConfirmationInput(e.target.value)}
+                      placeholder={deleteConfirmationPhrase}
+                      className="border-destructive/50 focus:ring-destructive/50"
+                    />
+                  </div>
 
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction 
-                            onClick={handleDelete} 
-                            disabled={deleteConfirmationInput !== deleteConfirmationPhrase}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                            Delete Vision
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      disabled={deleteConfirmationInput !== deleteConfirmationPhrase}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Delete Vision
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
             </div>
           </div>
-          
+
           <p className="text-lg text-muted-foreground max-w-3xl mb-6">{vision.goal}</p>
 
           <div>
-              <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-sm font-medium text-muted-foreground">Overall Vision Progress</span>
-                  <span className="text-sm font-bold text-primary">{Math.round(overallProgress)}%</span>
-              </div>
-              <Progress value={overallProgress} className="h-3 w-full" />
+            <div className="flex justify-between items-center mb-1.5">
+              <span className="text-sm font-medium text-muted-foreground">Overall Vision Progress</span>
+              <span className="text-sm font-bold text-primary">{Math.round(overallProgress)}%</span>
+            </div>
+            <Progress value={overallProgress} className="h-3 w-full" />
           </div>
 
         </div>
@@ -367,69 +376,78 @@ export default function VisionDetailPage() {
         </div>
       </main>
 
-       <Dialog open={isShareModalOpen} onOpenChange={setShareModalOpen}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Share Your Vision</DialogTitle>
-                    <DialogDescription>
-                        Make your vision public to share it with others. They will only be able to see your vision and yearly milestones.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="py-4 space-y-6">
-                    <div className="flex items-center space-x-2">
-                        <Switch id="public-switch" checked={vision.isPublic} onCheckedChange={handleIsPublicChange} />
-                        <Label htmlFor="public-switch">Make this vision public</Label>
-                    </div>
-                    {vision.isPublic && (
-                         <div className="space-y-2">
-                            <Label htmlFor="share-link">Shareable Link</Label>
-                            <div className="flex gap-2">
-                                <Input id="share-link" value={shareUrl} readOnly />
-                                <Button size="icon" onClick={copyToClipboard} variant="outline">
-                                    <Copy className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        </div>
-                    )}
+      <Dialog open={isShareModalOpen} onOpenChange={setShareModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Your Vision</DialogTitle>
+            <DialogDescription>
+              Make your vision public to share it with others. They will only be able to see your vision and yearly milestones.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-6">
+            <div className="flex items-center space-x-2">
+              <Switch id="public-switch" checked={vision.isPublic} onCheckedChange={handleIsPublicChange} />
+              <Label htmlFor="public-switch">Make this vision public</Label>
+            </div>
+            {vision.isPublic && (
+              <div className="space-y-2">
+                <Label htmlFor="share-link">Shareable Link</Label>
+                <div className="flex gap-2">
+                  <Input id="share-link" value={shareUrl} readOnly />
+                  <Button size="icon" onClick={copyToClipboard} variant="outline">
+                    <Copy className="h-4 w-4" />
+                  </Button>
                 </div>
-            </DialogContent>
-        </Dialog>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
-        <Dialog open={isRefocusModalOpen} onOpenChange={setRefocusModalOpen}>
-            <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                    <DialogTitle>Refocus & Regenerate Roadmap</DialogTitle>
-                    <DialogDescription>
-                        Provide focus areas for the AI to generate a more tailored roadmap. Completed tasks will be remembered.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="py-4 space-y-4 max-h-[70vh] overflow-y-auto">
-                    <div className="space-y-2">
-                      <Label>Yearly Focus</Label>
-                      <Textarea placeholder="e.g., Secure major funding round." value={yearlyFocus} onChange={(e) => setYearlyFocus(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Monthly Focus</Label>
-                      <Textarea placeholder="e.g., Onboard first 100 paying customers." value={monthlyFocus} onChange={(e) => setMonthlyFocus(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Weekly Focus</Label>
-                      <Textarea placeholder="e.g., Ship two new feature updates." value={weeklyFocus} onChange={(e) => setWeeklyFocus(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Daily Focus</Label>
-                      <Textarea placeholder="e.g., Stick to a consistent morning routine." value={dailyFocus} onChange={(e) => setDailyFocus(e.target.value)} />
-                    </div>
-                </div>
-                <DialogFooter>
-                    <Button variant="ghost" onClick={() => setRefocusModalOpen(false)}>Cancel</Button>
-                    <Button onClick={handleRegenerate} disabled={isRegenerating}>
-                        {isRegenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Regenerate with Focus
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+      <Dialog open={isRefocusModalOpen} onOpenChange={setRefocusModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Refocus & Regenerate Roadmap</DialogTitle>
+            <DialogDescription>
+              Provide focus areas for the AI to generate a more tailored roadmap. Completed tasks will be remembered.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div className="space-y-2">
+              <Label>Yearly Focus</Label>
+              <Textarea placeholder="e.g., Secure major funding round." value={yearlyFocus} onChange={(e) => setYearlyFocus(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Monthly Focus</Label>
+              <Textarea placeholder="e.g., Onboard first 100 paying customers." value={monthlyFocus} onChange={(e) => setMonthlyFocus(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Weekly Focus</Label>
+              <Textarea placeholder="e.g., Ship two new feature updates." value={weeklyFocus} onChange={(e) => setWeeklyFocus(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label>Daily Focus</Label>
+              <Textarea placeholder="e.g., Stick to a consistent morning routine." value={dailyFocus} onChange={(e) => setDailyFocus(e.target.value)} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setRefocusModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleRegenerate} disabled={isRegenerating}>
+              {isRegenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Regenerate with Focus
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {proposedRoadmap && (
+        <RoadmapSelectionDialog
+          isOpen={!!proposedRoadmap}
+          onOpenChange={(open) => !open && setProposedRoadmap(null)}
+          proposedRoadmap={proposedRoadmap}
+          onConfirm={handleConfirmRoadmap}
+        />
+      )}
     </>
   );
 }

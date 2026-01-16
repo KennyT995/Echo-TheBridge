@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser } from '@/firebase';
+import { useUser, useAuth } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -11,9 +11,11 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetDescription,
 } from '@/components/ui/sheet';
 import { UserNav } from './user-nav';
 import AppSidebar from './app-sidebar';
+import { VisionsDropdown } from './visions-dropdown';
 import { cn } from '@/lib/utils';
 
 interface HeaderClientProps {
@@ -22,9 +24,10 @@ interface HeaderClientProps {
 
 export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
   const { user, isUserLoading } = useUser();
+  const auth = useAuth();
 
   const authSection = (
-    <div className="flex items-center gap-2">
+    <div className="hidden md:flex items-center gap-2">
       {isUserLoading ? (
         <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
       ) : user ? (
@@ -53,7 +56,7 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
               Echo: The Bridge
             </span>
           </Link>
-          <nav className={cn("hidden md:flex items-center gap-4 text-sm font-medium xl:gap-6", isDashboardRoute && 'hidden')}>
+          <nav className="hidden md:flex items-center gap-4 text-sm font-medium xl:gap-6">
             <Link
               href="/about"
               className="transition-colors hover:text-foreground/80 text-foreground/60"
@@ -78,27 +81,95 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
             >
               Contact
             </Link>
+            {user && (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="transition-colors hover:text-foreground/80 text-foreground/60"
+                >
+                  Dashboard
+                </Link>
+                <VisionsDropdown />
+              </>
+            )}
           </nav>
         </div>
 
         <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
           {authSection}
-          {isDashboardRoute && user && (
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] p-0">
-                <SheetHeader className="p-4 border-b">
-                  <SheetTitle>Menu</SheetTitle>
-                </SheetHeader>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle Menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] p-0">
+              <SheetHeader className="p-4 border-b">
+                <SheetTitle>Menu</SheetTitle>
+                <SheetDescription className="sr-only">
+                  Navigation menu for accessing pages and user account.
+                </SheetDescription>
+              </SheetHeader>
+              {user ? (
                 <AppSidebar />
-              </SheetContent>
-            </Sheet>
-          )}
+              ) : (
+                <div className="flex flex-col h-full">
+                  <nav className="flex flex-col gap-2 p-4">
+                    <Link
+                      href="/about"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
+                    >
+                      About
+                    </Link>
+                    <Link
+                      href="/plans"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
+                    >
+                      Plans
+                    </Link>
+                    <Link
+                      href="/faq"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
+                    >
+                      FAQ
+                    </Link>
+                    <Link
+                      href="/contact"
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
+                    >
+                      Contact
+                    </Link>
+                  </nav>
+                  <div className="mt-auto p-4 border-t">
+                    {user ? (
+                      <div className="flex flex-col gap-2">
+                        <Button asChild className="w-full justify-start" variant="secondary">
+                          <Link href="/dashboard">Go to Dashboard</Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
+                          onClick={() => auth.signOut()}
+                        >
+                          Log out
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        <Button asChild variant="outline" className="w-full justify-start">
+                          <Link href="/login">Login</Link>
+                        </Button>
+                        <Button asChild className="w-full justify-start">
+                          <Link href="/login?tab=signup">Sign Up</Link>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>

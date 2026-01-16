@@ -67,7 +67,7 @@ async function seedDefaultPlans(db: any) {
       batch.set(docRef, plan);
     });
     await batch.commit();
-    console.log("Default plans seeded.");
+
   }
 }
 
@@ -186,11 +186,11 @@ export default function PlansPage() {
     setIsProcessing(true);
     try {
       const idToken = await user.getIdToken();
-      const response = await fetch('/api/stripe/create-portal-session', { 
-          method: 'POST',
-          headers: {
-              'Authorization': `Bearer ${idToken}`,
-          },
+      const response = await fetch('/api/stripe/create-portal-session', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+        },
       });
       const { url } = await response.json();
       window.location.assign(url);
@@ -216,7 +216,7 @@ export default function PlansPage() {
   const displayedPlans = plans && plans.length > 0 ? plans : defaultPlans;
 
   const currentPlan = displayedPlans.find(p => p.id === userData?.planTierId);
-  
+
   return (
     <>
       <main className="container mx-auto px-4 py-12 md:py-20">
@@ -265,7 +265,7 @@ export default function PlansPage() {
                 </ul>
               </CardContent>
               <CardFooter>
-                 <Button
+                <Button
                   className="w-full"
                   onClick={() => handleSelectPlan(plan)}
                   disabled={isProcessing || (!!user && userData?.planTierId === plan.id && plan.id !== 'trailblazer')}
