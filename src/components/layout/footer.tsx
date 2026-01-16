@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Rocket, Github, Twitter, Linkedin } from 'lucide-react';
+import { Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { footerContent } from '@/lib/navigation';
 
 export default function Footer() {
     return (
@@ -19,54 +20,34 @@ export default function Footer() {
                             Empowering individuals to turn their wildest dreams into actionable reality through the power of AI-driven strategy.
                         </p>
                         <div className="flex space-x-4">
-                            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                                <Twitter className="h-5 w-5" suppressHydrationWarning />
-                                <span className="sr-only">Twitter</span>
-                            </Link>
-                            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                                <Github className="h-5 w-5" suppressHydrationWarning />
-                                <span className="sr-only">GitHub</span>
-                            </Link>
-                            <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                                <Linkedin className="h-5 w-5" suppressHydrationWarning />
-                                <span className="sr-only">LinkedIn</span>
-                            </Link>
+                            {footerContent.socialLinks.map((item) => (
+                                <Link key={item.label} href={item.href} className="text-muted-foreground hover:text-primary transition-colors">
+                                    <item.icon className="h-5 w-5" suppressHydrationWarning />
+                                    <span className="sr-only">{item.label}</span>
+                                </Link>
+                            ))}
                         </div>
                     </div>
 
                     <div>
                         <h3 className="font-bold text-lg mb-4">Platform</h3>
                         <ul className="space-y-3 text-sm text-muted-foreground">
-                            <li>
-                                <Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
-                            </li>
-                            <li>
-                                <Link href="/plans" className="hover:text-primary transition-colors">Pricing</Link>
-                            </li>
-                            <li>
-                                <Link href="/dashboard" className="hover:text-primary transition-colors">Create Vision</Link>
-                            </li>
+                            {footerContent.platformLinks.map((item, index) => (
+                                <li key={index}>
+                                    <Link href={item.href} className="hover:text-primary transition-colors">{item.label}</Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 
                     <div>
                         <h3 className="font-bold text-lg mb-4">Company</h3>
                         <ul className="space-y-3 text-sm text-muted-foreground">
-                            <li>
-                                <Link href="/about" className="hover:text-primary transition-colors">About Us</Link>
-                            </li>
-                            <li>
-                                <Link href="/contact" className="hover:text-primary transition-colors">Contact</Link>
-                            </li>
-                            <li>
-                                <Link href="/faq" className="hover:text-primary transition-colors">FAQ</Link>
-                            </li>
-                            <li>
-                                <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
-                            </li>
-                            <li>
-                                <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
-                            </li>
+                            {footerContent.companyLinks.map((item) => (
+                                <li key={item.href}>
+                                    <Link href={item.href} className="hover:text-primary transition-colors">{item.label}</Link>
+                                </li>
+                            ))}
                         </ul>
                     </div>
 

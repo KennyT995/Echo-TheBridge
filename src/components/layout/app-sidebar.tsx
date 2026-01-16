@@ -1,7 +1,6 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Gem, Rocket } from 'lucide-react';
 import Link from 'next/link';
 import {
   useCollection,
@@ -20,20 +19,6 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const menuItems = [
-  {
-    path: '/dashboard',
-    label: 'Dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    path: '/plans',
-    label: 'Plans',
-    icon: Gem,
-  },
-];
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,9 +29,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CreditCard, LogOut, Settings, User as UserIcon } from 'lucide-react';
+import { CreditCard, LogOut, Settings, User as UserIcon, Rocket } from 'lucide-react';
 import { useAuth } from '@/firebase';
 import { useRouter } from 'next/navigation';
+import { sidebarInfoLinks, sidebarDashboardLinks } from '@/lib/navigation';
 
 export default function AppSidebar() {
   const pathname = usePathname();
@@ -60,6 +46,7 @@ export default function AppSidebar() {
     router.push('/login');
   };
 
+  const firestore = useFirestore();
   const visionsQuery = useMemoFirebase(() => {
     if (!user) return null;
     return query(
@@ -75,34 +62,31 @@ export default function AppSidebar() {
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex-1 p-4 overflow-y-auto">
         <nav className="flex flex-col gap-2">
-          <Button asChild variant="ghost" className="justify-start gap-2">
-            <Link href="/about">
-              <span>About</span>
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" className="justify-start gap-2">
-            <Link href="/faq">
-              <span>FAQ</span>
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" className="justify-start gap-2">
-            <Link href="/contact">
-              <span>Contact</span>
-            </Link>
-          </Button>
+          {sidebarInfoLinks.map((item) => (
+            <Button
+              key={item.href}
+              asChild
+              variant="ghost"
+              className="justify-start gap-2"
+            >
+              <Link href={item.href}>
+                <span>{item.label}</span>
+              </Link>
+            </Button>
+          ))}
         </nav>
 
         <div className="my-4 border-t border-sidebar-border/50" />
 
         <nav className="flex flex-col gap-2">
-          {menuItems.map((item) => (
+          {sidebarDashboardLinks.map((item) => (
             <Button
-              key={item.path}
+              key={item.href}
               asChild
-              variant={pathname === item.path ? 'secondary' : 'ghost'}
+              variant={pathname === item.href ? 'secondary' : 'ghost'}
               className="justify-start gap-2"
             >
-              <Link href={item.path}>
+              <Link href={item.href}>
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>
               </Link>

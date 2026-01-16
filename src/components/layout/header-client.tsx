@@ -17,6 +17,7 @@ import { UserNav } from './user-nav';
 import AppSidebar from './app-sidebar';
 import { VisionsDropdown } from './visions-dropdown';
 import { cn } from '@/lib/utils';
+import { mainNavLinks } from '@/lib/navigation';
 
 interface HeaderClientProps {
   isDashboardRoute: boolean;
@@ -57,30 +58,15 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-4 text-sm font-medium xl:gap-6">
-            <Link
-              href="/about"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              About
-            </Link>
-            <Link
-              href="/plans"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Plans
-            </Link>
-            <Link
-              href="/faq"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              FAQ
-            </Link>
-            <Link
-              href="/contact"
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
-            >
-              Contact
-            </Link>
+            {mainNavLinks.map((item) => (
+               <Link
+                key={item.href}
+                href={item.href}
+                className="transition-colors hover:text-foreground/80 text-foreground/60"
+              >
+                {item.label}
+              </Link>
+            ))}
             {user && (
               <>
                 <Link
@@ -116,47 +102,18 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
               ) : (
                 <div className="flex flex-col h-full">
                   <nav className="flex flex-col gap-2 p-4">
-                    <Link
-                      href="/about"
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                    >
-                      About
-                    </Link>
-                    <Link
-                      href="/plans"
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                    >
-                      Plans
-                    </Link>
-                    <Link
-                      href="/faq"
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                    >
-                      FAQ
-                    </Link>
-                    <Link
-                      href="/contact"
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                    >
-                      Contact
-                    </Link>
+                    {mainNavLinks.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
                   </nav>
                   <div className="mt-auto p-4 border-t">
-                    {user ? (
-                      <div className="flex flex-col gap-2">
-                        <Button asChild className="w-full justify-start" variant="secondary">
-                          <Link href="/dashboard">Go to Dashboard</Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50"
-                          onClick={() => auth.signOut()}
-                        >
-                          Log out
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2">
                         <Button asChild variant="outline" className="w-full justify-start">
                           <Link href="/login">Login</Link>
                         </Button>
@@ -164,7 +121,6 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
                           <Link href="/login">Sign Up</Link>
                         </Button>
                       </div>
-                    )}
                   </div>
                 </div>
               )}
