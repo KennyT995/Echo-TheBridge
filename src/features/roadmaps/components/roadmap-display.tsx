@@ -6,8 +6,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
-import type { Roadmap, RoadmapItem } from '@/lib/types';
-import { CheckCircle2, CircleDot, GanttChartSquare, CalendarDays, Pencil } from 'lucide-react';
+import type { Roadmap, RoadmapItem, RoadmapSectionKey } from '@/lib/types';
+import { CheckCircle2, CircleDot, GanttChartSquare, CalendarDays, Pencil, RefreshCw } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { DocumentReference } from 'firebase/firestore';
@@ -22,9 +22,8 @@ import { useToast } from '@/hooks/use-toast';
 interface RoadmapDisplayProps {
   roadmap: Roadmap;
   roadmapRef: DocumentReference | null;
+  onRegenerateSection: (section: RoadmapSectionKey) => void;
 }
-
-type RoadmapSectionKey = 'yearlyMilestones' | 'monthlySprints' | 'weeklyTactics' | 'dailyHabits';
 
 const roadmapSections = [
   {
@@ -49,7 +48,7 @@ const roadmapSections = [
   },
 ] as const;
 
-export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
+export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: RoadmapDisplayProps) {
   const [editing, setEditing] = useState<{ section: RoadmapSectionKey; index: number; text: string } | null>(null);
 
   const { toast } = useToast();
@@ -151,12 +150,25 @@ export function RoadmapDisplay({ roadmap, roadmapRef }: RoadmapDisplayProps) {
             return (
               <AccordionItem key={section.key} value={section.key} className="border border-border/60 rounded-xl overflow-hidden">
                 <div className="flex flex-col">
-                  <AccordionTrigger className="px-4 py-3 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline hover:bg-muted/30 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <section.icon className="h-5 w-5 text-primary" />
-                      </div>
-                      <span>{section.title}</span>
+                  <AccordionTrigger className="px-4 py-3 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline hover:bg-muted/30 transition-colors [&>svg]:hidden">
+                    <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                                <section.icon className="h-5 w-5 text-primary" />
+                            </div>
+                            <span>{section.title}</span>
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onRegenerateSection(section.key);
+                            }}
+                            >
+                            <RefreshCw className="h-4 w-4" />
+                        </Button>
                     </div>
                   </AccordionTrigger>
                   <div className="px-4 pb-4">

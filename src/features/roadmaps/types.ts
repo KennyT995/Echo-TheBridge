@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+export type RoadmapSectionKey = 'yearlyMilestones' | 'monthlySprints' | 'weeklyTactics' | 'dailyHabits';
+
 // New structure for a single roadmap item
 export const RoadmapItemSchema = z.object({
     text: z.string(),

@@ -6,12 +6,13 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import Loading from '@/app/loading';
 
 import { doc } from 'firebase/firestore';
-import type { Vision, Roadmap, PlanTier, UserData, RoadmapItem } from '@/lib/types';
+import type { Vision, Roadmap, PlanTier, UserData, RoadmapItem, RoadmapSectionKey, VisionFormValues } from '@/lib/types';
 import { RoadmapDisplay } from '@/features/roadmaps/components/roadmap-display';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Wand2, Trash2, Share2, Copy, RefreshCw } from 'lucide-react';
 import { getReflection, generateRoadmap } from '@/app/actions';
+import type { GenerateRoadmapFromVisionInput } from '@/ai/flows/generate-roadmap-from-vision';
 import { RoadmapSelectionDialog } from '@/features/roadmaps/components/roadmap-selection-dialog';
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -80,6 +81,7 @@ export default function VisionDetailPage() {
   const [monthlyFocus, setMonthlyFocus] = useState('');
   const [weeklyFocus, setWeeklyFocus] = useState('');
   const [dailyFocus, setDailyFocus] = useState('');
+  const [sectionToRegenerate, setSectionToRegenerate] = useState<RoadmapSectionKey | 'all'>('all');
 
 
   // Memoize Firestore references
@@ -136,17 +138,20 @@ export default function VisionDetailPage() {
       ...roadmap.dailyHabits,
     ].filter(task => task.completed).map(task => task.text);
 
-    const result = await generateRoadmap({
-      title: vision.title,
-      goal: vision.goal,
-      category: vision.category,
-      isPublic: vision.isPublic,
-      yearlyFocus,
-      monthlyFocus,
-      weeklyFocus,
-      dailyFocus,
-      completedTasks,
-    });
+    const regenerationInput: VisionFormValues & Partial<GenerateRoadmapFromVisionInput> = {
+        title: vision.title,
+        goal: vision.goal,
+        category: vision.category,
+        isPublic: vision.isPublic,
+        completedTasks,
+        ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'yearlyMilestones') && { yearlyFocus },
+        ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'monthlySprints') && { monthlyFocus },
+        ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'weeklyTactics') && { weeklyFocus },
+        ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'dailyHabits') && { dailyFocus },
+    };
+
+
+    const result = await generateRoadmap(regenerationInput);
 
     setIsRegenerating(false);
     setRefocusModalOpen(false);
@@ -169,15 +174,37 @@ export default function VisionDetailPage() {
   };
 
   const handleConfirmRoadmap = async (selectedRoadmap: Roadmap) => {
-    if (!roadmapRef) return;
+    if (!roadmapRef || !roadmap) return;
 
-    await updateDocumentNonBlocking(roadmapRef, selectedRoadmap);
+    // Create a new object for the update, starting with the existing roadmap data.
+    const finalRoadmapData = { ...roadmap };
+
+    if (sectionToRegenerate && sectionToRegenerate !== 'all') {
+        // If we only regenerated ONE section, we take the user's selections
+        // for JUST that section and merge it into our existing roadmap.
+        // This preserves all other sections as they were.
+        finalRoadmapData[sectionToRegenerate] = selectedRoadmap[sectionToRegenerate];
+    } else {
+        // If we regenerated the WHOLE roadmap, we replace it entirely with the user's selections.
+        finalRoadmapData.yearlyMilestones = selectedRoadmap.yearlyMilestones;
+        finalRoadmapData.monthlySprints = selectedRoadmap.monthlySprints;
+        finalRoadmapData.weeklyTactics = selectedRoadmap.weeklyTactics;
+        finalRoadmapData.dailyHabits = selectedRoadmap.dailyHabits;
+    }
+
+    await updateDocumentNonBlocking(roadmapRef, finalRoadmapData);
     setProposedRoadmap(null);
+    setSectionToRegenerate('all'); // Reset state
 
     toast({
       title: "Roadmap Updated!",
       description: "Your selection has been saved.",
     });
+  };
+
+  const handleRegenerateSection = (section: RoadmapSectionKey) => {
+    setSectionToRegenerate(section);
+    setRefocusModalOpen(true);
   };
 
 
@@ -264,7 +291,10 @@ export default function VisionDetailPage() {
               <Badge variant="secondary" className="mt-2">{vision.category}</Badge>
             </div>
             <div className="flex gap-2 flex-shrink-0">
-              <Button variant="outline" disabled={isRegenerating} onClick={() => setRefocusModalOpen(true)}>
+              <Button variant="outline" disabled={isRegenerating} onClick={() => {
+                setSectionToRegenerate('all');
+                setRefocusModalOpen(true);
+              }}>
                 {isRegenerating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
                 Regenerate
               </Button>
@@ -325,7 +355,11 @@ export default function VisionDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <RoadmapDisplay roadmap={roadmap} roadmapRef={roadmapRef} />
+            <RoadmapDisplay
+              roadmap={roadmap}
+              roadmapRef={roadmapRef}
+              onRegenerateSection={handleRegenerateSection}
+            />
           </div>
           <div>
             <Card>
