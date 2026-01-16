@@ -53,7 +53,6 @@ export default function AppSidebar() {
   const { user } = useUser();
   const auth = useAuth();
   const router = useRouter();
-  const firestore = useFirestore();
 
   const handleLogout = async () => {
     if (!auth) return;
@@ -204,15 +203,6 @@ export default function AppSidebar() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            <Button
-              variant="outline"
-              className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </Button>
           </div>
         )}
       </div>

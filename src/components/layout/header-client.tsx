@@ -161,7 +161,7 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
                           <Link href="/login">Login</Link>
                         </Button>
                         <Button asChild className="w-full justify-start">
-                          <Link href="/login?tab=signup">Sign Up</Link>
+                          <Link href="/login">Sign Up</Link>
                         </Button>
                       </div>
                     )}
