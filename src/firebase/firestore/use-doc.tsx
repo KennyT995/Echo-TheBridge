@@ -1,5 +1,5 @@
 'use client';
-    
+
 import { useState, useEffect } from 'react';
 import {
   DocumentReference,
@@ -49,6 +49,7 @@ export function useDoc<T = any>(
 
   useEffect(() => {
     if (!memoizedDocRef) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setData(null);
       setIsLoading(false);
       setError(null);

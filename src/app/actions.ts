@@ -145,3 +145,27 @@ export async function deleteVision(visionId: string, userId: string): Promise<{ 
     return { success: false, error: 'Failed to delete vision' };
   }
 }
+
+import { generateDailyBriefing, GenerateDailyBriefingInput, GenerateDailyBriefingOutput } from '@/ai/flows/generate-daily-briefing';
+
+export async function getDailyBriefing(input: GenerateDailyBriefingInput): Promise<{ briefing?: GenerateDailyBriefingOutput; error?: string }> {
+  try {
+    const briefing = await generateDailyBriefing(input);
+    return { briefing };
+  } catch (error) {
+    console.error('Daily briefing generation failed:', error);
+    return { error: 'Failed to generate daily briefing.' };
+  }
+}
+
+import { generateFutureSelfChat, GenerateFutureSelfChatInput, GenerateFutureSelfChatOutput } from '@/ai/flows/generate-future-self-chat';
+
+export async function getFutureSelfChat(input: GenerateFutureSelfChatInput): Promise<{ response?: GenerateFutureSelfChatOutput; error?: string }> {
+  try {
+    const chatResponse = await generateFutureSelfChat(input);
+    return { response: chatResponse };
+  } catch (error) {
+    console.error('Future self chat failed:', error);
+    return { error: 'Failed to connect to your future self.' };
+  }
+}

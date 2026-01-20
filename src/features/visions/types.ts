@@ -11,6 +11,10 @@ export const VisionFormSchema = z.object({
 
 export type VisionFormValues = z.infer<typeof VisionFormSchema>;
 
+import { Timestamp, FieldValue } from 'firebase/firestore';
+
+// ...
+
 export interface Vision {
     id: string;
     userId: string;
@@ -18,5 +22,5 @@ export interface Vision {
     goal: string;
     category: z.infer<typeof VisionFormSchema.shape.category>;
     isPublic: boolean;
-    createdAt: any; // Timestamp or FieldValue
+    createdAt: Timestamp | FieldValue;
 }

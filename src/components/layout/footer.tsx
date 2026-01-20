@@ -58,7 +58,7 @@ export default function Footer() {
                         </p>
                         <div className="flex gap-2">
                             <Input placeholder="Enter your email" className="bg-background" />
-                            <Button size="icon">
+                            <Button size="icon" variant="ghost" aria-label="Social link">
                                 <Rocket className="h-4 w-4" suppressHydrationWarning />
                                 <span className="sr-only">Subscribe</span>
                             </Button>

@@ -30,6 +30,8 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { getErrorMessage } from '@/lib/error-utils';
+
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address.' }),
@@ -64,10 +66,17 @@ export default function LoginPage() {
     }
   }, [user, isUserLoading, router]);
 
-  const handleAuthError = (error: any) => {
-    let message = 'An unknown error occurred.';
-    if (error.code) {
-      switch (error.code) {
+
+
+  // ... (inside component)
+
+  const handleAuthError = (error: unknown) => {
+    let message = getErrorMessage(error);
+
+    // Map Firebase error codes if possible
+    if (typeof error === 'object' && error !== null && 'code' in error) {
+      const code = (error as any).code;
+      switch (code) {
         case 'auth/wrong-password':
         case 'auth/invalid-credential':
           message = 'Incorrect password or email. Please try again.';
@@ -78,11 +87,7 @@ export default function LoginPage() {
         case 'auth/email-already-in-use':
           message = 'This email is already registered. Try logging in instead.';
           break;
-        default:
-          message = 'An authentication error occurred. Please try again.';
       }
-    } else if (error.message) { // Handle custom errors from our auth actions
-        message = error.message;
     }
 
     toast({
@@ -90,7 +95,7 @@ export default function LoginPage() {
       title: "Authentication Failed",
       description: message,
     });
-  }
+  };
 
   const onSubmit = async (values: LoginFormValues) => {
     const action = activeAction;
@@ -106,8 +111,9 @@ export default function LoginPage() {
       }
       // On successful auth, the `useUser` hook will update, and the `useEffect`
       // will handle the redirection to the dashboard. We don't need to do anything else here.
-    } catch (error: any) {
+    } catch (error: unknown) {
       handleAuthError(error);
+    } finally {
       setIsSubmitting(false); // Only reset on error
       setActiveAction(null);
     }
@@ -170,33 +176,33 @@ export default function LoginPage() {
               />
               <div className="flex flex-col gap-4 pt-2">
                 <Button
-                    onClick={() => setActiveAction('signup')}
-                    type="submit"
-                    disabled={isSubmitting || isUserLoading}
-                    className="w-full"
+                  onClick={() => setActiveAction('signup')}
+                  type="submit"
+                  disabled={isSubmitting || isUserLoading}
+                  className="w-full"
                 >
-                    {(isSubmitting && activeAction === 'signup') || isUserLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Create Account
+                  {(isSubmitting && activeAction === 'signup') || isUserLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Create Account
                 </Button>
                 <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-card px-2 text-muted-foreground">
-                            Already have an account?
-                        </span>
-                    </div>
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-card px-2 text-muted-foreground">
+                      Already have an account?
+                    </span>
+                  </div>
                 </div>
                 <Button
-                    onClick={() => setActiveAction('login')}
-                    type="submit"
-                    disabled={isSubmitting || isUserLoading}
-                    variant="secondary"
-                    className="w-full"
+                  onClick={() => setActiveAction('login')}
+                  type="submit"
+                  disabled={isSubmitting || isUserLoading}
+                  variant="secondary"
+                  className="w-full"
                 >
-                    {(isSubmitting && activeAction === 'login') || isUserLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Login
+                  {(isSubmitting && activeAction === 'login') || isUserLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Login
                 </Button>
               </div>
             </form>

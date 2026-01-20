@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Roadmap, RoadmapItem, RoadmapSectionKey } from '@/lib/types';
-import { CheckCircle2, CircleDot, GanttChartSquare, CalendarDays, Pencil, RefreshCw, Flag } from 'lucide-react';
+import { CheckCircle2, CircleDot, GanttChartSquare, CalendarDays, Pencil, RefreshCw, Flag, Timer } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { DocumentReference } from 'firebase/firestore';
@@ -19,6 +19,7 @@ import confetti from 'canvas-confetti';
 import { triggerMilestoneCelebration } from '@/lib/celebrations';
 import { useToast } from '@/hooks/use-toast';
 import { History } from 'lucide-react';
+import { FocusTimer } from '@/features/dashboard/components/focus-timer';
 
 interface RoadmapDisplayProps {
   roadmap: Roadmap;
@@ -236,16 +237,28 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: Roa
                               </label>
                             )}
                           </div>
-                          {!item.completed && !isEditing && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="ml-auto h-8 w-8 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
-                              onClick={() => setEditing({ section: section.key, index, text: item.text })}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          )}
+
+                          {
+                            !item.completed && !isEditing && (
+                              <div className="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                {section.key === 'dailyHabits' && (
+                                  <FocusTimer
+                                    habitName={item.text}
+                                    className="border-none shadow-none bg-transparent p-0"
+                                    onComplete={() => handleCheckChange(section.key, index, true)}
+                                  />
+                                )}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => setEditing({ section: section.key, index, text: item.text })}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )
+                          }
                         </li>
                       );
                     })}
@@ -293,6 +306,6 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: Roa
           )}
         </Accordion>
       </CardContent>
-    </Card>
+    </Card >
   );
 }

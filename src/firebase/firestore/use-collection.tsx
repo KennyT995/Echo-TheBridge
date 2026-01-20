@@ -53,6 +53,7 @@ export function useCollection<T = any>(
 
   useEffect(() => {
     if (!targetRefOrQuery) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setData(null);
       setIsLoading(false);
       setError(null);

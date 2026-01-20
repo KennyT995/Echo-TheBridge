@@ -2,7 +2,7 @@ import confetti from 'canvas-confetti';
 
 type CelebrationTier = 'dailyHabits' | 'weeklyTactics' | 'monthlySprints' | 'yearlyMilestones' | 'visionTimeline' | 'vision';
 
-export const triggerMilestoneCelebration = (tier: CelebrationTier, toast: any) => {
+export const triggerMilestoneCelebration = (tier: CelebrationTier, toast: (props: { title: string; description: string; className?: string; duration?: number }) => void) => {
     const strategies = celebrationStrategies[tier];
     if (!strategies || strategies.length === 0) return;
 
@@ -18,7 +18,7 @@ const runFireworks = () => {
 
     const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
-    const interval: any = setInterval(function () {
+    const interval: NodeJS.Timeout = setInterval(function () {
         const timeLeft = animationEnd - Date.now();
 
         if (timeLeft <= 0) {
@@ -57,7 +57,7 @@ const runSchoolPride = () => {
     })();
 };
 
-const celebrationStrategies: Record<CelebrationTier, ((toast: any) => void)[]> = {
+const celebrationStrategies: Record<CelebrationTier, ((toast: (props: { title: string; description: string; className?: string; duration?: number }) => void) => void)[]> = {
     dailyHabits: [
         // 1. "Streak Flame" (Simulated with distinct colors)
         (toast) => {
@@ -135,7 +135,7 @@ const celebrationStrategies: Record<CelebrationTier, ((toast: any) => void)[]> =
         // 2. "Confetti Cannon"
         (toast) => {
             const defaults = { origin: { y: 0.7 } };
-            const fire = (particleRatio: number, opts: any) => {
+            const fire = (particleRatio: number, opts: confetti.Options) => {
                 confetti(Object.assign({}, defaults, opts, {
                     particleCount: Math.floor(200 * particleRatio)
                 }));

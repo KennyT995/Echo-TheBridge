@@ -12,7 +12,7 @@ export type RoadmapItem = z.infer<typeof RoadmapItemSchema>;
 // Schema for archived/completed items
 export const RoadmapHistoryItemSchema = z.object({
     text: z.string(),
-    completedAt: z.any(), // Timestamp or Date
+    completedAt: z.custom<any>((val) => val && typeof val.toDate === 'function' || val instanceof Date), // Validate Timestamp or Date
     section: z.enum(['visionTimeline', 'yearlyMilestones', 'monthlySprints', 'weeklyTactics', 'dailyHabits']),
 });
 export type RoadmapHistoryItem = z.infer<typeof RoadmapHistoryItemSchema>;

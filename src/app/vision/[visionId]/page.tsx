@@ -15,6 +15,7 @@ import { EditVisionDialog } from '@/features/visions/components/edit-vision-dial
 import { getReflection, generateRoadmap } from '@/app/actions';
 import type { GenerateRoadmapFromVisionInput } from '@/ai/flows/generate-roadmap-from-vision';
 import { RoadmapSelectionDialog } from '@/features/roadmaps/components/roadmap-selection-dialog';
+import { FutureSelfChat } from '@/features/visions/components/future-self-chat';
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -550,6 +551,14 @@ export default function VisionDetailPage() {
           initialTitle={vision.title}
           initialCategory={vision.category || ''}
           onUpdate={handleUpdateVision}
+        />
+      )}
+
+      {vision && (
+        <FutureSelfChat
+          userName={userData?.displayName || user?.displayName}
+          visionTitle={vision.title}
+          visionGoal={vision.goal}
         />
       )}
     </>

@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getStripe } from '@/lib/stripe';
 import type { PlanTier, UserData } from '@/lib/types';
+import { getErrorMessage } from '@/lib/error-utils';
 
 
 const defaultPlans: PlanTier[] = [
@@ -70,6 +71,8 @@ async function seedDefaultPlans(db: any) {
 
   }
 }
+
+
 
 export default function PlansPage() {
   const firestore = useFirestore();
@@ -169,12 +172,12 @@ export default function PlansPage() {
       } else {
         throw new Error('Stripe.js is not loaded.');
       }
-    } catch (error: any) {
-      console.error('Stripe checkout error:', error);
+    } catch (error: unknown) {
+      console.error('Error handling subscription:', error);
       toast({
-        variant: 'destructive',
-        title: 'Payment Error',
-        description: error.message || 'Could not proceed to checkout. Please try again.',
+        title: "Subscription Error",
+        description: getErrorMessage(error),
+        variant: "destructive"
       });
       setIsProcessing(false);
     }

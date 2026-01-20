@@ -14,6 +14,7 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { UserNav } from './user-nav';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import AppSidebar from './app-sidebar';
 import { InstallPrompt } from '@/components/pwa/install-prompt';
 
@@ -31,6 +32,7 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
   const authSection = (
     <div className="hidden md:flex items-center gap-2">
       <InstallPrompt />
+      <ThemeToggle />
       {isUserLoading ? (
         <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
       ) : user ? (
@@ -77,7 +79,7 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
           {authSection}
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>

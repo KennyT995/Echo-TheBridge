@@ -40,6 +40,12 @@ import { VisionForm } from '@/features/visions/components/vision-form';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { VisionCharts } from '@/features/dashboard/components/vision-charts';
+import { toJsDate } from '@/lib/utils';
+import { calculateStreak } from '@/lib/streaks';
+import { StreakWidget } from '@/features/dashboard/components/streak-widget';
+import { DailyBriefing } from '@/features/dashboard/components/daily-briefing';
+import { JournalDialog } from '@/features/journal/components/journal-dialog';
+import { Moon } from 'lucide-react';
 
 function usePlan(userData: UserData | null | undefined) {
   const firestore = useFirestore();
@@ -61,6 +67,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isCreateVisionOpen, setCreateVisionOpen] = useState(false);
+  const [isJournalOpen, setJournalOpen] = useState(false);
   const [visionToDelete, setVisionToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -78,14 +85,12 @@ export default function DashboardPage() {
         toast({
           title: "Error",
           description: result.error || "Failed to delete vision.",
-          variant: "destructive",
         });
       }
     } catch (error) {
       toast({
         title: "Error",
         description: "An unexpected error occurred.",
-        variant: "destructive",
       });
     } finally {
       setIsDeleting(false);
@@ -122,6 +127,27 @@ export default function DashboardPage() {
       acc[roadmap.id] = roadmap;
       return acc;
     }, {} as Record<string, Roadmap>) || {};
+  }, [roadmaps]);
+
+  const { overallStats, dailyProgress } = useMemo(() => {
+    if (!roadmaps) return { overallStats: { currentStreak: 0, longestStreak: 0 }, dailyProgress: { completed: 0, total: 0 } };
+
+    // Consolidate history for streak
+    const allHistory = roadmaps.flatMap(r => r.history || []);
+    const stats = calculateStreak(allHistory);
+
+    // Calculate daily progress
+    let completed = 0;
+    let total = 0;
+
+    roadmaps.forEach(r => {
+      if (r.dailyHabits) {
+        total += r.dailyHabits.length;
+        completed += r.dailyHabits.filter(h => h.completed).length;
+      }
+    });
+
+    return { overallStats: stats, dailyProgress: { completed, total } };
   }, [roadmaps]);
 
 
@@ -193,10 +219,15 @@ export default function DashboardPage() {
               An overview of your life's aspirations.
             </p>
           </div>
-          <Button onClick={() => isLimitReached ? router.push('/plans') : setCreateVisionOpen(true)} disabled={isLoading}>
-            {isLimitReached ? 'Vision Limit Reached' : 'New Vision'}
-            {isLimitReached ? <ArrowRight className="ml-2" /> : <PlusCircle className="ml-2" />}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setJournalOpen(true)} disabled={isLoading}>
+              <Moon className="mr-2 h-4 w-4" /> Reflect
+            </Button>
+            <Button onClick={() => isLimitReached ? router.push('/plans') : setCreateVisionOpen(true)} disabled={isLoading}>
+              {isLimitReached ? 'Vision Limit Reached' : 'New Vision'}
+              {isLimitReached ? <ArrowRight className="ml-2" /> : <PlusCircle className="ml-2" />}
+            </Button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -206,6 +237,21 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
+            <div className="grid gap-6 mb-8">
+              <DailyBriefing
+                userName={userData?.displayName || user?.displayName}
+                roadmaps={roadmapsById}
+                activeVisionTitle={visions?.[0]?.title}
+                // In a real implementation, fetch the latest journal entry for reflection context
+                recentReflection=""
+              />
+              <StreakWidget
+                currentStreak={overallStats.currentStreak}
+                longestStreak={overallStats.longestStreak}
+                completedToday={dailyProgress.completed}
+                totalHabits={dailyProgress.total}
+              />
+            </div>
             <VisionCharts visions={visions || []} roadmaps={roadmapsById} />
 
             <h2 className="text-2xl font-bold tracking-tighter mt-12 mb-6">Your Visions</h2>
@@ -218,8 +264,8 @@ export default function DashboardPage() {
                         <CardTitle className="leading-tight">{vision.title}</CardTitle>
                         <CardDescription>
                           Created{' '}
-                          {vision.createdAt
-                            ? formatDistanceToNow((vision.createdAt as any).toDate(), { addSuffix: true })
+                          {vision.createdAt && toJsDate(vision.createdAt)
+                            ? formatDistanceToNow(toJsDate(vision.createdAt)!, { addSuffix: true })
                             : 'just now'}
                         </CardDescription>
                       </div>
@@ -320,6 +366,7 @@ export default function DashboardPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        <JournalDialog open={isJournalOpen} onOpenChange={setJournalOpen} />
       </main>
     </>
   );

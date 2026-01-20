@@ -8,8 +8,6 @@ import { getFirestore, Firestore } from 'firebase/firestore';
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
   let firebaseApp: FirebaseApp;
-  let auth: Auth;
-  let firestore: Firestore;
 
   if (getApps().length === 0) {
     // When not in production, always use the explicit firebaseConfig.
@@ -17,24 +15,24 @@ export function initializeFirebase() {
     if (process.env.NODE_ENV !== 'production') {
       firebaseApp = initializeApp(firebaseConfig);
     } else {
-        try {
-          // In production, try auto-initialization first.
-          firebaseApp = initializeApp();
-        } catch (e) {
-          console.warn(
-            'Automatic initialization failed. Falling back to firebase config object.',
-            e
-          );
-          // Fallback to explicit config if auto-init fails even in production.
-          firebaseApp = initializeApp(firebaseConfig);
-        }
+      try {
+        // In production, try auto-initialization first.
+        firebaseApp = initializeApp();
+      } catch (e) {
+        console.warn(
+          'Automatic initialization failed. Falling back to firebase config object.',
+          e
+        );
+        // Fallback to explicit config if auto-init fails even in production.
+        firebaseApp = initializeApp(firebaseConfig);
+      }
     }
   } else {
     firebaseApp = getApp();
   }
 
-  auth = getAuth(firebaseApp);
-  firestore = getFirestore(firebaseApp);
+  const auth = getAuth(firebaseApp);
+  const firestore = getFirestore(firebaseApp);
 
   return {
     firebaseApp,
