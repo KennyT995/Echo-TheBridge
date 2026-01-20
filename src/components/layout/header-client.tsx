@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/sheet';
 import { UserNav } from './user-nav';
 import AppSidebar from './app-sidebar';
+import { InstallPrompt } from '@/components/pwa/install-prompt';
 
 import { cn } from '@/lib/utils';
 import { mainNavLinks } from '@/lib/navigation';
@@ -29,6 +30,7 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
 
   const authSection = (
     <div className="hidden md:flex items-center gap-2">
+      <InstallPrompt />
       {isUserLoading ? (
         <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
       ) : user ? (

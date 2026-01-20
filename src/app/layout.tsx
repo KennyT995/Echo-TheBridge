@@ -32,6 +32,12 @@ export const metadata: Metadata = {
     description: 'Bridge the gap between long-term vision and daily action.',
     images: ['/og-image.jpg'],
   },
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Echo: The Bridge",
+  },
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',
