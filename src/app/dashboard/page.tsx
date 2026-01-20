@@ -6,9 +6,26 @@ import { useEffect, useState, useMemo } from 'react';
 import Loading from '../loading';
 
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Eye, Zap, ArrowRight } from 'lucide-react';
+import { PlusCircle, Eye, Zap, ArrowRight, MoreVertical, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { deleteVision } from '@/app/actions';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { formatDistanceToNow } from 'date-fns';
 import type { Vision, Roadmap, UserData, PlanTier } from '@/lib/types';
@@ -25,16 +42,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { VisionCharts } from '@/features/dashboard/components/vision-charts';
 
 function usePlan(userData: UserData | null | undefined) {
-    const firestore = useFirestore();
+  const firestore = useFirestore();
 
-    const planRef = useMemoFirebase(() => {
-        if (!firestore || !userData?.planTierId) return null;
-        return doc(firestore, 'plan_tiers', userData.planTierId);
-    }, [userData, firestore]);
+  const planRef = useMemoFirebase(() => {
+    if (!firestore || !userData?.planTierId) return null;
+    return doc(firestore, 'plan_tiers', userData.planTierId);
+  }, [userData, firestore]);
 
-    const { data: planData, isLoading: isPlanLoading } = useDoc<PlanTier>(planRef);
+  const { data: planData, isLoading: isPlanLoading } = useDoc<PlanTier>(planRef);
 
-    return { plan: planData, isPlanLoading };
+  return { plan: planData, isPlanLoading };
 }
 
 
@@ -44,6 +61,37 @@ export default function DashboardPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [isCreateVisionOpen, setCreateVisionOpen] = useState(false);
+  const [visionToDelete, setVisionToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteVision = async () => {
+    if (!visionToDelete || !user) return;
+    setIsDeleting(true);
+    try {
+      const result = await deleteVision(visionToDelete, user.uid);
+      if (result.success) {
+        toast({
+          title: "Vision Deleted",
+          description: "Your vision has been successfully deleted.",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to delete vision.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setVisionToDelete(null);
+    }
+  };
 
   const visionsQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -71,10 +119,10 @@ export default function DashboardPage() {
 
   const roadmapsById = useMemo(() => {
     return roadmaps?.reduce((acc, roadmap) => {
-        acc[roadmap.id] = roadmap;
-        return acc;
+      acc[roadmap.id] = roadmap;
+      return acc;
     }, {} as Record<string, Roadmap>) || {};
-}, [roadmaps]);
+  }, [roadmaps]);
 
 
   useEffect(() => {
@@ -85,11 +133,21 @@ export default function DashboardPage() {
 
   const onVisionCreated = (visionId: string) => {
     setCreateVisionOpen(false);
-    toast({
-      title: "Success!",
-      description: "Your new vision and roadmap have been created.",
-    });
-    router.push(`/vision/${visionId}`);
+
+    if (visionId === 'dashboard') {
+      toast({
+        title: "Visions Created",
+        description: "Your new visions have been added to your dashboard.",
+      });
+      // We are already on the dashboard, and the subscription will auto-update
+      // passing 'dashboard' prevents redirection to /vision/dashboard (which is invalid)
+    } else {
+      toast({
+        title: "Success!",
+        description: "Your new vision and roadmap have been created.",
+      });
+      router.push(`/vision/${visionId}`);
+    }
   };
 
   const isLoading = isUserLoading || visionsLoading || roadmapsLoading || isUserDataLoading || isPlanLoading;
@@ -135,7 +193,7 @@ export default function DashboardPage() {
               An overview of your life's aspirations.
             </p>
           </div>
-           <Button onClick={() => isLimitReached ? router.push('/plans') : setCreateVisionOpen(true)} disabled={isLoading}>
+          <Button onClick={() => isLimitReached ? router.push('/plans') : setCreateVisionOpen(true)} disabled={isLoading}>
             {isLimitReached ? 'Vision Limit Reached' : 'New Vision'}
             {isLimitReached ? <ArrowRight className="ml-2" /> : <PlusCircle className="ml-2" />}
           </Button>
@@ -155,14 +213,37 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visions.map((vision) => (
                   <Card key={vision.id} className="flex flex-col">
-                    <CardHeader>
-                      <CardTitle>{vision.title}</CardTitle>
-                      <CardDescription>
-                        Created{' '}
-                        {vision.createdAt
-                          ? formatDistanceToNow((vision.createdAt as any).toDate(), { addSuffix: true })
-                          : 'just now'}
-                      </CardDescription>
+                    <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+                      <div className="space-y-1 pr-4">
+                        <CardTitle className="leading-tight">{vision.title}</CardTitle>
+                        <CardDescription>
+                          Created{' '}
+                          {vision.createdAt
+                            ? formatDistanceToNow((vision.createdAt as any).toDate(), { addSuffix: true })
+                            : 'just now'}
+                        </CardDescription>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/vision/${vision.id}`} className="cursor-pointer flex items-center">
+                              <Eye className="mr-2 h-4 w-4" /> View
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive cursor-pointer flex items-center"
+                            onClick={() => setVisionToDelete(vision.id)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </CardHeader>
                     <CardContent className="flex-grow">
                       <p className="text-sm text-muted-foreground line-clamp-3">
@@ -180,15 +261,22 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 border-2 border-dashed border-muted-foreground/30 rounded-lg">
-                <Zap className="mx-auto h-12 w-12 text-muted-foreground" />
-                <h3 className="mt-4 text-lg font-semibold">No Visions Yet</h3>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  Start by creating a new vision for your future.
+              <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-muted rounded-xl bg-muted/10">
+                <div className="bg-background p-4 rounded-full shadow-sm mb-4">
+                  <Zap className="h-10 w-10 text-primary" />
+                </div>
+                <h3 className="text-xl font-bold tracking-tight mb-2">No Visions Found</h3>
+                <p className="text-muted-foreground text-center max-w-sm mb-6">
+                  You haven't created any visions yet. Define your future to get a personalized roadmap and AI coaching.
                 </p>
-                <Button className="mt-6" onClick={() => setCreateVisionOpen(true)} disabled={isLoading || isLimitReached}>
-                    {isLimitReached ? 'Upgrade to Create More' : 'Create Your First Vision'}
-                    {isLimitReached ? <ArrowRight className="ml-2" /> : <PlusCircle className="ml-2" />}
+                <Button
+                  size="lg"
+                  onClick={() => setCreateVisionOpen(true)}
+                  disabled={isLoading || isLimitReached}
+                  className="font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow"
+                >
+                  {isLimitReached ? 'Upgrade to Create More' : 'Create Your First Vision'}
+                  {isLimitReached ? <ArrowRight className="ml-2 h-4 w-4" /> : <PlusCircle className="ml-2 h-4 w-4" />}
                 </Button>
               </div>
             )}
@@ -208,6 +296,30 @@ export default function DashboardPage() {
             </div>
           </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!visionToDelete} onOpenChange={(open) => !open && setVisionToDelete(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete your vision and its associated roadmap.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeleteVision();
+                }}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </main>
     </>
   );

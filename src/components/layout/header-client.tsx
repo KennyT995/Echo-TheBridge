@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sheet';
 import { UserNav } from './user-nav';
 import AppSidebar from './app-sidebar';
-import { VisionsDropdown } from './visions-dropdown';
+
 import { cn } from '@/lib/utils';
 import { mainNavLinks } from '@/lib/navigation';
 
@@ -59,7 +59,7 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
           </Link>
           <nav className="hidden md:flex items-center gap-4 text-sm font-medium xl:gap-6">
             {mainNavLinks.map((item) => (
-               <Link
+              <Link
                 key={item.href}
                 href={item.href}
                 className="transition-colors hover:text-foreground/80 text-foreground/60"
@@ -67,17 +67,7 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
                 {item.label}
               </Link>
             ))}
-            {user && (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="transition-colors hover:text-foreground/80 text-foreground/60"
-                >
-                  Dashboard
-                </Link>
-                <VisionsDropdown />
-              </>
-            )}
+
           </nav>
         </div>
 
@@ -114,13 +104,13 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
                   </nav>
                   <div className="mt-auto p-4 border-t">
                     <div className="flex flex-col gap-2">
-                        <Button asChild variant="outline" className="w-full justify-start">
-                          <Link href="/login">Login</Link>
-                        </Button>
-                        <Button asChild className="w-full justify-start">
-                          <Link href="/login">Sign Up</Link>
-                        </Button>
-                      </div>
+                      <Button asChild variant="outline" className="w-full justify-start">
+                        <Link href="/login">Login</Link>
+                      </Button>
+                      <Button asChild className="w-full justify-start">
+                        <Link href="/login">Sign Up</Link>
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}

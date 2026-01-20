@@ -14,6 +14,7 @@ import { z } from 'zod';
 const GenerateRoadmapFromVisionInputSchema = z.object({
   title: z.string().optional().default(''),
   goal: z.string().describe("The user's primary goal or vision."),
+  timelineFocus: z.string().optional().describe("User's specific focus for the overall vision timeline."),
   yearlyFocus: z.string().optional().describe("User's specific focus for yearly milestones."),
   monthlyFocus: z.string().optional().describe("User's specific focus for monthly sprints."),
   weeklyFocus: z.string().optional().describe("User's specific focus for weekly tactics."),
@@ -28,13 +29,14 @@ const RoadmapItemSchema = z.object({
 });
 
 const RoadmapSchema = z.object({
+  visionTimeline: z.array(RoadmapItemSchema).describe('The chronological phases of the entire journey (e.g., Phase 1, Phase 2, Phase 3).'),
   yearlyMilestones: z.array(RoadmapItemSchema).describe('Key achievements for the current year.'),
   monthlySprints: z.array(RoadmapItemSchema).describe('Focus for the next 12 months.'),
   weeklyTactics: z.array(RoadmapItemSchema).describe('Actions needed this week.'),
   dailyHabits: z.array(RoadmapItemSchema).describe('Atomic units of action required daily.'),
 });
 
-const GenerateRoadmapFromVisionOutputSchema = RoadmapSchema.describe('A structured roadmap with yearly milestones, monthly sprints, weekly tactics, and daily habits.');
+const GenerateRoadmapFromVisionOutputSchema = RoadmapSchema.describe('A structured roadmap with vision timeline, yearly milestones, monthly sprints, weekly tactics, and daily habits.');
 export type GenerateRoadmapFromVisionOutput = z.infer<typeof GenerateRoadmapFromVisionOutputSchema>;
 
 export async function generateRoadmapFromVision(input: GenerateRoadmapFromVisionInput): Promise<GenerateRoadmapFromVisionOutput> {
@@ -60,7 +62,10 @@ Completed Tasks:
 {{/each}}
 {{/if}}
 
-The user may have provided specific focus areas to guide generation. If a focus area is provided for a section, prioritize it. Otherwise, generate the best items based on the overall goal.
+The user may have provided specific focus areas to guide generation. If a focus area is provided for a section, prioritize it. Otherwise, generate the best items based on the overall goal and timeframe.
+{{#if timelineFocus}}
+Timeline Focus: {{{timelineFocus}}}
+{{/if}}
 {{#if yearlyFocus}}
 Yearly Focus: {{{yearlyFocus}}}
 {{/if}}
@@ -75,15 +80,15 @@ Daily Focus: {{{dailyFocus}}}
 {{/if}}
 
 Generate the roadmap with these sections:
-1. Yearly Milestones: The "Big Rocks" that must move.
-2. Monthly Sprints: The 30-day missions to conquer specific territories.
-3. Weekly Tactics: The precise maneuvers to execute starting next Monday.
-4. Daily Habits: The atomic units of behavior that compound into the result.
+
+1. Vision Timeline: The chronological phases of the entire journey.
+2. Yearly Milestones: The MAJOR milestones.
+3. Monthly Sprints: The medium-term missions.
+4. Weekly Tactics: The specific actions for the near term.
+5. Daily Habits: The atomic units of behavior.
 
 CRITICAL INSTRUCTIONS:
-- Be uncomfortably specific. Avoid generic filler like "Research market" or "Stay positive".
-- Instead of "Network", say "Send 5 DMs to industry leaders in [Niche]".
-- Instead of "Learn code", say "Build a Hello World app in Next.js".
+- Be uncomfortably specific. Avoid generic filler.
 - Focus on High-Leverage Activities (80/20 rule).
 
 Return ONLY the raw JSON matching the schema.`,

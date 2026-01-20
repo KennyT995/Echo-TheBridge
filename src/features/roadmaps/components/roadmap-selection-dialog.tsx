@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import type { Roadmap, RoadmapItem } from '@/lib/types';
-import { CalendarDays, CheckCircle2, CircleDot, GanttChartSquare } from 'lucide-react';
+import { CalendarDays, CheckCircle2, CircleDot, GanttChartSquare, Flag } from 'lucide-react';
 
 interface RoadmapSelectionDialogProps {
     isOpen: boolean;
@@ -35,12 +35,15 @@ export function RoadmapSelectionDialog({
     useEffect(() => {
         if (proposedRoadmap) {
             const initial: SelectionState = {};
-            const sections = ['dailyHabits', 'weeklyTactics', 'monthlySprints', 'yearlyMilestones'] as const;
+            const sections = ['visionTimeline', 'dailyHabits', 'weeklyTactics', 'monthlySprints', 'yearlyMilestones'] as const;
 
             sections.forEach((key) => {
-                proposedRoadmap[key].forEach((item, index) => {
-                    initial[`${key}-${index}`] = true; // All selected by default
-                });
+                const items = proposedRoadmap[key];
+                if (items) {
+                    items.forEach((item, index) => {
+                        initial[`${key}-${index}`] = true; // All selected by default
+                    });
+                }
             });
             setSelections(initial);
         }
@@ -55,6 +58,7 @@ export function RoadmapSelectionDialog({
         // Filter the roadmap based on selections
         const filteredRoadmap: Roadmap = {
             ...proposedRoadmap,
+            visionTimeline: filterSection('visionTimeline'),
             dailyHabits: filterSection('dailyHabits'),
             weeklyTactics: filterSection('weeklyTactics'),
             monthlySprints: filterSection('monthlySprints'),
@@ -64,10 +68,13 @@ export function RoadmapSelectionDialog({
     };
 
     const filterSection = (key: keyof Roadmap): RoadmapItem[] => {
-        return (proposedRoadmap[key] as RoadmapItem[]).filter((_, index) => !!selections[`${key}-${index}`]);
+        const items = proposedRoadmap[key] as RoadmapItem[];
+        if (!items) return [];
+        return items.filter((_, index) => !!selections[`${key}-${index}`]);
     };
 
     const sections = [
+        { key: 'visionTimeline', label: 'Vision Timeline', icon: Flag },
         { key: 'dailyHabits', label: 'Daily Habits', icon: CheckCircle2 },
         { key: 'weeklyTactics', label: 'Weekly Tactics', icon: CircleDot },
         { key: 'monthlySprints', label: 'Monthly Sprints', icon: CalendarDays },

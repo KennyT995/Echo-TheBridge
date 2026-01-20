@@ -1,6 +1,6 @@
 import confetti from 'canvas-confetti';
 
-type CelebrationTier = 'dailyHabits' | 'weeklyTactics' | 'monthlySprints' | 'yearlyMilestones' | 'vision';
+type CelebrationTier = 'dailyHabits' | 'weeklyTactics' | 'monthlySprints' | 'yearlyMilestones' | 'visionTimeline' | 'vision';
 
 export const triggerMilestoneCelebration = (tier: CelebrationTier, toast: any) => {
     const strategies = celebrationStrategies[tier];
@@ -160,6 +160,16 @@ const celebrationStrategies: Record<CelebrationTier, ((toast: any) => void)[]> =
                 title: "🎆 YEARLY MILESTONE ACHIEVED",
                 description: "This is a major life moment. Take it in.",
                 duration: 8000
+            });
+        }
+    ],
+    visionTimeline: [
+        (toast) => {
+            runSchoolPride();
+            toast({
+                title: "🚩 MILESTONE REACHED",
+                description: "You've conquered a major phase of your journey.",
+                className: "border-indigo-500 bg-indigo-50"
             });
         }
     ],

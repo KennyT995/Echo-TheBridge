@@ -10,6 +10,28 @@ import { cn } from '@/lib/utils';
 export const metadata: Metadata = {
   title: 'Echo: The Bridge',
   description: 'Bridge the gap between long-term vision and daily action.',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://echo-the-bridge.com',
+    title: 'Echo: The Bridge',
+    description: 'Bridge the gap between long-term vision and daily action.',
+    siteName: 'Echo: The Bridge',
+    images: [
+      {
+        url: '/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Echo: The Bridge',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Echo: The Bridge',
+    description: 'Bridge the gap between long-term vision and daily action.',
+    images: ['/og-image.jpg'],
+  },
   icons: {
     icon: '/logo.png',
     apple: '/logo.png',

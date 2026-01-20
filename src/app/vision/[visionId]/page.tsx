@@ -10,7 +10,8 @@ import type { Vision, Roadmap, PlanTier, UserData, RoadmapItem, RoadmapSectionKe
 import { RoadmapDisplay } from '@/features/roadmaps/components/roadmap-display';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Wand2, Trash2, Share2, Copy, RefreshCw } from 'lucide-react';
+import { Loader2, Wand2, Trash2, Share2, Copy, RefreshCw, Pencil } from 'lucide-react';
+import { EditVisionDialog } from '@/features/visions/components/edit-vision-dialog';
 import { getReflection, generateRoadmap } from '@/app/actions';
 import type { GenerateRoadmapFromVisionInput } from '@/ai/flows/generate-roadmap-from-vision';
 import { RoadmapSelectionDialog } from '@/features/roadmaps/components/roadmap-selection-dialog';
@@ -77,11 +78,14 @@ export default function VisionDetailPage() {
   const deleteConfirmationPhrase = "I want to delete this vision";
 
   const [isRefocusModalOpen, setRefocusModalOpen] = useState(false);
+  const [timelineFocus, setTimelineFocus] = useState('');
   const [yearlyFocus, setYearlyFocus] = useState('');
   const [monthlyFocus, setMonthlyFocus] = useState('');
   const [weeklyFocus, setWeeklyFocus] = useState('');
   const [dailyFocus, setDailyFocus] = useState('');
   const [sectionToRegenerate, setSectionToRegenerate] = useState<RoadmapSectionKey | 'all'>('all');
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
 
 
   // Memoize Firestore references
@@ -132,6 +136,7 @@ export default function VisionDetailPage() {
     setIsRegenerating(true);
 
     const completedTasks = [
+      ...(roadmap.visionTimeline || []),
       ...roadmap.yearlyMilestones,
       ...roadmap.monthlySprints,
       ...roadmap.weeklyTactics,
@@ -139,15 +144,16 @@ export default function VisionDetailPage() {
     ].filter(task => task.completed).map(task => task.text);
 
     const regenerationInput: VisionFormValues & Partial<GenerateRoadmapFromVisionInput> = {
-        title: vision.title,
-        goal: vision.goal,
-        category: vision.category,
-        isPublic: vision.isPublic,
-        completedTasks,
-        ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'yearlyMilestones') && { yearlyFocus },
-        ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'monthlySprints') && { monthlyFocus },
-        ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'weeklyTactics') && { weeklyFocus },
-        ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'dailyHabits') && { dailyFocus },
+      title: vision.title,
+      goal: vision.goal,
+      category: vision.category,
+      isPublic: vision.isPublic,
+      completedTasks,
+      ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'visionTimeline') && { timelineFocus },
+      ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'yearlyMilestones') && { yearlyFocus },
+      ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'monthlySprints') && { monthlyFocus },
+      ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'weeklyTactics') && { weeklyFocus },
+      ...(sectionToRegenerate === 'all' || sectionToRegenerate === 'dailyHabits') && { dailyFocus },
     };
 
 
@@ -155,6 +161,7 @@ export default function VisionDetailPage() {
 
     setIsRegenerating(false);
     setRefocusModalOpen(false);
+    setTimelineFocus('');
     setYearlyFocus('');
     setMonthlyFocus('');
     setWeeklyFocus('');
@@ -179,17 +186,42 @@ export default function VisionDetailPage() {
     // Create a new object for the update, starting with the existing roadmap data.
     const finalRoadmapData = { ...roadmap };
 
+    // Initialize history if it doesn't exist
+    if (!finalRoadmapData.history) {
+      finalRoadmapData.history = [];
+    }
+
+    const sectionsToProcess: RoadmapSectionKey[] =
+      (sectionToRegenerate && sectionToRegenerate !== 'all')
+        ? [sectionToRegenerate]
+        : ['visionTimeline', 'yearlyMilestones', 'monthlySprints', 'weeklyTactics', 'dailyHabits'];
+
+    // Archive completed tasks from the sections we are about to overwrite
+    sectionsToProcess.forEach(section => {
+      const currentItems = roadmap[section] || [];
+      const completedItems = currentItems.filter(item => item.completed);
+
+      completedItems.forEach(item => {
+        finalRoadmapData.history!.push({
+          text: item.text,
+          completedAt: new Date(),
+          section: section
+        });
+      });
+    });
+
     if (sectionToRegenerate && sectionToRegenerate !== 'all') {
-        // If we only regenerated ONE section, we take the user's selections
-        // for JUST that section and merge it into our existing roadmap.
-        // This preserves all other sections as they were.
-        finalRoadmapData[sectionToRegenerate] = selectedRoadmap[sectionToRegenerate];
+      // If we only regenerated ONE section, we take the user's selections
+      // for JUST that section and merge it into our existing roadmap.
+      // This preserves all other sections as they were.
+      finalRoadmapData[sectionToRegenerate] = selectedRoadmap[sectionToRegenerate];
     } else {
-        // If we regenerated the WHOLE roadmap, we replace it entirely with the user's selections.
-        finalRoadmapData.yearlyMilestones = selectedRoadmap.yearlyMilestones;
-        finalRoadmapData.monthlySprints = selectedRoadmap.monthlySprints;
-        finalRoadmapData.weeklyTactics = selectedRoadmap.weeklyTactics;
-        finalRoadmapData.dailyHabits = selectedRoadmap.dailyHabits;
+      // If we regenerated the WHOLE roadmap, we replace it entirely with the user's selections.
+      finalRoadmapData.visionTimeline = selectedRoadmap.visionTimeline;
+      finalRoadmapData.yearlyMilestones = selectedRoadmap.yearlyMilestones;
+      finalRoadmapData.monthlySprints = selectedRoadmap.monthlySprints;
+      finalRoadmapData.weeklyTactics = selectedRoadmap.weeklyTactics;
+      finalRoadmapData.dailyHabits = selectedRoadmap.dailyHabits;
     }
 
     await updateDocumentNonBlocking(roadmapRef, finalRoadmapData);
@@ -198,7 +230,7 @@ export default function VisionDetailPage() {
 
     toast({
       title: "Roadmap Updated!",
-      description: "Your selection has been saved.",
+      description: "Your selection has been saved and completed tasks archived.",
     });
   };
 
@@ -226,6 +258,16 @@ export default function VisionDetailPage() {
     }
   };
 
+  const handleUpdateVision = async (title: string, category: string) => {
+    if (visionRef) {
+      await updateDocumentNonBlocking(visionRef, { title, category });
+      toast({
+        title: "Vision Updated",
+        description: "Your vision details have been saved.",
+      });
+    }
+  };
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareUrl);
     toast({ title: 'Copied!', description: 'Share link copied to clipboard.' });
@@ -233,6 +275,7 @@ export default function VisionDetailPage() {
 
   const calculateOverallProgress = (roadmap: Roadmap): number => {
     const allItems: RoadmapItem[] = [
+      ...(roadmap.visionTimeline || []),
       ...(roadmap.yearlyMilestones || []),
       ...(roadmap.monthlySprints || []),
       ...(roadmap.weeklyTactics || []),
@@ -291,6 +334,9 @@ export default function VisionDetailPage() {
               <Badge variant="secondary" className="mt-2">{vision.category}</Badge>
             </div>
             <div className="flex gap-2 flex-shrink-0">
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(true)}>
+                <Pencil className="mr-2 h-4 w-4" /> Edit
+              </Button>
               <Button variant="outline" disabled={isRegenerating} onClick={() => {
                 setSectionToRegenerate('all');
                 setRefocusModalOpen(true);
@@ -447,22 +493,36 @@ export default function VisionDetailPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-4 max-h-[70vh] overflow-y-auto">
-            <div className="space-y-2">
-              <Label>Yearly Focus</Label>
-              <Textarea placeholder="e.g., Secure major funding round." value={yearlyFocus} onChange={(e) => setYearlyFocus(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Monthly Focus</Label>
-              <Textarea placeholder="e.g., Onboard first 100 paying customers." value={monthlyFocus} onChange={(e) => setMonthlyFocus(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Weekly Focus</Label>
-              <Textarea placeholder="e.g., Ship two new feature updates." value={weeklyFocus} onChange={(e) => setWeeklyFocus(e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label>Daily Focus</Label>
-              <Textarea placeholder="e.g., Stick to a consistent morning routine." value={dailyFocus} onChange={(e) => setDailyFocus(e.target.value)} />
-            </div>
+            {(sectionToRegenerate === 'all' || sectionToRegenerate === 'visionTimeline') && (
+              <div className="space-y-2">
+                <Label>Timeline Focus</Label>
+                <Textarea placeholder="e.g., Establish the foundation, then scale." value={timelineFocus} onChange={(e) => setTimelineFocus(e.target.value)} />
+              </div>
+            )}
+            {(sectionToRegenerate === 'all' || sectionToRegenerate === 'yearlyMilestones') && (
+              <div className="space-y-2">
+                <Label>Yearly Focus</Label>
+                <Textarea placeholder="e.g., Secure major funding round." value={yearlyFocus} onChange={(e) => setYearlyFocus(e.target.value)} />
+              </div>
+            )}
+            {(sectionToRegenerate === 'all' || sectionToRegenerate === 'monthlySprints') && (
+              <div className="space-y-2">
+                <Label>Monthly Focus</Label>
+                <Textarea placeholder="e.g., Onboard first 100 paying customers." value={monthlyFocus} onChange={(e) => setMonthlyFocus(e.target.value)} />
+              </div>
+            )}
+            {(sectionToRegenerate === 'all' || sectionToRegenerate === 'weeklyTactics') && (
+              <div className="space-y-2">
+                <Label>Weekly Focus</Label>
+                <Textarea placeholder="e.g., Ship two new feature updates." value={weeklyFocus} onChange={(e) => setWeeklyFocus(e.target.value)} />
+              </div>
+            )}
+            {(sectionToRegenerate === 'all' || sectionToRegenerate === 'dailyHabits') && (
+              <div className="space-y-2">
+                <Label>Daily Focus</Label>
+                <Textarea placeholder="e.g., Stick to a consistent morning routine." value={dailyFocus} onChange={(e) => setDailyFocus(e.target.value)} />
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setRefocusModalOpen(false)}>Cancel</Button>
@@ -480,6 +540,16 @@ export default function VisionDetailPage() {
           onOpenChange={(open) => !open && setProposedRoadmap(null)}
           proposedRoadmap={proposedRoadmap}
           onConfirm={handleConfirmRoadmap}
+        />
+      )}
+
+      {vision && (
+        <EditVisionDialog
+          isOpen={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          initialTitle={vision.title}
+          initialCategory={vision.category || ''}
+          onUpdate={handleUpdateVision}
         />
       )}
     </>

@@ -12,20 +12,21 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 async function getUserIdFromRequest(request: Request): Promise<string | null> {
-    const authHeader = headers().get('Authorization');
-    if (authHeader) {
-        const idToken = authHeader.split('Bearer ')[1];
-        if (idToken) {
-            try {
-                const decodedToken = await getAuth(admin.app()).verifyIdToken(idToken);
-                return decodedToken.uid;
-            } catch (error) {
-                console.error("Error verifying ID token:", error);
-                return null;
-            }
-        }
+  const headerList = await headers();
+  const authHeader = headerList.get('Authorization');
+  if (authHeader) {
+    const idToken = authHeader.split('Bearer ')[1];
+    if (idToken) {
+      try {
+        const decodedToken = await getAuth(admin.app()).verifyIdToken(idToken);
+        return decodedToken.uid;
+      } catch (error) {
+        console.error("Error verifying ID token:", error);
+        return null;
+      }
     }
-    return null;
+  }
+  return null;
 }
 
 export async function POST(request: Request) {

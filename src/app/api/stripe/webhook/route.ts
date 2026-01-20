@@ -5,14 +5,15 @@ import { headers } from 'next/headers';
 import { admin } from '@/firebase/admin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2024-06-20',
+  apiVersion: '2024-06-20',
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
 export async function POST(request: Request) {
   const body = await request.text();
-  const signature = headers().get('stripe-signature')!;
+  const headerList = await headers();
+  const signature = headerList.get('stripe-signature')!;
 
   let event: Stripe.Event;
 
@@ -36,14 +37,14 @@ export async function POST(request: Request) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const sessionWithLineItems = await stripe.checkout.sessions.retrieve(
-            session.id,
-            { expand: ['line_items'] }
+          session.id,
+          { expand: ['line_items'] }
         );
         const lineItem = sessionWithLineItems.line_items?.data[0];
         const priceId = lineItem?.price?.id;
         const customerId = session.customer as string;
         const subscriptionId = session.subscription as string;
-        
+
         await updateUserSubscription(userId, subscriptionId, customerId, priceId);
         break;
       }
@@ -68,11 +69,11 @@ export async function POST(request: Request) {
 async function updateUserSubscription(userId: string, subscriptionId: string, customerId: string, priceId?: string, isDeleted: boolean = false) {
   const userRef = admin.firestore().collection('users').doc(userId);
   const plans = await admin.firestore().collection('plan_tiers').get();
-  
+
   let planId = 'trailblazer'; // Default to free plan
   if (!isDeleted && priceId) {
     const matchedPlan = plans.docs.find(doc => doc.data().stripePriceId === priceId);
-    if(matchedPlan) {
+    if (matchedPlan) {
       planId = matchedPlan.id;
     }
   }

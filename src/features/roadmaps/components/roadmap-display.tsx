@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
 import type { Roadmap, RoadmapItem, RoadmapSectionKey } from '@/lib/types';
-import { CheckCircle2, CircleDot, GanttChartSquare, CalendarDays, Pencil, RefreshCw } from 'lucide-react';
+import { CheckCircle2, CircleDot, GanttChartSquare, CalendarDays, Pencil, RefreshCw, Flag } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { DocumentReference } from 'firebase/firestore';
@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import confetti from 'canvas-confetti';
 import { triggerMilestoneCelebration } from '@/lib/celebrations';
 import { useToast } from '@/hooks/use-toast';
+import { History } from 'lucide-react';
 
 interface RoadmapDisplayProps {
   roadmap: Roadmap;
@@ -27,14 +28,14 @@ interface RoadmapDisplayProps {
 
 const roadmapSections = [
   {
-    title: 'Daily Habits',
-    key: 'dailyHabits',
-    icon: CheckCircle2,
+    title: 'Vision Timeline',
+    key: 'visionTimeline',
+    icon: Flag,
   },
   {
-    title: 'Weekly Tactics',
-    key: 'weeklyTactics',
-    icon: CircleDot,
+    title: 'Yearly Milestones',
+    key: 'yearlyMilestones',
+    icon: GanttChartSquare,
   },
   {
     title: 'Monthly Sprints',
@@ -42,9 +43,14 @@ const roadmapSections = [
     icon: CalendarDays,
   },
   {
-    title: 'Yearly Milestones',
-    key: 'yearlyMilestones',
-    icon: GanttChartSquare,
+    title: 'Weekly Tactics',
+    key: 'weeklyTactics',
+    icon: CircleDot,
+  },
+  {
+    title: 'Daily Habits',
+    key: 'dailyHabits',
+    icon: CheckCircle2,
   },
 ] as const;
 
@@ -67,6 +73,7 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: Roa
       weeklyTactics: { count: 60, spread: 60, scalar: 1.0 },
       monthlySprints: { count: 100, spread: 80, scalar: 1.2 },
       yearlyMilestones: { count: 150, spread: 100, scalar: 1.4 },
+      visionTimeline: { count: 180, spread: 120, scalar: 1.5 },
     }[sectionKey];
 
     // Randomize the parameters slightly to feel organic
@@ -96,30 +103,30 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: Roa
 
     if (newSection[index]) {
       newSection[index] = { ...newSection[index], completed: checked };
-      
+
       if (checked) {
         // Temporarily update the full roadmap to check overall status
         const tempFullRoadmap = { ...roadmap, [section]: newSection };
 
         const allItems = [
-            ...(tempFullRoadmap.yearlyMilestones || []),
-            ...(tempFullRoadmap.monthlySprints || []),
-            ...(tempFullRoadmap.weeklyTactics || []),
-            ...(tempFullRoadmap.dailyHabits || []),
+          ...(tempFullRoadmap.yearlyMilestones || []),
+          ...(tempFullRoadmap.monthlySprints || []),
+          ...(tempFullRoadmap.weeklyTactics || []),
+          ...(tempFullRoadmap.dailyHabits || []),
         ];
         const isVisionComplete = allItems.every(item => item.completed);
 
         if (isVisionComplete) {
-            triggerMilestoneCelebration('vision', toast);
+          triggerMilestoneCelebration('vision', toast);
         } else {
-            const isSectionComplete = newSection.every((item) => item.completed);
-            const wasSectionComplete = roadmap[section].every((item) => item.completed);
+          const isSectionComplete = newSection.every((item) => item.completed);
+          const wasSectionComplete = roadmap[section].every((item) => item.completed);
 
-            if (isSectionComplete && !wasSectionComplete) {
-                triggerMilestoneCelebration(section, toast);
-            } else {
-                triggerCelebration(section);
-            }
+          if (isSectionComplete && !wasSectionComplete) {
+            triggerMilestoneCelebration(section, toast);
+          } else {
+            triggerCelebration(section);
+          }
         }
       }
 
@@ -162,27 +169,27 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: Roa
             return (
               <AccordionItem key={section.key} value={section.key} className="border border-border/60 rounded-xl overflow-hidden">
                 <div className="flex flex-col">
-                  <AccordionTrigger className="px-4 py-3 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline hover:bg-muted/30 transition-colors [&>svg]:hidden">
-                    <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                                <section.icon className="h-5 w-5 text-primary" />
-                            </div>
-                            <span>{section.title}</span>
+                  <div className="px-4 py-3 flex items-center justify-between w-full hover:bg-muted/30 transition-colors">
+                    <AccordionTrigger className="p-0 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline [&>svg]:hidden flex-1 py-0 justify-start">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-primary/10 rounded-lg">
+                          <section.icon className="h-5 w-5 text-primary" />
                         </div>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onRegenerateSection(section.key);
-                            }}
-                            >
-                            <RefreshCw className="h-4 w-4" />
-                        </Button>
-                    </div>
-                  </AccordionTrigger>
+                        <span>{section.title}</span>
+                      </div>
+                    </AccordionTrigger>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0 ml-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRegenerateSection(section.key);
+                      }}
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <div className="px-4 pb-4">
                     <div className="flex justify-between items-center mb-1.5">
                       <span className="text-xs font-medium text-muted-foreground">
@@ -247,6 +254,43 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: Roa
               </AccordionItem>
             );
           })}
+
+          {roadmap.history && roadmap.history.length > 0 && (
+            <AccordionItem value="history" className="border border-border/60 rounded-xl overflow-hidden">
+              <AccordionTrigger className="px-4 py-3 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline hover:bg-muted/30 transition-colors [&>svg]:hidden">
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <History className="h-5 w-5 text-primary" />
+                    </div>
+                    <span>Past Achievements</span>
+                  </div>
+                  <span className="text-sm text-muted-foreground mr-2">{roadmap.history.length} completed</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="p-0">
+                <ul className="divide-y divide-border/50">
+                  {roadmap.history.map((item, index) => (
+                    <li key={index} className="flex items-center gap-3 p-4 hover:bg-muted/20 transition-colors">
+                      <CheckCircle2 className="h-5 w-5 text-muted-foreground opacity-50 flex-shrink-0" />
+                      <div className="flex-1">
+                        <span className="text-sm sm:text-base text-muted-foreground line-through opacity-70">
+                          {item.text}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {item.completedAt ? (
+                          new Date(item.completedAt.seconds * 1000).toLocaleDateString()
+                        ) : (
+                          'Archived'
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </AccordionContent>
+            </AccordionItem>
+          )}
         </Accordion>
       </CardContent>
     </Card>

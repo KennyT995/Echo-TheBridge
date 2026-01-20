@@ -12,7 +12,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 async function getUserIdFromRequest(request: Request): Promise<string | null> {
-    const authHeader = headers().get('Authorization');
+    const headerList = await headers();
+    const authHeader = headerList.get('Authorization');
     if (authHeader) {
         const idToken = authHeader.split('Bearer ')[1];
         if (idToken) {
