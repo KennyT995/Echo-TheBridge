@@ -34,7 +34,11 @@ import { useAuth } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { sidebarInfoLinks, sidebarDashboardLinks } from '@/lib/navigation';
 
-export default function AppSidebar() {
+interface AppSidebarProps {
+  onLinkClick?: () => void;
+}
+
+export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
   const pathname = usePathname();
   const { user } = useUser();
   const auth = useAuth();
@@ -69,7 +73,7 @@ export default function AppSidebar() {
               variant="ghost"
               className="justify-start gap-2"
             >
-              <Link href={item.href}>
+              <Link href={item.href} onClick={onLinkClick}>
                 <span>{item.label}</span>
               </Link>
             </Button>
@@ -86,7 +90,7 @@ export default function AppSidebar() {
               variant={pathname === item.href ? 'secondary' : 'ghost'}
               className="justify-start gap-2"
             >
-              <Link href={item.href}>
+              <Link href={item.href} onClick={onLinkClick}>
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>
               </Link>
@@ -121,6 +125,7 @@ export default function AppSidebar() {
                       <li key={vision.id}>
                         <Link
                           href={`/vision/${vision.id}`}
+                          onClick={onLinkClick}
                           className={cn(
                             'block text-sm rounded-md p-2 hover:bg-muted',
                             pathname === `/vision/${vision.id}`
@@ -168,13 +173,13 @@ export default function AppSidebar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
-                    <Link href="/account" className="w-full cursor-pointer">
+                    <Link href="/account" className="w-full cursor-pointer" onClick={onLinkClick}>
                       <UserIcon className="mr-2 h-4 w-4" />
                       <span>My Account</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/plans" className="w-full cursor-pointer">
+                    <Link href="/plans" className="w-full cursor-pointer" onClick={onLinkClick}>
                       <CreditCard className="mr-2 h-4 w-4" />
                       <span>Plans</span>
                     </Link>

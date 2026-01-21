@@ -20,6 +20,12 @@ import { triggerMilestoneCelebration } from '@/lib/celebrations';
 import { useToast } from '@/hooks/use-toast';
 import { History } from 'lucide-react';
 import { FocusTimer } from '@/features/dashboard/components/focus-timer';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface RoadmapDisplayProps {
   roadmap: Roadmap;
@@ -94,6 +100,37 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: Roa
       drift: Math.random() - 0.5,
       ticks: 300,
     });
+  };
+
+  const shouldTellUserToRegenerate = (section: RoadmapSectionKey, items: RoadmapItem[]): { should: boolean; reason?: string } => {
+    if (!items || items.length === 0) return { should: true, reason: 'Empty section' };
+
+    const allCompleted = items.every(i => i.completed);
+    if (allCompleted) return { should: true, reason: 'All tasks completed' };
+
+    const now = new Date();
+
+    switch (section) {
+      case 'dailyHabits':
+        // Reminder after 6 PM
+        if (now.getHours() >= 18) return { should: true, reason: 'End of day approaching' };
+        break;
+      case 'weeklyTactics':
+        // Reminder on Friday (5), Saturday (6), Sunday (0)
+        const day = now.getDay();
+        if (day === 0 || day === 5 || day === 6) return { should: true, reason: 'End of week approaching' };
+        break;
+      case 'monthlySprints':
+        // Reminder after 25th of the month
+        if (now.getDate() >= 25) return { should: true, reason: 'End of month approaching' };
+        break;
+      case 'yearlyMilestones':
+        // Reminder in December (11)
+        if (now.getMonth() === 11) return { should: true, reason: 'End of year approaching' };
+        break;
+    }
+
+    return { should: false };
   };
 
   const handleCheckChange = (section: RoadmapSectionKey, index: number, checked: boolean) => {
@@ -179,17 +216,33 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: Roa
                         <span>{section.title}</span>
                       </div>
                     </AccordionTrigger>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-primary shrink-0 ml-2"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRegenerateSection(section.key);
-                      }}
-                    >
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={cn(
+                              "h-8 w-8 shrink-0 ml-2 transition-all",
+                              shouldTellUserToRegenerate(section.key, items).should
+                                ? "text-amber-500 hover:text-amber-600 hover:bg-amber-100 animate-pulse"
+                                : "text-muted-foreground hover:text-primary"
+                            )}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRegenerateSection(section.key);
+                            }}
+                          >
+                            <RefreshCw className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        {shouldTellUserToRegenerate(section.key, items).should && (
+                          <TooltipContent>
+                            <p>{shouldTellUserToRegenerate(section.key, items).reason} - Click to regenerate</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                   <div className="px-4 pb-4">
                     <div className="flex justify-between items-center mb-1.5">
@@ -246,6 +299,7 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection }: Roa
                                     habitName={item.text}
                                     className="border-none shadow-none bg-transparent p-0"
                                     onComplete={() => handleCheckChange(section.key, index, true)}
+                                    compact={true}
                                   />
                                 )}
                                 <Button

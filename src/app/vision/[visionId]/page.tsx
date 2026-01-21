@@ -327,14 +327,14 @@ export default function VisionDetailPage() {
     <>
       <main className="container mx-auto px-4 py-8 md:py-12">
         <div className="mb-8">
-          <div className="flex items-start justify-between gap-4 mb-4">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
             <div>
               <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl">
                 {vision.title}
               </h1>
               <Badge variant="secondary" className="mt-2">{vision.category}</Badge>
             </div>
-            <div className="flex gap-2 flex-shrink-0">
+            <div className="flex flex-wrap gap-2 flex-shrink-0">
               <Button variant="outline" onClick={() => setIsEditDialogOpen(true)}>
                 <Pencil className="mr-2 h-4 w-4" /> Edit
               </Button>

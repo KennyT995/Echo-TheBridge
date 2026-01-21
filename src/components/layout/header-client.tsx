@@ -1,5 +1,5 @@
 'use client';
-
+import { useState } from 'react';
 import { useUser, useAuth } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -28,6 +28,7 @@ interface HeaderClientProps {
 export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const [open, setOpen] = useState(false);
 
   const authSection = (
     <div className="hidden md:flex items-center gap-2">
@@ -77,7 +78,7 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
 
         <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
           {authSection}
-          <Sheet>
+          <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
                 <Menu className="h-5 w-5" />
@@ -92,7 +93,7 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
                 </SheetDescription>
               </SheetHeader>
               {user ? (
-                <AppSidebar />
+                <AppSidebar onLinkClick={() => setOpen(false)} />
               ) : (
                 <div className="flex flex-col h-full">
                   <nav className="flex flex-col gap-2 p-4">
@@ -100,6 +101,7 @@ export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
                       <Link
                         key={item.href}
                         href={item.href}
+                        onClick={() => setOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
                       >
                         {item.label}

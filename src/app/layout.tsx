@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
   title: 'Echo: The Bridge',
   description: 'Bridge the gap between long-term vision and daily action.',
   openGraph: {

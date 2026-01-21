@@ -11,9 +11,10 @@ interface FocusTimerProps {
     durationMinutes?: number;
     onComplete?: () => void;
     className?: string;
+    compact?: boolean;
 }
 
-export function FocusTimer({ habitName, durationMinutes = 25, onComplete, className }: FocusTimerProps) {
+export function FocusTimer({ habitName, durationMinutes = 25, onComplete, className, compact = false }: FocusTimerProps) {
     const [timeLeft, setTimeLeft] = useState(durationMinutes * 60);
     const [isActive, setIsActive] = useState(false);
     const [isCompleted, setIsCompleted] = useState(false);
@@ -80,6 +81,20 @@ export function FocusTimer({ habitName, durationMinutes = 25, onComplete, classN
         );
     }
 
+    if (compact && !isActive && timeLeft === originalDuration) {
+        return (
+            <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors"
+                onClick={handleStart}
+                aria-label="Start focus timer"
+            >
+                <Timer className="h-4 w-4" />
+            </Button>
+        );
+    }
+
     return (
         <Card className={cn("overflow-hidden border-border", className)}>
             <CardContent className="p-0">
@@ -91,17 +106,18 @@ export function FocusTimer({ habitName, durationMinutes = 25, onComplete, classN
                     />
                 </div>
 
-                <div className="p-4 flex items-center justify-between">
-                    <div className='flex items-center gap-3'>
+                <div className={cn("flex items-center justify-between", compact ? "p-1" : "p-4")}>
+                    <div className={cn('flex items-center', compact ? "gap-2" : "gap-3")}>
                         <div className={cn(
-                            "p-2 rounded-full",
+                            "rounded-full",
+                            compact ? "p-1.5" : "p-2",
                             isActive ? "bg-indigo-100 text-indigo-600 animate-pulse" : "bg-muted text-muted-foreground"
                         )}>
                             <Timer className="w-5 h-5" />
                         </div>
                         <div>
                             <p className="font-mono text-xl font-bold leading-none">{formatTime(timeLeft)}</p>
-                            <p className="text-xs text-muted-foreground truncate max-w-[150px]">{habitName}</p>
+                            {!compact && <p className="text-xs text-muted-foreground truncate max-w-[150px]">{habitName}</p>}
                         </div>
                     </div>
 
