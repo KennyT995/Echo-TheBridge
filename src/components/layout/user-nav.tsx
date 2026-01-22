@@ -14,7 +14,7 @@ import {
 import { useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { CreditCard, LayoutDashboard, LogOut, Settings, User } from 'lucide-react';
+import { CreditCard, LayoutDashboard, LogOut, User } from 'lucide-react';
 
 export function UserNav() {
     const { user, isUserLoading } = useUser();
@@ -56,7 +56,7 @@ export function UserNav() {
                             <span>Dashboard</span>
                         </Link>
                     </DropdownMenuItem>
-                     <DropdownMenuItem asChild>
+                    <DropdownMenuItem asChild>
                         <Link href="/account" className="w-full cursor-pointer">
                             <User className="mr-2 h-4 w-4" />
                             <span>My Account</span>

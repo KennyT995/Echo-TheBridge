@@ -11,7 +11,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
-async function getUserIdFromRequest(request: Request): Promise<string | null> {
+async function getUserIdFromRequest(): Promise<string | null> {
   const headerList = await headers();
   const authHeader = headerList.get('Authorization');
   if (authHeader) {
@@ -32,7 +32,7 @@ async function getUserIdFromRequest(request: Request): Promise<string | null> {
 export async function POST(request: Request) {
   try {
     const { priceId, userEmail } = await request.json();
-    const userId = await getUserIdFromRequest(request);
+    const userId = await getUserIdFromRequest();
 
     if (!userId) {
       return new NextResponse(JSON.stringify({ error: { message: 'User not authenticated.' } }), { status: 401 });
@@ -70,8 +70,8 @@ export async function POST(request: Request) {
 
     return new NextResponse(JSON.stringify({ sessionId: session.id }), { status: 200 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Stripe Checkout Session Error:', error);
-    return new NextResponse(JSON.stringify({ error: { message: error.message } }), { status: 500 });
+    return new NextResponse(JSON.stringify({ error: { message: (error as Error).message } }), { status: 500 });
   }
 }

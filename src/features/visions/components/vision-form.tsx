@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -23,13 +22,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { generateRoadmap, getVisionIdeas, analyzeVision } from '@/app/actions';
-import { VisionFormSchema, type VisionFormValues, visionCategories } from '@/lib/types';
+import { VisionFormSchema, type VisionFormValues, visionCategories, type VisionCategory } from '@/lib/types';
 import { VisionConfirmationDialog } from './vision-confirmation-dialog';
 
 import { useToast } from '@/hooks/use-toast';
 import { setDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface VisionFormProps {
     onVisionCreated: (visionId: string) => void;
@@ -97,6 +96,23 @@ function VisionInspiration({ onSelectIdea }: { onSelectIdea: (idea: string) => v
     );
 }
 
+interface VisionAnalysis {
+    isMultiVision: boolean;
+    reasoning: string;
+    unifiedVision: {
+        title: string;
+        goal: string;
+        category: VisionCategory;
+        reasoning?: string;
+    };
+    proposedVisions: Array<{
+        title: string;
+        goal: string;
+        category: VisionCategory;
+        reasoning?: string;
+    }>;
+}
+
 export function VisionForm({ onVisionCreated }: VisionFormProps) {
     const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
@@ -112,7 +128,7 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
         },
     });
 
-    const [analysis, setAnalysis] = useState<any | null>(null);
+    const [analysis, setAnalysis] = useState<VisionAnalysis | null>(null);
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     // Helper to actually create a vision
@@ -190,7 +206,7 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
             // We will handle the "one vision" case immediately below via existing prop
             if (onVisionCreated) onVisionCreated('fallback');
         } else {
-            setAnalysis(analysisResult);
+            setAnalysis(analysisResult as unknown as VisionAnalysis);
             if (analysisResult.isMultiVision) {
                 setIsLoading(false);
                 setIsConfirmOpen(true);
@@ -199,8 +215,9 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
                 // Auto-inject inferred category if missing
                 if (!values.category && analysisResult.unifiedVision.category) {
                     // We need to match the enum
-                    form.setValue('category', analysisResult.unifiedVision.category as any);
-                    values.category = analysisResult.unifiedVision.category as any;
+                    const category = analysisResult.unifiedVision.category as VisionCategory;
+                    form.setValue('category', category);
+                    values.category = category;
                 }
                 // Auto-inject title if missing
                 if (!values.title && analysisResult.unifiedVision.title) {

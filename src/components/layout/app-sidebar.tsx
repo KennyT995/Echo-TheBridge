@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CreditCard, LogOut, Settings, User as UserIcon, Rocket } from 'lucide-react';
+import { CreditCard, LogOut, User as UserIcon, Rocket } from 'lucide-react';
 import { useAuth } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { sidebarInfoLinks, sidebarDashboardLinks } from '@/lib/navigation';
@@ -46,6 +46,7 @@ export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
 
   const handleLogout = async () => {
     if (!auth) return;
+    if (onLinkClick) onLinkClick();
     await auth.signOut();
     router.push('/login');
   };

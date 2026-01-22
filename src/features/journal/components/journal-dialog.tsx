@@ -78,7 +78,7 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
 
                     <div className="bg-muted/50 p-3 rounded-md text-xs text-muted-foreground flex gap-2">
                         <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-yellow-500" />
-                        <p>Your AI Coach will analyze this reflection to provide better guidance in tomorrow's morning briefing.</p>
+                        <p>Your AI Coach will analyze this reflection to provide better guidance in tomorrow&apos;s morning briefing.</p>
                     </div>
                 </div>
 

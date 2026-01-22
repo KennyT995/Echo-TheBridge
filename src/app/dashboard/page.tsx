@@ -6,7 +6,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Loading from '../loading';
 
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Eye, Zap, ArrowRight, MoreVertical, Trash2 } from 'lucide-react';
+import { PlusCircle, Eye, Zap, ArrowRight, MoreVertical, Trash2, BookOpen, Moon, Compass, Mail, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { deleteVision } from '@/app/actions';
+import { deleteVision, checkFutureLetter } from '@/app/actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,13 +39,17 @@ import {
 import { VisionForm } from '@/features/visions/components/vision-form';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { VisionCharts } from '@/features/dashboard/components/vision-charts';
 import { toJsDate } from '@/lib/utils';
 import { calculateStreak } from '@/lib/streaks';
 import { StreakWidget } from '@/features/dashboard/components/streak-widget';
 import { DailyBriefing } from '@/features/dashboard/components/daily-briefing';
 import { JournalDialog } from '@/features/journal/components/journal-dialog';
-import { Moon } from 'lucide-react';
+import { NightlyReviewDialog } from '@/features/journal/components/nightly-review-dialog';
+import { DecisionDialog } from '@/features/journal/components/decision-dialog';
+import { FutureLetterModal } from '@/features/dashboard/components/future-letter-modal';
+import { GenerateFutureLetterOutput } from '@/ai/flows/generate-future-letter';
+import { CrossingCelebration } from '@/features/roadmaps/components/crossing-celebration';
+import { WeeklyRetroDialog } from '@/features/journal/components/weekly-retro-dialog';
 
 function usePlan(userData: UserData | null | undefined) {
   const firestore = useFirestore();
@@ -68,6 +72,17 @@ export default function DashboardPage() {
   const { toast } = useToast();
   const [isCreateVisionOpen, setCreateVisionOpen] = useState(false);
   const [isJournalOpen, setJournalOpen] = useState(false);
+  const [isNightlyReviewOpen, setNightlyReviewOpen] = useState(false);
+  const [isDecisionOpen, setDecisionOpen] = useState(false);
+  const [isFutureLetterOpen, setFutureLetterOpen] = useState(false);
+  const [futureLetter, setFutureLetter] = useState<GenerateFutureLetterOutput | null>(null);
+  const [isGeneratingLetter, setIsGeneratingLetter] = useState(false);
+  const [completedRoadmap, setCompletedRoadmap] = useState<{ id: string, visionTitle: string } | null>(null);
+
+  const [isWeeklyRetroOpen, setWeeklyRetroOpen] = useState(false);
+  const today = new Date();
+  const isSunday = today.getDay() === 0;
+
   const [visionToDelete, setVisionToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -87,7 +102,7 @@ export default function DashboardPage() {
           description: result.error || "Failed to delete vision.",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "An unexpected error occurred.",
@@ -97,6 +112,36 @@ export default function DashboardPage() {
       setVisionToDelete(null);
     }
   };
+
+  const handleGenerateLetter = async () => {
+    if (!user) return;
+    setIsGeneratingLetter(true);
+    try {
+      // In a real app, we would fetch recent daily logs here to pass as context
+      const { result, error } = await checkFutureLetter({
+        userName: user.displayName || 'Traveler',
+        visions: visions?.map(v => v.title) || [],
+        streakCount: overallStats.currentStreak,
+      });
+
+      if (error || !result) {
+        toast({
+          title: "Connection Failed",
+          description: "The signal from the future is weak. Try again later.",
+          variant: "destructive"
+        });
+      } else {
+        setFutureLetter(result);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGeneratingLetter(false);
+    }
+  };
+
+
+
 
   const visionsQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -149,6 +194,39 @@ export default function DashboardPage() {
 
     return { overallStats: stats, dailyProgress: { completed, total } };
   }, [roadmaps]);
+
+
+  useEffect(() => {
+    // This useEffect seems to be incomplete or referencing undefined variables like 'complete' and 'vision'.
+    // Assuming it was meant to be part of a conditional block or a different logic.
+    // For now, I'm adding a placeholder comment and fixing the syntax.
+    // If 'complete' and 'vision' are meant to be defined elsewhere, they should be added.
+    // As per the instruction, I'm just restoring a missing brace to make it syntactically valid.
+    // The original code had an extra '}' after the setCompletedRoadmap call, making it invalid.
+    // The instruction implies a missing brace *before* the setCompletedRoadmap, but the context
+    // suggests the existing `}` was misplaced.
+    // Given the instruction "Restore missing brace" and the provided snippet,
+    // the most likely fix to make the code syntactically correct is to remove the extra `}`.
+    // However, if the intent was to wrap `setCompletedRoadmap` in a block, that block is missing.
+    // Without further context, I will remove the extra `}` to fix the immediate syntax error.
+    // If 'complete' and 'vision' are indeed undefined, this line will still cause a runtime error.
+    // The instruction is to restore a missing brace, not to fix logical errors.
+    // The snippet shows `setCompletedRoadmap(...) } }`, which is an extra `}`.
+    // The instruction's snippet `setCompletedRoadmap({ id: complete.id, visionTitle: vision?.title || 'Unknown Vision' }); }`
+    // implies that the `}` should be there, but the full code has `}}`.
+    // Let's assume the instruction meant to add a block around `setCompletedRoadmap` if it was missing,
+    // but the current code has an extra `}`.
+    // The most faithful interpretation of "restore missing brace" in the context of the provided snippet
+    // `setCompletedRoadmap({ id: complete.id, visionTitle: vision?.title || 'Unknown Vision' }); }`
+    if (!roadmaps || !visions) return;
+
+    // Check if any roadmap just hit 100%
+    const complete = roadmaps.find(r => calculateOverallProgress(r) === 100);
+    if (complete) {
+      const vision = visions.find(v => v.id === complete.visionId);
+      setCompletedRoadmap({ id: complete.id, visionTitle: vision?.title || 'Unknown Vision' });
+    }
+  }, [roadmaps, visions]);
 
 
   useEffect(() => {
@@ -210,22 +288,40 @@ export default function DashboardPage() {
   return (
     <>
       <main className="container mx-auto px-4 py-8 md:py-12">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">
               Dashboard
             </h1>
             <p className="text-muted-foreground mt-1">
-              An overview of your life's aspirations.
+              An overview of your life&apos;s aspirations.
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setJournalOpen(true)} disabled={isLoading}>
-              <Moon className="mr-2 h-4 w-4" /> Reflect
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="ghost" size="icon" onClick={() => setFutureLetterOpen(true)} disabled={isLoading} className="text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50">
+              <Mail className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" onClick={() => setJournalOpen(true)} disabled={isLoading}>
+              <BookOpen className="mr-2 h-4 w-4" /> Journal
+            </Button>
+            <Button variant="outline" onClick={() => setDecisionOpen(true)} disabled={isLoading} className="border-indigo-200 hover:bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/50">
+              <Compass className="mr-2 h-4 w-4" /> Align
+            </Button>
+            {isSunday && (
+              <Button
+                variant="default"
+                onClick={() => setWeeklyRetroOpen(true)}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 animate-pulse"
+              >
+                <CalendarDays className="mr-2 h-4 w-4" /> Weekly Review
+              </Button>
+            )}
+            <Button variant="outline" onClick={() => setNightlyReviewOpen(true)} disabled={isLoading} className="border-indigo-200 hover:bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/50">
+              <Moon className="mr-2 h-4 w-4" /> End Day
             </Button>
             <Button onClick={() => isLimitReached ? router.push('/plans') : setCreateVisionOpen(true)} disabled={isLoading}>
-              {isLimitReached ? 'Vision Limit Reached' : 'New Vision'}
-              {isLimitReached ? <ArrowRight className="ml-2" /> : <PlusCircle className="ml-2" />}
+              {isLimitReached ? 'Limit Reached' : 'New Vision'}
+              {isLimitReached ? <ArrowRight className="ml-2 h-4 w-4" /> : <PlusCircle className="ml-2 h-4 w-4" />}
             </Button>
           </div>
         </div>
@@ -252,7 +348,6 @@ export default function DashboardPage() {
                 totalHabits={dailyProgress.total}
               />
             </div>
-            <VisionCharts visions={visions || []} roadmaps={roadmapsById} />
 
             <h2 className="text-2xl font-bold tracking-tighter mt-12 mb-6">Your Visions</h2>
             {visions && visions.length > 0 ? (
@@ -313,7 +408,7 @@ export default function DashboardPage() {
                 </div>
                 <h3 className="text-xl font-bold tracking-tight mb-2">No Visions Found</h3>
                 <p className="text-muted-foreground text-center max-w-sm mb-6">
-                  You haven't created any visions yet. Define your future to get a personalized roadmap and AI coaching.
+                  You haven&apos;t created any visions yet. Define your future to get a personalized roadmap and AI coaching.
                 </p>
                 <Button
                   size="lg"
@@ -334,7 +429,7 @@ export default function DashboardPage() {
             <DialogHeader>
               <DialogTitle>Create a New Vision</DialogTitle>
               <DialogDescription>
-                Define your future. We'll architect the path.
+                Define your future. We&apos;ll architect the path.
               </DialogDescription>
             </DialogHeader>
             <div className="max-h-[80vh] overflow-y-auto p-1">
@@ -367,7 +462,42 @@ export default function DashboardPage() {
           </AlertDialogContent>
         </AlertDialog>
         <JournalDialog open={isJournalOpen} onOpenChange={setJournalOpen} />
+        <NightlyReviewDialog open={isNightlyReviewOpen} onOpenChange={setNightlyReviewOpen} />
+        <DecisionDialog
+          open={isDecisionOpen}
+          onOpenChange={setDecisionOpen}
+          activeVisions={visions?.map(v => v.title) || []}
+        />
+        <FutureLetterModal
+          open={isFutureLetterOpen}
+          onOpenChange={setFutureLetterOpen}
+          letter={futureLetter}
+          isLoading={isGeneratingLetter}
+          onGenerate={handleGenerateLetter}
+        />
+        <CrossingCelebration
+          progress={completedRoadmap ? 100 : 0}
+          roadmapTitle={completedRoadmap?.visionTitle || ""}
+          onClose={() => setCompletedRoadmap(null)}
+        />
+        <WeeklyRetroDialog
+          open={isWeeklyRetroOpen}
+          onOpenChange={setWeeklyRetroOpen}
+        />
       </main>
     </>
   );
+}
+
+// Add this helper function at the top or inside the component
+function calculateOverallProgress(roadmap: Roadmap): number {
+  const allItems = [
+    ...(roadmap.dailyHabits || []),
+    ...(roadmap.weeklyTactics || []),
+    ...(roadmap.monthlySprints || []),
+    ...(roadmap.yearlyMilestones || []),
+  ];
+  if (allItems.length === 0) return 0;
+  const completedItems = allItems.filter(item => item.completed).length;
+  return (completedItems / allItems.length) * 100;
 }

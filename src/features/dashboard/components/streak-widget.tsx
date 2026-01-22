@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Flame, CheckCircle2, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BridgeVisualizer } from "@/features/roadmaps/components/bridge-visualizer";
 
 interface StreakWidgetProps {
     currentStreak: number;
@@ -13,7 +13,6 @@ interface StreakWidgetProps {
 
 export function StreakWidget({
     currentStreak,
-    longestStreak,
     completedToday,
     totalHabits,
     className
@@ -50,11 +49,11 @@ export function StreakWidget({
                         <div className="flex justify-between items-end mb-2">
                             <div>
                                 <h3 className="font-semibold text-lg flex items-center gap-2">
-                                    Today's Bridge
+                                    Today&apos;s Bridge
                                     {progress === 100 && <CheckCircle2 className="w-5 h-5 text-green-500" />}
                                 </h3>
                                 <p className="text-sm text-muted-foreground">
-                                    {completedToday} of {totalHabits} habits completed
+                                    {completedToday} of {totalHabits} planks laid
                                 </p>
                             </div>
                             <div className="text-right">
@@ -62,9 +61,9 @@ export function StreakWidget({
                             </div>
                         </div>
 
-                        <Progress value={progress} className="h-2.5" indicatorClassName={cn(
-                            progress === 100 ? "bg-green-500" : "bg-primary"
-                        )} />
+                        <div className="relative pt-2 pb-4">
+                            <BridgeVisualizer progress={progress} totalPlanks={Math.max(totalHabits, 5)} className="h-16" />
+                        </div>
 
                         {progress === 100 && (
                             <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-medium flex items-center gap-1">

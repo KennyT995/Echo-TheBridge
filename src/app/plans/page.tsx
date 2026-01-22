@@ -57,7 +57,9 @@ const defaultPlans: PlanTier[] = [
   },
 ];
 
-async function seedDefaultPlans(db: any) {
+import { Firestore } from 'firebase/firestore';
+
+async function seedDefaultPlans(db: Firestore) {
   const plansRef = collection(db, 'plan_tiers');
   // Check if plans already exist to avoid overwriting
   const snapshot = await getDoc(doc(plansRef, defaultPlans[0].id));
@@ -197,7 +199,7 @@ export default function PlansPage() {
       });
       const { url } = await response.json();
       window.location.assign(url);
-    } catch (error: any) {
+    } catch {
       toast({
         variant: "destructive",
         title: "Error",

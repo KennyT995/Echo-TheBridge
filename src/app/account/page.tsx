@@ -19,7 +19,6 @@ import { Loader2 } from 'lucide-react';
 
 const profileFormSchema = z.object({
   displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }).max(50, { message: 'Name must not be longer than 50 characters.' }),
-  email: z.string().email(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -42,7 +41,6 @@ export default function AccountPage() {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       displayName: '',
-      email: '',
     },
   });
 
@@ -56,7 +54,6 @@ export default function AccountPage() {
     if (userData) {
       form.reset({
         displayName: userData.displayName || '',
-        email: userData.email,
       });
     }
   }, [userData, form]);
@@ -77,7 +74,7 @@ export default function AccountPage() {
   if (isLoading || !userData) {
     return <Loading />;
   }
-  
+
   return (
     <main className="container mx-auto max-w-2xl px-4 py-8 md:py-12">
       <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl mb-8">
@@ -89,6 +86,10 @@ export default function AccountPage() {
           <CardDescription>Manage your account details here.</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="mb-6 rounded-md bg-muted/50 p-3">
+            <p className="text-sm font-medium text-muted-foreground">Email Address</p>
+            <p className="text-sm">{user?.email}</p>
+          </div>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
@@ -104,20 +105,7 @@ export default function AccountPage() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email Address</FormLabel>
-                    <FormControl>
-                      <Input {...field} readOnly disabled />
-                    </FormControl>
-                    <FormDescription>Your email address cannot be changed.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+
               <div className="flex justify-end">
                 <Button type="submit" disabled={isSubmitting || !form.formState.isDirty}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

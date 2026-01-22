@@ -1,5 +1,12 @@
 
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Terms of Service | Echo: The Bridge",
+    description: "The terms and conditions for using Echo: The Bridge."
+};
+
 export default function TermsPage() {
     return (
         <div className="flex flex-col min-h-screen bg-background">
@@ -17,7 +24,7 @@ export default function TermsPage() {
 
                         <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">2. Description of Service</h2>
                         <p className="mb-4">
-                            Echo: The Bridge provides users with AI-generated strategic roadmaps based on user input. You understand and agree that the Service is provided "AS-IS" and that Echo: The Bridge assumes no responsibility for the timeliness, deletion, mis-delivery or failure to store any user communications or personalization settings.
+                            Echo: The Bridge provides users with AI-generated strategic roadmaps based on user input. You understand and agree that the Service is provided &quot;AS-IS&quot; and that Echo: The Bridge assumes no responsibility for the timeliness, deletion, mis-delivery or failure to store any user communications or personalization settings.
                         </p>
 
                         <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">3. Registration</h2>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, Pencil } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
 
 import {
@@ -24,7 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { visionCategories } from '@/features/visions/types';
+import { visionCategories, type VisionCategory } from '@/features/visions/types';
 
 const EditVisionSchema = z.object({
     title: z.string().min(3, 'Title must be at least 3 characters.'),
@@ -62,7 +62,7 @@ export function EditVisionDialog({
         resolver: zodResolver(EditVisionSchema),
         defaultValues: {
             title: initialTitle,
-            category: initialCategory as any,
+            category: initialCategory as VisionCategory,
         },
     });
 

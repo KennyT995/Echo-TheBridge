@@ -28,8 +28,8 @@ export function calculateStreak(history: RoadmapHistoryItem[] = []): StreakResul
     const uniqueDates = Array.from(new Set(habitHistory.map(item => {
         // Handle both Firestore Timestamp and Date strings/objects
         let date: Date;
-        if (item.completedAt && typeof item.completedAt.toDate === 'function') {
-            date = item.completedAt.toDate();
+        if (item.completedAt && typeof (item.completedAt as any).toDate === 'function') {
+            date = (item.completedAt as any).toDate();
         } else if (item.completedAt instanceof Date) {
             date = item.completedAt;
         } else {

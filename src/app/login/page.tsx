@@ -75,7 +75,7 @@ export default function LoginPage() {
 
     // Map Firebase error codes if possible
     if (typeof error === 'object' && error !== null && 'code' in error) {
-      const code = (error as any).code;
+      const code = (error as { code: string }).code;
       switch (code) {
         case 'auth/wrong-password':
         case 'auth/invalid-credential':

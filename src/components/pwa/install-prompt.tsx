@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Share, Menu, MoreVertical } from 'lucide-react';
+import { Download, Share, MoreVertical } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -19,6 +19,7 @@ export function InstallPrompt() {
     useEffect(() => {
         // Check if already installed
         if (window.matchMedia('(display-mode: standalone)').matches) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsStandalone(true);
         }
 

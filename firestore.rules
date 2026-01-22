@@ -87,6 +87,7 @@ service cloud.firestore {
         allow delete: if isOwner(userId);
       }
 
+
       // Roadmaps Subcollection
       match /roadmaps/{roadmapId} {
         allow get: if isOwner(userId) || (get(/databases/$(database)/documents/users/$(userId)/visions/$(roadmapId)).data.isPublic == true);
@@ -94,6 +95,19 @@ service cloud.firestore {
         allow create: if isOwner(userId) && incomingRoadmapDataIsValid(userId, roadmapId);
         allow update: if isOwner(userId) && request.resource.data.id == resource.data.id && request.resource.data.userId == resource.data.userId && request.resource.data.visionId == resource.data.visionId;
         allow delete: if isOwner(userId);
+      }
+
+      // New Feature Collections
+      match /daily_plans/{planId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      match /daily_logs/{logId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      match /decision_journal/{decisionId} {
+        allow read, write: if isOwner(userId);
       }
     }
 

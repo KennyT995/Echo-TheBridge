@@ -19,9 +19,9 @@ export async function POST(request: Request) {
 
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-  } catch (error: any) {
-    console.error(`Webhook signature verification failed: ${error.message}`);
-    return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+  } catch (error: unknown) {
+    console.error(`Webhook signature verification failed: ${(error as Error).message}`);
+    return new NextResponse(`Webhook Error: ${(error as Error).message}`, { status: 400 });
   }
 
   const session = event.data.object as Stripe.Checkout.Session;
@@ -78,7 +78,7 @@ async function updateUserSubscription(userId: string, subscriptionId: string, cu
     }
   }
 
-  const subscriptionData: any = {
+  const subscriptionData = {
     stripeCustomerId: customerId,
     stripeSubscriptionId: isDeleted ? null : subscriptionId,
     stripePriceId: isDeleted ? null : priceId,

@@ -6,15 +6,15 @@ import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import Loading from '@/app/loading';
 
 import { doc } from 'firebase/firestore';
-import type { Vision, Roadmap, PlanTier, UserData, RoadmapItem, RoadmapSectionKey, VisionFormValues } from '@/lib/types';
-import { RoadmapDisplay } from '@/features/roadmaps/components/roadmap-display';
+import { Loader2, Wand2, Trash2, Share2, Copy, RefreshCw, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Wand2, Trash2, Share2, Copy, RefreshCw, Pencil } from 'lucide-react';
 import { EditVisionDialog } from '@/features/visions/components/edit-vision-dialog';
 import { getReflection, generateRoadmap } from '@/app/actions';
 import type { GenerateRoadmapFromVisionInput } from '@/ai/flows/generate-roadmap-from-vision';
 import { RoadmapSelectionDialog } from '@/features/roadmaps/components/roadmap-selection-dialog';
+import { RoadmapDisplay } from '@/features/roadmaps/components/roadmap-display';
+import { Vision, Roadmap, UserData, PlanTier, RoadmapSectionKey, VisionFormValues } from '@/lib/types';
 import { FutureSelfChat } from '@/features/visions/components/future-self-chat';
 import { Card, CardContent, CardHeader, CardDescription, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -44,7 +44,6 @@ import { Input } from '@/components/ui/input';
 import { deleteDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Progress } from '@/components/ui/progress';
 
 
 function usePlan(userData: UserData | null | undefined) {
@@ -274,22 +273,7 @@ export default function VisionDetailPage() {
     toast({ title: 'Copied!', description: 'Share link copied to clipboard.' });
   };
 
-  const calculateOverallProgress = (roadmap: Roadmap): number => {
-    const allItems: RoadmapItem[] = [
-      ...(roadmap.visionTimeline || []),
-      ...(roadmap.yearlyMilestones || []),
-      ...(roadmap.monthlySprints || []),
-      ...(roadmap.weeklyTactics || []),
-      ...(roadmap.dailyHabits || []),
-    ];
 
-    if (allItems.length === 0) {
-      return 0;
-    }
-
-    const completedItems = allItems.filter(item => item.completed).length;
-    return (completedItems / allItems.length) * 100;
-  };
 
   const isLoading = isUserLoading || isVisionLoading || isRoadmapLoading || isUserDataLoading || isPlanLoading;
 
@@ -321,7 +305,7 @@ export default function VisionDetailPage() {
     );
   }
 
-  const overallProgress = calculateOverallProgress(roadmap);
+
 
   return (
     <>
@@ -363,7 +347,7 @@ export default function VisionDetailPage() {
                   </AlertDialogHeader>
 
                   <div className="py-2 space-y-4">
-                    <Label htmlFor="delete-confirm">To confirm, type: <span className="font-mono text-primary/90">"{deleteConfirmationPhrase}"</span></Label>
+                    <Label htmlFor="delete-confirm">To confirm, type: <span className="font-mono text-primary/90">&quot;{deleteConfirmationPhrase}&quot;</span></Label>
                     <Input
                       id="delete-confirm"
                       value={deleteConfirmationInput}
@@ -390,13 +374,7 @@ export default function VisionDetailPage() {
 
           <p className="text-lg text-muted-foreground max-w-3xl mb-6">{vision.goal}</p>
 
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <span className="text-sm font-medium text-muted-foreground">Overall Vision Progress</span>
-              <span className="text-sm font-bold text-primary">{Math.round(overallProgress)}%</span>
-            </div>
-            <Progress value={overallProgress} className="h-3 w-full" />
-          </div>
+
 
         </div>
 

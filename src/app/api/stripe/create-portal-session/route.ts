@@ -11,7 +11,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
-async function getUserIdFromRequest(request: Request): Promise<string | null> {
+async function getUserIdFromRequest(): Promise<string | null> {
     const headerList = await headers();
     const authHeader = headerList.get('Authorization');
     if (authHeader) {
@@ -29,9 +29,9 @@ async function getUserIdFromRequest(request: Request): Promise<string | null> {
     return null;
 }
 
-export async function POST(request: Request) {
+export async function POST() {
     try {
-        const userId = await getUserIdFromRequest(request);
+        const userId = await getUserIdFromRequest();
 
         if (!userId) {
             return new NextResponse(JSON.stringify({ error: { message: 'Unauthorized' } }), { status: 401 });
@@ -51,8 +51,8 @@ export async function POST(request: Request) {
 
         return new NextResponse(JSON.stringify({ url: portalSession.url }), { status: 200 });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Stripe Portal Session Error:', error);
-        return new NextResponse(JSON.stringify({ error: { message: error.message } }), { status: 500 });
+        return new NextResponse(JSON.stringify({ error: { message: (error as Error).message } }), { status: 500 });
     }
 }

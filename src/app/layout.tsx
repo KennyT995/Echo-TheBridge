@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from "@/components/ui/toaster";
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { FocusAnchorProvider } from "@/features/focus/context/focus-context";
 import Footer from '@/components/layout/footer';
 import Header from '@/components/layout/header';
 import { inter, spaceGrotesk } from '@/app/lib/fonts';
@@ -9,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://echo-the-bridge.com'),
   title: 'Echo: The Bridge',
   description: 'Bridge the gap between long-term vision and daily action.',
   openGraph: {
@@ -65,12 +66,14 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <FirebaseClientProvider>
-            <div className="flex flex-col min-h-screen w-full">
-              <Header />
-              <main className="flex-1 flex flex-col">{children}</main>
-              <Footer />
-            </div>
-            <Toaster />
+            <FocusAnchorProvider>
+              <div className="flex flex-col min-h-screen w-full">
+                <Header />
+                <main className="flex-1 flex flex-col">{children}</main>
+                <Footer />
+              </div>
+              <Toaster />
+            </FocusAnchorProvider>
           </FirebaseClientProvider>
         </ThemeProvider>
       </body>

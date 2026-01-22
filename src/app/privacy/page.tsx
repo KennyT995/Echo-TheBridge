@@ -1,5 +1,12 @@
 
 
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Privacy Policy | Echo: The Bridge",
+    description: "How Echo: The Bridge collects, uses, and protects your personal data."
+};
+
 export default function PrivacyPage() {
     return (
         <div className="flex flex-col min-h-screen bg-background">

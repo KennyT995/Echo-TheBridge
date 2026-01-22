@@ -11,7 +11,6 @@ import {
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { useMemo } from 'react';
 
 /** Utility type to add an 'id' field to a given type T. */
 export type WithId<T> = T & { id: string };
@@ -37,7 +36,7 @@ export interface UseCollectionResult<T> {
  * The Firestore CollectionReference or Query. Waits if null/undefined.
  * @returns {UseCollectionResult<T>} Object with data, isLoading, error.
  */
-export function useCollection<T = any>(
+export function useCollection<T = DocumentData>(
   targetRefOrQuery:
     | CollectionReference<DocumentData>
     | Query<DocumentData>
@@ -74,14 +73,17 @@ export function useCollection<T = any>(
         setError(null);
         setIsLoading(false);
       },
-      (err: FirestoreError) => {
-        let path: string;
+      () => {
+        let path: string = 'unknown';
         if (targetRefOrQuery.type === 'collection') {
           path = (targetRefOrQuery as CollectionReference).path;
         } else {
-          // This is a simplified way to get a query's path.
-          // In a real-world complex app, you might need a more robust method.
-          path = (targetRefOrQuery as any)._query.path.segments.join('/');
+          // Attempt to extract path from internal query object safely
+          // _query is internal API, so we guard against it
+          const query = targetRefOrQuery as unknown as { _query?: { path?: { segments?: string[] } } };
+          if (query._query?.path?.segments) {
+            path = query._query.path.segments.join('/');
+          }
         }
 
         const contextualError = new FirestorePermissionError({

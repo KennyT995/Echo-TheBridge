@@ -29,7 +29,7 @@ const createUserProfile = async (userCredential: UserCredential) => {
     displayName: displayName,
     planTierId: 'trailblazer', // Default plan
   };
-  
+
   // This is a critical step, so we await it and let errors propagate.
   await setDoc(userRef, userData);
 };
@@ -42,7 +42,7 @@ export async function signUpWithEmail(auth: Auth, email: string, password: strin
   const userCredential = await createUserWithEmailAndPassword(auth, email, password);
   try {
     await createUserProfile(userCredential);
-  } catch (profileError) {
+  } catch {
     // If profile creation fails, delete the auth user to clean up.
     try {
       await userCredential.user.delete();

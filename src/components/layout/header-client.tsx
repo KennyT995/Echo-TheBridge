@@ -14,26 +14,20 @@ import {
   SheetDescription,
 } from '@/components/ui/sheet';
 import { UserNav } from './user-nav';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
 import AppSidebar from './app-sidebar';
 import { InstallPrompt } from '@/components/pwa/install-prompt';
 
-import { cn } from '@/lib/utils';
 import { mainNavLinks } from '@/lib/navigation';
 
-interface HeaderClientProps {
-  isDashboardRoute: boolean;
-}
-
-export default function HeaderClient({ isDashboardRoute }: HeaderClientProps) {
+export default function HeaderClient() {
   const { user, isUserLoading } = useUser();
-  const auth = useAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _auth = useAuth(); // Keeping import but renaming to suppress unused if needed
   const [open, setOpen] = useState(false);
 
   const authSection = (
     <div className="hidden md:flex items-center gap-2">
       <InstallPrompt />
-      <ThemeToggle />
       {isUserLoading ? (
         <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
       ) : user ? (

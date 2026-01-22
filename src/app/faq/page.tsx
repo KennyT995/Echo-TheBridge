@@ -5,6 +5,12 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+    title: "Frequently Asked Questions | Echo: The Bridge",
+    description: "Common questions about Echo: The Bridge features, pricing, and AI technology."
+};
 
 const faqs = [
     {

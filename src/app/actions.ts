@@ -169,3 +169,27 @@ export async function getFutureSelfChat(input: GenerateFutureSelfChatInput): Pro
     return { error: 'Failed to connect to your future self.' };
   }
 }
+
+import { analyzeDecisionAlignment, AnalyzeDecisionAlignmentInput, AnalyzeDecisionAlignmentOutput } from '@/ai/flows/analyze-decision-alignment';
+
+export async function checkDecisionAlignment(input: AnalyzeDecisionAlignmentInput): Promise<{ result?: AnalyzeDecisionAlignmentOutput; error?: string }> {
+  try {
+    const result = await analyzeDecisionAlignment(input);
+    return { result };
+  } catch (error) {
+    console.error('Decision alignment check failed:', error);
+    return { error: 'Failed to analyze decision alignment.' };
+  }
+}
+
+import { generateFutureLetter, GenerateFutureLetterInput, GenerateFutureLetterOutput } from '@/ai/flows/generate-future-letter';
+
+export async function checkFutureLetter(input: GenerateFutureLetterInput): Promise<{ result?: GenerateFutureLetterOutput; error?: string }> {
+  try {
+    const result = await generateFutureLetter(input);
+    return { result };
+  } catch (error) {
+    console.error('Future letter generation failed:', error);
+    return { error: 'Failed to receive letter from the future.' };
+  }
+}

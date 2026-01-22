@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export const WeeklySummaryEmail = (props: any) => {
+export const WeeklySummaryEmail = () => {
     return (
         <div>
             <h1>Weekly Summary Email</h1>

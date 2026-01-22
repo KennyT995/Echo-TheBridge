@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -21,7 +21,7 @@ interface RoadmapSelectionDialogProps {
     onConfirm: (selectedRoadmap: Roadmap) => void;
 }
 
-type SelectionState = Record<string, boolean>;
+
 
 export function RoadmapSelectionDialog({
     isOpen,
@@ -29,29 +29,49 @@ export function RoadmapSelectionDialog({
     proposedRoadmap,
     onConfirm,
 }: RoadmapSelectionDialogProps) {
-    const [selections, setSelections] = useState<SelectionState>({});
+    // Store user overrides: true = checked, false = unchecked, undefined = default (checked)
+    const [userOverrides, setUserOverrides] = useState<Record<string, boolean>>({});
 
-    // Initialize selections when prop changes
-    useEffect(() => {
-        if (proposedRoadmap) {
-            const initial: SelectionState = {};
-            const sections = ['visionTimeline', 'dailyHabits', 'weeklyTactics', 'monthlySprints', 'yearlyMilestones'] as const;
+    // Reset overrides when roadmap changes (effectively a new session)
+    // We can use a key on the parent, but since we are inside, we can just clear overrides if ID changes?
+    // For now, simpler: just rely on the user manually unchecking things.
+    // If we want to strictly reset when `proposedRoadmap` object changes reference:
+    /*
+    const [prevRoadmap, setPrevRoadmap] = useState(proposedRoadmap);
+    if (proposedRoadmap !== prevRoadmap) {
+        setPrevRoadmap(proposedRoadmap);
+        setUserOverrides({});
+    }
+    */
+    // Actually, the useEffect pattern is fine if we suppress strict mode warning, 
+    // BUT the derived state pattern is better.
+    // Let's stick to the simplest fix for the lint:
+    // Just initialize state with the values, and use key={proposedRoadmap.id} in the parent if possible.
+    // Since I can't touch parent easily, I'll use the "state from props" pattern with an effect but ensure it's clean.
+    // Actually, the lint error was "Calling setState synchronously within an effect".
+    // I'll assume the previous code was doing it synchronously because of missing dependency or something?
+    // No, it was just inside useEffect.
 
-            sections.forEach((key) => {
-                const items = proposedRoadmap[key];
-                if (items) {
-                    items.forEach((item, index) => {
-                        initial[`${key}-${index}`] = true; // All selected by default
-                    });
-                }
-            });
-            setSelections(initial);
-        }
-    }, [proposedRoadmap]);
+    // Alternative: Use a key on the Dialog content content? No.
+
+    // Let's implement the "userOverrides" pattern.
+    // Default is ALL selected.
 
     const toggleSelection = (key: string, index: number) => {
         const id = `${key}-${index}`;
-        setSelections((prev) => ({ ...prev, [id]: !prev[id] }));
+        setUserOverrides((prev) => {
+            // If currently true (default), setting to false.
+            // If currently false (overridden), setting to true (default).
+            // We can just toggle boolean.
+            const isSelected = prev[id] !== false; // Default is true
+            return { ...prev, [id]: !isSelected };
+        });
+    };
+
+    const isSelected = (key: string, index: number) => {
+        const id = `${key}-${index}`;
+        // Default true, unless overridden to false
+        return userOverrides[id] !== false;
     };
 
     const handleConfirm = () => {
@@ -70,7 +90,7 @@ export function RoadmapSelectionDialog({
     const filterSection = (key: keyof Roadmap): RoadmapItem[] => {
         const items = proposedRoadmap[key] as RoadmapItem[];
         if (!items) return [];
-        return items.filter((_, index) => !!selections[`${key}-${index}`]);
+        return items.filter((_, index) => isSelected(key as string, index));
     };
 
     const sections = [
@@ -81,13 +101,22 @@ export function RoadmapSelectionDialog({
         { key: 'yearlyMilestones', label: 'Yearly Milestones', icon: GanttChartSquare },
     ] as const;
 
+    // Clear overrides when dialog closes or opens?
+    // Better to clear when `proposedRoadmap` changes.
+    // We can use the stash-state pattern.
+    const [prevRoadmapRef, setPrevRoadmapRef] = useState(proposedRoadmap);
+    if (proposedRoadmap !== prevRoadmapRef) {
+        setPrevRoadmapRef(proposedRoadmap);
+        setUserOverrides({});
+    }
+
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Review Your Roadmap</DialogTitle>
                     <DialogDescription>
-                        Select the tasks you want to keep. Uncheck any that don't fit your vision.
+                        Select the tasks you want to keep. Uncheck any that don&apos;t fit your vision.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -108,17 +137,17 @@ export function RoadmapSelectionDialog({
                                     <div className="space-y-2">
                                         {(proposedRoadmap[section.key] as RoadmapItem[]).map((item, index) => {
                                             const id = `${section.key}-${index}`;
-                                            const isSelected = !!selections[id];
+                                            const selected = isSelected(section.key, index);
                                             return (
                                                 <div key={index} className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
                                                     <Checkbox
                                                         id={id}
-                                                        checked={isSelected}
+                                                        checked={selected}
                                                         onCheckedChange={() => toggleSelection(section.key, index)}
                                                     />
                                                     <label
                                                         htmlFor={id}
-                                                        className={`text-sm cursor-pointer leading-tight ${isSelected ? 'text-foreground' : 'text-muted-foreground line-through opacity-70'}`}
+                                                        className={`text-sm cursor-pointer leading-tight ${selected ? 'text-foreground' : 'text-muted-foreground line-through opacity-70'}`}
                                                     >
                                                         {item.text}
                                                     </label>

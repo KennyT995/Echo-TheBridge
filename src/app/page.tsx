@@ -3,6 +3,12 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Rocket, Target, BrainCircuit } from 'lucide-react';
 import placeholderData from '@/app/lib/placeholder-images.json';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: "Echo: The Bridge - Turn Long-Term Vision into Daily Action",
+  description: "Stop dreaming, start doing. Echo: The Bridge translates your long-term goals into a dynamic, AI-powered action plan."
+};
 
 const featureData = [
   {
@@ -95,7 +101,7 @@ export default function HomePage() {
               Find the Perfect Plan
             </h2>
             <p className="mt-4 max-w-xl mx-auto text-lg text-muted-foreground">
-              Whether you're just starting out or ready to build a lasting legacy, we have a plan for you.
+              Whether you&apos;re just starting out or ready to build a lasting legacy, we have a plan for you.
             </p>
             <Button asChild size="lg" className="mt-8 font-bold" variant="outline">
               <Link href="/plans">View Plans</Link>

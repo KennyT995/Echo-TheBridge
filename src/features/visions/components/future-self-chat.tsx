@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Sparkles, User, Loader2, MessageSquare, X } from "lucide-react";
+import { Send, Sparkles, User, Loader2, X } from "lucide-react";
 import { getFutureSelfChat } from "@/app/actions";
 import { cn } from "@/lib/utils";
 
@@ -79,7 +79,7 @@ export function FutureSelfChat({ userName, visionTitle, visionGoal, className }:
                             <Sparkles className="w-4 h-4" /> Future {userName?.split(' ')[0] || 'You'}
                         </CardTitle>
                         <CardDescription className="text-xs">
-                            Speaking from a future where "{visionTitle}" is reality.
+                            Speaking from a future where &quot;{visionTitle}&quot; is reality.
                         </CardDescription>
                     </div>
                     <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 -mt-2" onClick={() => setIsOpen(false)} aria-label="Close chat">
@@ -94,14 +94,14 @@ export function FutureSelfChat({ userName, visionTitle, visionGoal, className }:
                         <div className="text-center text-muted-foreground mt-20 px-6">
                             <Sparkles className="w-12 h-12 mx-auto mb-4 text-indigo-200" />
                             <p className="text-sm">
-                                I am you, 5 years from now. I know what you're going through, and I know we make it. What's on your mind?
+                                I am you, 5 years from now. I know what you&apos;re going through, and I know we make it. What&apos;s on your mind?
                             </p>
                             <div className="mt-6 space-y-2">
                                 <Button variant="outline" size="sm" className="w-full justify-start text-xs" onClick={() => { setInput("I'm feeling stuck. How did we get past this?"); handleSend(); }}>
-                                    "I'm feeling stuck..."
+                                    &quot;I&apos;m feeling stuck...&quot;
                                 </Button>
                                 <Button variant="outline" size="sm" className="w-full justify-start text-xs" onClick={() => { setInput("Is all this effort really worth it?"); handleSend(); }}>
-                                    "Is it worth it?"
+                                    &quot;Is it worth it?&quot;
                                 </Button>
                             </div>
                         </div>

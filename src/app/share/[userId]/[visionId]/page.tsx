@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { doc, getDoc, getDocs, collection, query, where, limit } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import { Vision, Roadmap } from '@/lib/types';
 import Loading from '@/app/loading';
@@ -46,11 +46,12 @@ export default function SharePage() {
                 if (roadmapSnap.exists()) {
                     setRoadmap(roadmapSnap.data() as Roadmap);
                 }
-                
+
                 setError(null);
-            } catch (e: any) {
+            } catch (e: unknown) {
                 console.error(e);
-                setError(e.message || "Failed to fetch vision data. The link may be incorrect or the vision may no longer be public.");
+                const errorMessage = e instanceof Error ? e.message : "An unknown error occurred";
+                setError(errorMessage || "Failed to fetch vision data. The link may be incorrect or the vision may no longer be public.");
             } finally {
                 setIsLoading(false);
             }
@@ -72,7 +73,7 @@ export default function SharePage() {
                 </CardHeader>
                 <CardContent className="text-center space-y-6">
                     {error ? (
-                         <Alert variant="destructive">
+                        <Alert variant="destructive">
                             <ShieldAlert className="h-4 w-4" />
                             <AlertTitle>Could Not Load Vision</AlertTitle>
                             <AlertDescription>{error}</AlertDescription>
@@ -97,7 +98,7 @@ export default function SharePage() {
                         </>
                     ) : null}
                     <div className="pt-6">
-                         <Button asChild>
+                        <Button asChild>
                             <Link href="/">Create Your Own Vision with Echo: The Bridge</Link>
                         </Button>
                     </div>

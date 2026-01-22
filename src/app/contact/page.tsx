@@ -36,7 +36,7 @@ export default function ContactPage() {
                             Get in Touch
                         </h1>
                         <p className="text-xl text-muted-foreground">
-                            Have questions about your roadmap? Want to partner with us? We'd love to hear from you.
+                            Have questions about your roadmap? Want to partner with us? We&apos;d love to hear from you.
                         </p>
                     </div>
 
