@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Query,
   onSnapshot,
@@ -8,9 +8,9 @@ import {
   FirestoreError,
   QuerySnapshot,
   CollectionReference,
-} from 'firebase/firestore';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
+} from "firebase/firestore";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 /** Utility type to add an 'id' field to a given type T. */
 export type WithId<T> = T & { id: string };
@@ -21,7 +21,7 @@ export type WithId<T> = T & { id: string };
  */
 export interface UseCollectionResult<T> {
   data: WithId<T>[] | null; // Document data with ID, or null.
-  isLoading: boolean;       // True if loading.
+  isLoading: boolean; // True if loading.
   error: FirestoreError | Error | null; // Error object, or null.
 }
 
@@ -41,7 +41,7 @@ export function useCollection<T = DocumentData>(
     | CollectionReference<DocumentData>
     | Query<DocumentData>
     | null
-    | undefined
+    | undefined,
 ): UseCollectionResult<T> {
   type ResultItemType = WithId<T>;
   type StateDataType = ResultItemType[] | null;
@@ -65,7 +65,7 @@ export function useCollection<T = DocumentData>(
     const unsubscribe = onSnapshot(
       targetRefOrQuery,
       (snapshot: QuerySnapshot<DocumentData>) => {
-        const results: ResultItemType[] = snapshot.docs.map(doc => ({
+        const results: ResultItemType[] = snapshot.docs.map((doc) => ({
           ...(doc.data() as T),
           id: doc.id,
         }));
@@ -74,20 +74,22 @@ export function useCollection<T = DocumentData>(
         setIsLoading(false);
       },
       () => {
-        let path: string = 'unknown';
-        if (targetRefOrQuery.type === 'collection') {
+        let path: string = "unknown";
+        if (targetRefOrQuery.type === "collection") {
           path = (targetRefOrQuery as CollectionReference).path;
         } else {
           // Attempt to extract path from internal query object safely
           // _query is internal API, so we guard against it
-          const query = targetRefOrQuery as unknown as { _query?: { path?: { segments?: string[] } } };
+          const query = targetRefOrQuery as unknown as {
+            _query?: { path?: { segments?: string[] } };
+          };
           if (query._query?.path?.segments) {
-            path = query._query.path.segments.join('/');
+            path = query._query.path.segments.join("/");
           }
         }
 
         const contextualError = new FirestorePermissionError({
-          operation: 'list',
+          operation: "list",
           path,
         });
 
@@ -95,8 +97,8 @@ export function useCollection<T = DocumentData>(
         setData(null);
         setIsLoading(false);
 
-        errorEmitter.emit('permission-error', contextualError);
-      }
+        errorEmitter.emit("permission-error", contextualError);
+      },
     );
 
     return () => unsubscribe();

@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 /**
  * @fileOverview Generates a roadmap from a single, user-defined goal.
@@ -8,43 +8,86 @@
  * - GenerateRoadmapFromVisionOutput - The return type for the generateRoadmapFromVision function.
  */
 
-import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import { ai } from "@/ai/genkit";
+import { z } from "zod";
 
 const GenerateRoadmapFromVisionInputSchema = z.object({
-  title: z.string().optional().default(''),
+  title: z.string().optional().default(""),
   goal: z.string().describe("The user's primary goal or vision."),
-  timelineFocus: z.string().optional().describe("User's specific focus for the overall vision timeline."),
-  yearlyFocus: z.string().optional().describe("User's specific focus for yearly milestones."),
-  monthlyFocus: z.string().optional().describe("User's specific focus for monthly sprints."),
-  weeklyFocus: z.string().optional().describe("User's specific focus for weekly tactics."),
-  dailyFocus: z.string().optional().describe("User's specific focus for daily habits."),
-  completedTasks: z.array(z.string()).optional().describe("A list of tasks the user has already completed."),
+  timelineFocus: z
+    .string()
+    .optional()
+    .describe("User's specific focus for the overall vision timeline."),
+  yearlyFocus: z
+    .string()
+    .optional()
+    .describe("User's specific focus for yearly milestones."),
+  monthlyFocus: z
+    .string()
+    .optional()
+    .describe("User's specific focus for monthly sprints."),
+  weeklyFocus: z
+    .string()
+    .optional()
+    .describe("User's specific focus for weekly tactics."),
+  dailyFocus: z
+    .string()
+    .optional()
+    .describe("User's specific focus for daily habits."),
+  completedTasks: z
+    .array(z.string())
+    .optional()
+    .describe("A list of tasks the user has already completed."),
 });
-export type GenerateRoadmapFromVisionInput = z.infer<typeof GenerateRoadmapFromVisionInputSchema>;
+export type GenerateRoadmapFromVisionInput = z.infer<
+  typeof GenerateRoadmapFromVisionInputSchema
+>;
 
 const RoadmapItemSchema = z.object({
   text: z.string().describe("The actionable text for the roadmap item."),
-  completed: z.boolean().default(false).describe("Whether the item is completed. This should always be false by default."),
+  completed: z
+    .boolean()
+    .default(false)
+    .describe(
+      "Whether the item is completed. This should always be false by default.",
+    ),
 });
 
 const RoadmapSchema = z.object({
-  visionTimeline: z.array(RoadmapItemSchema).describe('The chronological phases of the entire journey. (e.g. Phase 1, Phase 2).'),
-  yearlyMilestones: z.array(RoadmapItemSchema).describe('Key achievements to hit this year.'),
-  monthlySprints: z.array(RoadmapItemSchema).describe('Recurring monthly focus areas or themes.'),
-  weeklyTactics: z.array(RoadmapItemSchema).describe('Standard weekly routine or key actions to take every week.'),
-  dailyHabits: z.array(RoadmapItemSchema).describe('Atomic units of action required daily.'),
+  visionTimeline: z
+    .array(RoadmapItemSchema)
+    .describe(
+      "The chronological phases of the entire journey. (e.g. Phase 1, Phase 2).",
+    ),
+  yearlyMilestones: z
+    .array(RoadmapItemSchema)
+    .describe("Key achievements to hit this year."),
+  monthlySprints: z
+    .array(RoadmapItemSchema)
+    .describe("Recurring monthly focus areas or themes."),
+  weeklyTactics: z
+    .array(RoadmapItemSchema)
+    .describe("Standard weekly routine or key actions to take every week."),
+  dailyHabits: z
+    .array(RoadmapItemSchema)
+    .describe("Atomic units of action required daily."),
 });
 
-const GenerateRoadmapFromVisionOutputSchema = RoadmapSchema.describe('A structured roadmap with vision timeline, yearly milestones, monthly sprints, weekly tactics, and daily habits.');
-export type GenerateRoadmapFromVisionOutput = z.infer<typeof GenerateRoadmapFromVisionOutputSchema>;
+const GenerateRoadmapFromVisionOutputSchema = RoadmapSchema.describe(
+  "A structured roadmap with vision timeline, yearly milestones, monthly sprints, weekly tactics, and daily habits.",
+);
+export type GenerateRoadmapFromVisionOutput = z.infer<
+  typeof GenerateRoadmapFromVisionOutputSchema
+>;
 
-export async function generateRoadmapFromVision(input: GenerateRoadmapFromVisionInput): Promise<GenerateRoadmapFromVisionOutput> {
+export async function generateRoadmapFromVision(
+  input: GenerateRoadmapFromVisionInput,
+): Promise<GenerateRoadmapFromVisionOutput> {
   return generateRoadmapFromVisionFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'generateRoadmapFromVisionPrompt',
+  name: "generateRoadmapFromVisionPrompt",
   input: { schema: GenerateRoadmapFromVisionInputSchema },
   output: { schema: GenerateRoadmapFromVisionOutputSchema },
   prompt: `You are a world-class Strategy Architect and Chief Vision Officer, capable of reverse-engineering ambitious dreams into inevitable realities.
@@ -95,15 +138,14 @@ CRITICAL INSTRUCTIONS:
 Return ONLY the raw JSON matching the schema.`,
 });
 
-
 const generateRoadmapFromVisionFlow = ai.defineFlow(
   {
-    name: 'generateRoadmapFromVisionFlow',
+    name: "generateRoadmapFromVisionFlow",
     inputSchema: GenerateRoadmapFromVisionInputSchema,
     outputSchema: GenerateRoadmapFromVisionOutputSchema,
   },
-  async input => {
+  async (input) => {
     const { output } = await prompt(input);
     return output!;
-  }
+  },
 );

@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   DocumentReference,
   onSnapshot,
   DocumentData,
   FirestoreError,
   DocumentSnapshot,
-} from 'firebase/firestore';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
+} from "firebase/firestore";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
 
 /** Utility type to add an 'id' field to a given type T. */
 type WithId<T> = T & { id: string };
@@ -20,7 +20,7 @@ type WithId<T> = T & { id: string };
  */
 export interface UseDocResult<T> {
   data: WithId<T> | null; // Document data with ID, or null.
-  isLoading: boolean;       // True if loading.
+  isLoading: boolean; // True if loading.
   error: FirestoreError | Error | null; // Error object, or null.
 }
 
@@ -73,7 +73,7 @@ export function useDoc<T = DocumentData>(
       },
       () => {
         const contextualError = new FirestorePermissionError({
-          operation: 'get',
+          operation: "get",
           path: docRef.path,
         });
 
@@ -82,8 +82,8 @@ export function useDoc<T = DocumentData>(
         setIsLoading(false);
 
         // trigger global error propagation
-        errorEmitter.emit('permission-error', contextualError);
-      }
+        errorEmitter.emit("permission-error", contextualError);
+      },
     );
 
     return () => unsubscribe();

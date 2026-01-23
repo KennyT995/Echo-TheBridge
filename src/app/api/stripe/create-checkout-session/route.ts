@@ -1,21 +1,20 @@
-
-import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { headers } from 'next/headers';
-import { admin } from '@/firebase/admin';
-import { getAuth } from 'firebase-admin/auth';
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+import { headers } from "next/headers";
+import { admin } from "@/firebase/admin";
+import { getAuth } from "firebase-admin/auth";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
+  apiVersion: "2024-06-20",
 });
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 async function getUserIdFromRequest(): Promise<string | null> {
   const headerList = await headers();
-  const authHeader = headerList.get('Authorization');
+  const authHeader = headerList.get("Authorization");
   if (authHeader) {
-    const idToken = authHeader.split('Bearer ')[1];
+    const idToken = authHeader.split("Bearer ")[1];
     if (idToken) {
       try {
         const decodedToken = await getAuth(admin.app()).verifyIdToken(idToken);
@@ -35,10 +34,13 @@ export async function POST(request: Request) {
     const userId = await getUserIdFromRequest();
 
     if (!userId) {
-      return new NextResponse(JSON.stringify({ error: { message: 'User not authenticated.' } }), { status: 401 });
+      return new NextResponse(
+        JSON.stringify({ error: { message: "User not authenticated." } }),
+        { status: 401 },
+      );
     }
 
-    const userRef = admin.firestore().collection('users').doc(userId);
+    const userRef = admin.firestore().collection("users").doc(userId);
     const userDoc = await userRef.get();
     let customerId = userDoc.data()?.stripeCustomerId;
 
@@ -54,24 +56,30 @@ export async function POST(request: Request) {
     }
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
+      payment_method_types: ["card"],
+      mode: "subscription",
       customer: customerId,
-      line_items: [{
-        price: priceId,
-        quantity: 1,
-      }],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
       success_url: `${appUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/plans`,
       metadata: {
         firebaseUID: userId,
-      }
+      },
     });
 
-    return new NextResponse(JSON.stringify({ sessionId: session.id }), { status: 200 });
-
+    return new NextResponse(JSON.stringify({ sessionId: session.id }), {
+      status: 200,
+    });
   } catch (error: unknown) {
-    console.error('Stripe Checkout Session Error:', error);
-    return new NextResponse(JSON.stringify({ error: { message: (error as Error).message } }), { status: 500 });
+    console.error("Stripe Checkout Session Error:", error);
+    return new NextResponse(
+      JSON.stringify({ error: { message: (error as Error).message } }),
+      { status: 500 },
+    );
   }
 }

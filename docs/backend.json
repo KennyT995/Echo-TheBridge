@@ -24,12 +24,7 @@
           "description": "Reference to the PlanTier. (Relationship: PlanTier 1:N User)"
         }
       },
-      "required": [
-        "id",
-        "email",
-        "displayName",
-        "planTierId"
-      ]
+      "required": ["id", "email", "displayName", "planTierId"]
     },
     "PlanTier": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -110,7 +105,15 @@
           "description": "Timestamp when the vision was created."
         }
       },
-      "required": ["id", "userId", "title", "goal", "category", "isPublic", "createdAt"]
+      "required": [
+        "id",
+        "userId",
+        "title",
+        "goal",
+        "category",
+        "isPublic",
+        "createdAt"
+      ]
     },
     "Roadmap": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -173,13 +176,19 @@
           }
         }
       },
-      "required": ["id", "visionId", "userId", "yearlyMilestones", "monthlySprints", "weeklyTactics", "dailyHabits"]
+      "required": [
+        "id",
+        "visionId",
+        "userId",
+        "yearlyMilestones",
+        "monthlySprints",
+        "weeklyTactics",
+        "dailyHabits"
+      ]
     }
   },
   "auth": {
-    "providers": [
-      "password"
-    ]
+    "providers": ["password"]
   },
   "firestore": {
     "/users/{userId}": {

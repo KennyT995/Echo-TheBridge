@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import { usePathname } from 'next/navigation';
-import Link from 'next/link';
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import {
   useCollection,
   useFirestore,
   useUser,
   useMemoFirebase,
-} from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
-import type { Vision } from '@/lib/types';
+} from "@/firebase";
+import { collection, query, orderBy } from "firebase/firestore";
+import type { Vision } from "@/lib/types";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+} from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,12 +27,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CreditCard, LogOut, User as UserIcon, Rocket } from 'lucide-react';
-import { useAuth } from '@/firebase';
-import { useRouter } from 'next/navigation';
-import { sidebarInfoLinks, sidebarDashboardLinks } from '@/lib/navigation';
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CreditCard, LogOut, User as UserIcon, Rocket } from "lucide-react";
+import { useAuth } from "@/firebase";
+import { useRouter } from "next/navigation";
+import { sidebarInfoLinks, sidebarDashboardLinks } from "@/lib/navigation";
 
 interface AppSidebarProps {
   onLinkClick?: () => void;
@@ -48,15 +48,15 @@ export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
     if (!auth) return;
     if (onLinkClick) onLinkClick();
     await auth.signOut();
-    router.push('/login');
+    router.push("/login");
   };
 
   const firestore = useFirestore();
   const visionsQuery = useMemoFirebase(() => {
     if (!user) return null;
     return query(
-      collection(firestore, 'users', user.uid, 'visions'),
-      orderBy('createdAt', 'desc')
+      collection(firestore, "users", user.uid, "visions"),
+      orderBy("createdAt", "desc"),
     );
   }, [user, firestore]);
 
@@ -88,7 +88,7 @@ export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
             <Button
               key={item.href}
               asChild
-              variant={pathname === item.href ? 'secondary' : 'ghost'}
+              variant={pathname === item.href ? "secondary" : "ghost"}
               className="justify-start gap-2"
             >
               <Link href={item.href} onClick={onLinkClick}>
@@ -128,10 +128,10 @@ export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
                           href={`/vision/${vision.id}`}
                           onClick={onLinkClick}
                           className={cn(
-                            'block text-sm rounded-md p-2 hover:bg-muted',
+                            "block text-sm rounded-md p-2 hover:bg-muted",
                             pathname === `/vision/${vision.id}`
-                              ? 'bg-muted font-semibold'
-                              : ''
+                              ? "bg-muted font-semibold"
+                              : "",
                           )}
                         >
                           {vision.title}
@@ -151,21 +151,39 @@ export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
           <div className="flex flex-col gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="w-full justify-start px-2 gap-2 h-auto py-2">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start px-2 gap-2 h-auto py-2"
+                >
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
-                    <AvatarFallback>{(user.displayName?.[0] || user.email?.[0] || 'U').toUpperCase()}</AvatarFallback>
+                    <AvatarImage
+                      src={user.photoURL || ""}
+                      alt={user.displayName || "User"}
+                    />
+                    <AvatarFallback>
+                      {(
+                        user.displayName?.[0] ||
+                        user.email?.[0] ||
+                        "U"
+                      ).toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col items-start overflow-hidden">
-                    <span className="text-sm font-medium truncate w-full text-left">{user.displayName || 'User'}</span>
-                    <span className="text-xs text-muted-foreground truncate w-full text-left">{user.email}</span>
+                    <span className="text-sm font-medium truncate w-full text-left">
+                      {user.displayName || "User"}
+                    </span>
+                    <span className="text-xs text-muted-foreground truncate w-full text-left">
+                      {user.email}
+                    </span>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{user.displayName || user.email}</p>
+                    <p className="text-sm font-medium leading-none">
+                      {user.displayName || user.email}
+                    </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}
                     </p>
@@ -174,20 +192,31 @@ export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
-                    <Link href="/account" className="w-full cursor-pointer" onClick={onLinkClick}>
+                    <Link
+                      href="/account"
+                      className="w-full cursor-pointer"
+                      onClick={onLinkClick}
+                    >
                       <UserIcon className="mr-2 h-4 w-4" />
                       <span>My Account</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/plans" className="w-full cursor-pointer" onClick={onLinkClick}>
+                    <Link
+                      href="/plans"
+                      className="w-full cursor-pointer"
+                      onClick={onLinkClick}
+                    >
                       <CreditCard className="mr-2 h-4 w-4" />
                       <span>Plans</span>
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600 focus:text-red-600 cursor-pointer">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-red-600 focus:text-red-600 cursor-pointer"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>

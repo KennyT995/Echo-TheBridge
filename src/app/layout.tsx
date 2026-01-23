@@ -1,49 +1,51 @@
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { FocusAnchorProvider } from "@/features/focus/context/focus-context";
-import Footer from '@/components/layout/footer';
-import Header from '@/components/layout/header';
-import { inter, spaceGrotesk } from '@/app/lib/fonts';
-import { cn } from '@/lib/utils';
-import { ThemeProvider } from "@/components/theme-provider"
+import Footer from "@/components/layout/footer";
+import Header from "@/components/layout/header";
+import { inter, spaceGrotesk } from "@/app/lib/fonts";
+import { cn } from "@/lib/utils";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://echo-the-bridge.com'),
-  title: 'Echo: The Bridge',
-  description: 'Bridge the gap between long-term vision and daily action.',
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://echo-the-bridge.com",
+  ),
+  title: "Echo: The Bridge",
+  description: "Bridge the gap between long-term vision and daily action.",
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://echo-the-bridge.com',
-    title: 'Echo: The Bridge',
-    description: 'Bridge the gap between long-term vision and daily action.',
-    siteName: 'Echo: The Bridge',
+    type: "website",
+    locale: "en_US",
+    url: "https://echo-the-bridge.com",
+    title: "Echo: The Bridge",
+    description: "Bridge the gap between long-term vision and daily action.",
+    siteName: "Echo: The Bridge",
     images: [
       {
-        url: '/og-image.jpg',
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: 'Echo: The Bridge',
+        alt: "Echo: The Bridge",
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Echo: The Bridge',
-    description: 'Bridge the gap between long-term vision and daily action.',
-    images: ['/og-image.jpg'],
+    card: "summary_large_image",
+    title: "Echo: The Bridge",
+    description: "Bridge the gap between long-term vision and daily action.",
+    images: ["/og-image.jpg"],
   },
-  manifest: '/manifest.json',
+  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Echo: The Bridge",
   },
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
 

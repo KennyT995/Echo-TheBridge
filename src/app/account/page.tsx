@@ -1,24 +1,40 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
-import { doc } from 'firebase/firestore';
-import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import Loading from '../loading';
-import { UserData } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
+import { doc } from "firebase/firestore";
+import { updateDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Loading from "../loading";
+import { UserData } from "@/lib/types";
+import { Loader2 } from "lucide-react";
 
 const profileFormSchema = z.object({
-  displayName: z.string().min(2, { message: 'Name must be at least 2 characters.' }).max(50, { message: 'Name must not be longer than 50 characters.' }),
+  displayName: z
+    .string()
+    .min(2, { message: "Name must be at least 2 characters." })
+    .max(50, { message: "Name must not be longer than 50 characters." }),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -32,28 +48,29 @@ export default function AccountPage() {
 
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
-    return doc(firestore, 'users', user.uid);
+    return doc(firestore, "users", user.uid);
   }, [user, firestore]);
 
-  const { data: userData, isLoading: isUserDataLoading } = useDoc<UserData>(userDocRef);
+  const { data: userData, isLoading: isUserDataLoading } =
+    useDoc<UserData>(userDocRef);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      displayName: '',
+      displayName: "",
     },
   });
 
   useEffect(() => {
     if (!isUserLoading && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [user, isUserLoading, router]);
 
   useEffect(() => {
     if (userData) {
       form.reset({
-        displayName: userData.displayName || '',
+        displayName: userData.displayName || "",
       });
     }
   }, [userData, form]);
@@ -63,8 +80,8 @@ export default function AccountPage() {
     setIsSubmitting(true);
     updateDocumentNonBlocking(userDocRef, { displayName: data.displayName });
     toast({
-      title: 'Profile Updated',
-      description: 'Your display name has been successfully updated.',
+      title: "Profile Updated",
+      description: "Your display name has been successfully updated.",
     });
     setIsSubmitting(false);
   }
@@ -87,7 +104,9 @@ export default function AccountPage() {
         </CardHeader>
         <CardContent>
           <div className="mb-6 rounded-md bg-muted/50 p-3">
-            <p className="text-sm font-medium text-muted-foreground">Email Address</p>
+            <p className="text-sm font-medium text-muted-foreground">
+              Email Address
+            </p>
             <p className="text-sm">{user?.email}</p>
           </div>
           <Form {...form}>
@@ -107,9 +126,14 @@ export default function AccountPage() {
               />
 
               <div className="flex justify-end">
-                <Button type="submit" disabled={isSubmitting || !form.formState.isDirty}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {form.formState.isDirty ? 'Save Changes' : 'Saved'}
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || !form.formState.isDirty}
+                >
+                  {isSubmitting && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  {form.formState.isDirty ? "Save Changes" : "Saved"}
                 </Button>
               </div>
             </form>

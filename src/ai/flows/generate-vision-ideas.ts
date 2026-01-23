@@ -1,4 +1,4 @@
-'use server';
+"use server";
 /**
  * @fileOverview Generates inspiring vision statements based on user-provided keywords.
  *
@@ -7,29 +7,37 @@
  * - GenerateVisionIdeasOutput - The return type for the generateVisionIdeas function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from "@/ai/genkit";
+import { z } from "genkit";
 
 const GenerateVisionIdeasInputSchema = z.object({
-  keywords: z.string().describe('A comma-separated list of keywords from the user.'),
+  keywords: z
+    .string()
+    .describe("A comma-separated list of keywords from the user."),
 });
-export type GenerateVisionIdeasInput = z.infer<typeof GenerateVisionIdeasInputSchema>;
+export type GenerateVisionIdeasInput = z.infer<
+  typeof GenerateVisionIdeasInputSchema
+>;
 
 const GenerateVisionIdeasOutputSchema = z.object({
-  ideas: z.array(z.string()).describe('An array of three generated vision statements.'),
+  ideas: z
+    .array(z.string())
+    .describe("An array of three generated vision statements."),
 });
-export type GenerateVisionIdeasOutput = z.infer<typeof GenerateVisionIdeasOutputSchema>;
+export type GenerateVisionIdeasOutput = z.infer<
+  typeof GenerateVisionIdeasOutputSchema
+>;
 
 export async function generateVisionIdeas(
-  input: GenerateVisionIdeasInput
+  input: GenerateVisionIdeasInput,
 ): Promise<GenerateVisionIdeasOutput> {
   return generateVisionIdeasFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'generateVisionIdeasPrompt',
-  input: {schema: GenerateVisionIdeasInputSchema},
-  output: {schema: GenerateVisionIdeasOutputSchema},
+  name: "generateVisionIdeasPrompt",
+  input: { schema: GenerateVisionIdeasInputSchema },
+  output: { schema: GenerateVisionIdeasOutputSchema },
   prompt: `You are an expert creative strategist and life coach. Your task is to generate three distinct and inspiring vision statements based on the user's keywords.
 
 Keywords: {{{keywords}}}
@@ -45,12 +53,12 @@ Generate three ideas now.`,
 
 const generateVisionIdeasFlow = ai.defineFlow(
   {
-    name: 'generateVisionIdeasFlow',
+    name: "generateVisionIdeasFlow",
     inputSchema: GenerateVisionIdeasInputSchema,
     outputSchema: GenerateVisionIdeasOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    const { output } = await prompt(input);
     return output!;
-  }
+  },
 );

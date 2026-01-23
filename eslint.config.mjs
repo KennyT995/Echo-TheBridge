@@ -7,12 +7,14 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default defineConfig([{
+export default defineConfig([
+  {
     extends: [...nextCoreWebVitals, ...nextTypescript],
     rules: {
-        "@typescript-eslint/no-explicit-any": "warn",
-        "react-hooks/set-state-in-effect": "warn",
-        "@typescript-eslint/no-unused-vars": "warn",
-        "@typescript-eslint/no-require-imports": "warn"
-    }
-}]);
+      "@typescript-eslint/no-explicit-any": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-require-imports": "warn",
+    },
+  },
+]);

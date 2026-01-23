@@ -1,66 +1,72 @@
-'use client';
+"use client";
 
-import { useCollection, useDoc, useMemoFirebase } from '@/firebase';
-import { useFirestore, useUser } from '@/firebase';
+import { useCollection, useDoc, useMemoFirebase } from "@/firebase";
+import { useFirestore, useUser } from "@/firebase";
 
-import { collection, doc, writeBatch, getDoc } from 'firebase/firestore';
-import { Loader2, Check, ExternalLink } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { getStripe } from '@/lib/stripe';
-import type { PlanTier, UserData } from '@/lib/types';
-import { getErrorMessage } from '@/lib/error-utils';
-
+import { collection, doc, writeBatch, getDoc } from "firebase/firestore";
+import { Loader2, Check, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { getStripe } from "@/lib/stripe";
+import type { PlanTier, UserData } from "@/lib/types";
+import { getErrorMessage } from "@/lib/error-utils";
 
 const defaultPlans: PlanTier[] = [
   {
-    id: 'trailblazer',
-    name: 'Trailblazer',
+    id: "trailblazer",
+    name: "Trailblazer",
     price: 0,
     maxVisions: 1,
     aiFeaturesEnabled: false,
-    features: ['1 Vision', 'Basic Roadmap Generation', 'Community Support'],
-    stripePriceId: null
+    features: ["1 Vision", "Basic Roadmap Generation", "Community Support"],
+    stripePriceId: null,
   },
   {
-    id: 'pathfinder',
-    name: 'Pathfinder',
+    id: "pathfinder",
+    name: "Pathfinder",
     price: 15,
     maxVisions: 5,
     aiFeaturesEnabled: true,
     features: [
-      '5 Visions',
-      'Advanced AI-Powered Roadmap',
-      'AI-Powered Strategic Briefings',
-      'Email Support',
+      "5 Visions",
+      "Advanced AI-Powered Roadmap",
+      "AI-Powered Strategic Briefings",
+      "Email Support",
     ],
-    stripePriceId: 'price_1PXZEkRUD5S9xH2g8aXQY9aZ' // Replace with your actual Stripe Price ID
+    stripePriceId: "price_1PXZEkRUD5S9xH2g8aXQY9aZ", // Replace with your actual Stripe Price ID
   },
   {
-    id: 'visionary',
-    name: 'Visionary',
+    id: "visionary",
+    name: "Visionary",
     price: 45,
     maxVisions: 999, // Effectively unlimited
     aiFeaturesEnabled: true,
     features: [
-      'Unlimited Visions',
-      'Advanced AI-Powered Roadmap',
-      'AI-Powered Strategic Briefings',
-      'Priority Support',
-      'Legacy Planning',
+      "Unlimited Visions",
+      "Advanced AI-Powered Roadmap",
+      "AI-Powered Strategic Briefings",
+      "Priority Support",
+      "Legacy Planning",
     ],
-    stripePriceId: 'price_1PXZFjRUD5S9xH2gX3eZ4w5A' // Replace with your actual Stripe Price ID
+    stripePriceId: "price_1PXZFjRUD5S9xH2gX3eZ4w5A", // Replace with your actual Stripe Price ID
   },
 ];
 
-import { Firestore } from 'firebase/firestore';
+import { Firestore } from "firebase/firestore";
 
 async function seedDefaultPlans(db: Firestore) {
-  const plansRef = collection(db, 'plan_tiers');
+  const plansRef = collection(db, "plan_tiers");
   // Check if plans already exist to avoid overwriting
   const snapshot = await getDoc(doc(plansRef, defaultPlans[0].id));
   if (!snapshot.exists()) {
@@ -70,11 +76,8 @@ async function seedDefaultPlans(db: Firestore) {
       batch.set(docRef, plan);
     });
     await batch.commit();
-
   }
 }
-
-
 
 export default function PlansPage() {
   const firestore = useFirestore();
@@ -86,10 +89,11 @@ export default function PlansPage() {
 
   const plansQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'plan_tiers');
+    return collection(firestore, "plan_tiers");
   }, [firestore]);
 
-  const { data: plans, isLoading: plansLoading } = useCollection<PlanTier>(plansQuery);
+  const { data: plans, isLoading: plansLoading } =
+    useCollection<PlanTier>(plansQuery);
 
   useEffect(() => {
     async function handleSeeding() {
@@ -110,13 +114,13 @@ export default function PlansPage() {
 
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
+    return doc(firestore, "users", user.uid);
   }, [firestore, user]);
   const { data: userData } = useDoc<UserData>(userDocRef);
 
   const handleSelectPlan = async (plan: PlanTier) => {
     if (!user) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
     setIsProcessing(true);
@@ -124,13 +128,19 @@ export default function PlansPage() {
     // Free plan, just update firestore
     if (plan.price === 0 && userDocRef) {
       try {
-        const { setDocumentNonBlocking } = await import('@/firebase/non-blocking-updates');
-        setDocumentNonBlocking(userDocRef, { planTierId: plan.id }, { merge: true });
+        const { setDocumentNonBlocking } =
+          await import("@/firebase/non-blocking-updates");
+        setDocumentNonBlocking(
+          userDocRef,
+          { planTierId: plan.id },
+          { merge: true },
+        );
         toast({
           title: "Plan Updated!",
-          description: "Your plan has been successfully updated to Trailblazer.",
+          description:
+            "Your plan has been successfully updated to Trailblazer.",
         });
-        router.push('/dashboard');
+        router.push("/dashboard");
       } catch (error) {
         console.error("Error updating to free plan: ", error);
         toast({
@@ -147,11 +157,11 @@ export default function PlansPage() {
     // Paid plan, create checkout session
     try {
       const idToken = await user.getIdToken();
-      const response = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
+      const response = await fetch("/api/stripe/create-checkout-session", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           priceId: plan.stripePriceId,
@@ -161,7 +171,7 @@ export default function PlansPage() {
 
       if (!response.ok) {
         const { error } = await response.json();
-        throw new Error(error.message || 'Failed to create checkout session.');
+        throw new Error(error.message || "Failed to create checkout session.");
       }
 
       const { sessionId } = await response.json();
@@ -172,14 +182,14 @@ export default function PlansPage() {
           throw error;
         }
       } else {
-        throw new Error('Stripe.js is not loaded.');
+        throw new Error("Stripe.js is not loaded.");
       }
     } catch (error: unknown) {
-      console.error('Error handling subscription:', error);
+      console.error("Error handling subscription:", error);
       toast({
         title: "Subscription Error",
         description: getErrorMessage(error),
-        variant: "destructive"
+        variant: "destructive",
       });
       setIsProcessing(false);
     }
@@ -191,10 +201,10 @@ export default function PlansPage() {
     setIsProcessing(true);
     try {
       const idToken = await user.getIdToken();
-      const response = await fetch('/api/stripe/create-portal-session', {
-        method: 'POST',
+      const response = await fetch("/api/stripe/create-portal-session", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${idToken}`,
+          Authorization: `Bearer ${idToken}`,
         },
       });
       const { url } = await response.json();
@@ -209,7 +219,6 @@ export default function PlansPage() {
     }
   };
 
-
   if (plansLoading || isSeeding) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -220,7 +229,7 @@ export default function PlansPage() {
 
   const displayedPlans = plans && plans.length > 0 ? plans : defaultPlans;
 
-  const currentPlan = displayedPlans.find(p => p.id === userData?.planTierId);
+  const currentPlan = displayedPlans.find((p) => p.id === userData?.planTierId);
 
   return (
     <>
@@ -237,7 +246,11 @@ export default function PlansPage() {
         {currentPlan && currentPlan.price > 0 && (
           <div className="mt-8 text-center">
             <Button onClick={handleManageBilling} disabled={isProcessing}>
-              {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ExternalLink className="mr-2 h-4 w-4" />}
+              {isProcessing ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <ExternalLink className="mr-2 h-4 w-4" />
+              )}
               Manage Billing & Subscription
             </Button>
           </div>
@@ -248,15 +261,20 @@ export default function PlansPage() {
             <Card
               key={plan.id}
               className={cn(
-                'flex flex-col border-border/50',
-                userData?.planTierId === plan.id && 'border-primary ring-2 ring-primary'
+                "flex flex-col border-border/50",
+                userData?.planTierId === plan.id &&
+                  "border-primary ring-2 ring-primary",
               )}
             >
               <CardHeader>
                 <CardTitle>{plan.name}</CardTitle>
                 <CardDescription>
                   <span className="text-3xl font-bold">${plan.price}</span>
-                  {plan.price > 0 && <span className="text-sm text-muted-foreground">/month</span>}
+                  {plan.price > 0 && (
+                    <span className="text-sm text-muted-foreground">
+                      /month
+                    </span>
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
@@ -273,10 +291,17 @@ export default function PlansPage() {
                 <Button
                   className="w-full"
                   onClick={() => handleSelectPlan(plan)}
-                  disabled={isProcessing || (!!user && userData?.planTierId === plan.id && plan.id !== 'trailblazer')}
+                  disabled={
+                    isProcessing ||
+                    (!!user &&
+                      userData?.planTierId === plan.id &&
+                      plan.id !== "trailblazer")
+                  }
                 >
                   {isProcessing && <Loader2 className="mr-2 animate-spin" />}
-                  {user && userData?.planTierId === plan.id ? 'Current Plan' : 'Select Plan'}
+                  {user && userData?.planTierId === plan.id
+                    ? "Current Plan"
+                    : "Select Plan"}
                 </Button>
               </CardFooter>
             </Card>

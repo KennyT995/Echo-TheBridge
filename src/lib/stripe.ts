@@ -10,7 +10,9 @@ export const getStripe = (): Promise<Stripe | null> => {
     if (publicKey) {
       stripePromise = loadStripe(publicKey);
     } else {
-      console.warn("Stripe publishable key is not set. Stripe.js will not be loaded.");
+      console.warn(
+        "Stripe publishable key is not set. Stripe.js will not be loaded.",
+      );
       return Promise.resolve(null);
     }
   }

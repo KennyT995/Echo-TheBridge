@@ -1,31 +1,41 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Card, CardContent } from '@/components/ui/card';
-import type { Roadmap, RoadmapItem, RoadmapSectionKey } from '@/lib/types';
-import { CheckCircle2, CircleDot, GanttChartSquare, CalendarDays, Pencil, RefreshCw, Flag, Trash2, Plus } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { cn } from '@/lib/utils';
-import { DocumentReference, Timestamp } from 'firebase/firestore';
-import { updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import confetti from 'canvas-confetti';
-import { triggerMilestoneCelebration } from '@/lib/celebrations';
-import { useToast } from '@/hooks/use-toast';
-import { History } from 'lucide-react';
+} from "@/components/ui/accordion";
+import { Card, CardContent } from "@/components/ui/card";
+import type { Roadmap, RoadmapItem, RoadmapSectionKey } from "@/lib/types";
+import {
+  CheckCircle2,
+  CircleDot,
+  GanttChartSquare,
+  CalendarDays,
+  Pencil,
+  RefreshCw,
+  Flag,
+  Trash2,
+  Plus,
+} from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
+import { DocumentReference, Timestamp } from "firebase/firestore";
+import { updateDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import confetti from "canvas-confetti";
+import { triggerMilestoneCelebration } from "@/lib/celebrations";
+import { useToast } from "@/hooks/use-toast";
+import { History } from "lucide-react";
 
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from "@/components/ui/tooltip";
 
 interface RoadmapDisplayProps {
   roadmap: Roadmap;
@@ -36,28 +46,28 @@ interface RoadmapDisplayProps {
 
 const roadmapSections = [
   {
-    title: 'Vision Timeline',
-    key: 'visionTimeline',
+    title: "Vision Timeline",
+    key: "visionTimeline",
     icon: Flag,
   },
   {
-    title: 'Yearly Milestones',
-    key: 'yearlyMilestones',
+    title: "Yearly Milestones",
+    key: "yearlyMilestones",
     icon: GanttChartSquare,
   },
   {
-    title: 'Monthly Sprints',
-    key: 'monthlySprints',
+    title: "Monthly Sprints",
+    key: "monthlySprints",
     icon: CalendarDays,
   },
   {
-    title: 'Weekly Tactics',
-    key: 'weeklyTactics',
+    title: "Weekly Tactics",
+    key: "weeklyTactics",
     icon: CircleDot,
   },
   {
-    title: 'Daily Habits',
-    key: 'dailyHabits',
+    title: "Daily Habits",
+    key: "dailyHabits",
     icon: CheckCircle2,
   },
 ] as const;
@@ -82,7 +92,7 @@ const triggerCelebration = (sectionKey: RoadmapSectionKey) => {
     origin: { y: 0.6, x: randomOriginX },
     scalar: baseLine.scalar,
     disableForReducedMotion: true,
-    colors: ['#22c55e', '#ec4899', '#3b82f6', '#eab308'],
+    colors: ["#22c55e", "#ec4899", "#3b82f6", "#eab308"],
     startVelocity: 30 + Math.random() * 20,
     gravity: 0.8,
     drift: Math.random() - 0.5,
@@ -90,8 +100,17 @@ const triggerCelebration = (sectionKey: RoadmapSectionKey) => {
   });
 };
 
-export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readOnly = false }: RoadmapDisplayProps) {
-  const [editing, setEditing] = useState<{ section: RoadmapSectionKey; index: number; text: string } | null>(null);
+export function RoadmapDisplay({
+  roadmap,
+  roadmapRef,
+  onRegenerateSection,
+  readOnly = false,
+}: RoadmapDisplayProps) {
+  const [editing, setEditing] = useState<{
+    section: RoadmapSectionKey;
+    index: number;
+    text: string;
+  } | null>(null);
 
   const { toast } = useToast();
 
@@ -105,39 +124,50 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
 
   // triggerCelebration MOVED OUTSIDE
 
+  const shouldTellUserToRegenerate = (
+    section: RoadmapSectionKey,
+    items: RoadmapItem[],
+  ): { should: boolean; reason?: string } => {
+    if (!items || items.length === 0)
+      return { should: true, reason: "Empty section" };
 
-  const shouldTellUserToRegenerate = (section: RoadmapSectionKey, items: RoadmapItem[]): { should: boolean; reason?: string } => {
-    if (!items || items.length === 0) return { should: true, reason: 'Empty section' };
-
-    const allCompleted = items.every(i => i.completed);
-    if (allCompleted) return { should: true, reason: 'All tasks completed' };
+    const allCompleted = items.every((i) => i.completed);
+    if (allCompleted) return { should: true, reason: "All tasks completed" };
 
     const now = new Date();
 
     switch (section) {
-      case 'dailyHabits':
+      case "dailyHabits":
         // Reminder after 6 PM
-        if (now.getHours() >= 18) return { should: true, reason: 'End of day approaching' };
+        if (now.getHours() >= 18)
+          return { should: true, reason: "End of day approaching" };
         break;
-      case 'weeklyTactics':
+      case "weeklyTactics":
         // Reminder on Friday (5), Saturday (6), Sunday (0)
         const day = now.getDay();
-        if (day === 0 || day === 5 || day === 6) return { should: true, reason: 'End of week approaching' };
+        if (day === 0 || day === 5 || day === 6)
+          return { should: true, reason: "End of week approaching" };
         break;
-      case 'monthlySprints':
+      case "monthlySprints":
         // Reminder after 25th of the month
-        if (now.getDate() >= 25) return { should: true, reason: 'End of month approaching' };
+        if (now.getDate() >= 25)
+          return { should: true, reason: "End of month approaching" };
         break;
-      case 'yearlyMilestones':
+      case "yearlyMilestones":
         // Reminder in December (11)
-        if (now.getMonth() === 11) return { should: true, reason: 'End of year approaching' };
+        if (now.getMonth() === 11)
+          return { should: true, reason: "End of year approaching" };
         break;
     }
 
     return { should: false };
   };
 
-  const handleCheckChange = (section: RoadmapSectionKey, index: number, checked: boolean) => {
+  const handleCheckChange = (
+    section: RoadmapSectionKey,
+    index: number,
+    checked: boolean,
+  ) => {
     if (!roadmapRef || readOnly) return;
 
     const newRoadmapData = { ...roadmap };
@@ -156,13 +186,15 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
           ...(tempFullRoadmap.weeklyTactics || []),
           ...(tempFullRoadmap.dailyHabits || []),
         ];
-        const isVisionComplete = allItems.every(item => item.completed);
+        const isVisionComplete = allItems.every((item) => item.completed);
 
         if (isVisionComplete) {
-          triggerMilestoneCelebration('vision', toast);
+          triggerMilestoneCelebration("vision", toast);
         } else {
           const isSectionComplete = newSection.every((item) => item.completed);
-          const wasSectionComplete = roadmap[section].every((item) => item.completed);
+          const wasSectionComplete = roadmap[section].every(
+            (item) => item.completed,
+          );
 
           if (isSectionComplete && !wasSectionComplete) {
             triggerMilestoneCelebration(section, toast);
@@ -187,22 +219,25 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
   const handleAdd = (section: RoadmapSectionKey) => {
     if (!roadmapRef) return;
     const newRoadmapData = { ...roadmap };
-    const newSection = [...newRoadmapData[section], { text: '', completed: false }];
+    const newSection = [
+      ...newRoadmapData[section],
+      { text: "", completed: false },
+    ];
 
-    // We update the DB immediately with the empty item. 
+    // We update the DB immediately with the empty item.
     // This allows it to render, and we then set it to editing state.
     // Ideally we'd have local state for instant feedback, but for now this is consistent with the app's architecture.
     updateDocumentNonBlocking(roadmapRef, { [section]: newSection });
 
     // We can't synchronously set editing because the item doesn't exist in the 'roadmap' prop yet until Firestore emits.
-    // However, since we optimistic update via 'updateDocumentNonBlocking' (which usually just writes), 
-    // we can try to set editing and hope the re-render happens quickly. 
+    // However, since we optimistic update via 'updateDocumentNonBlocking' (which usually just writes),
+    // we can try to set editing and hope the re-render happens quickly.
     // Actually, let's just write to DB. The user will see the empty row appear (if we rendered empty rows).
     // But we filter empty rows? No, we don't.
     // So we will see a row with empty text.
-    // We need to identify it to auto-focus. 
+    // We need to identify it to auto-focus.
     // Let's rely on the index.
-    setEditing({ section, index: newSection.length - 1, text: '' });
+    setEditing({ section, index: newSection.length - 1, text: "" });
   };
 
   const handleSaveEdit = () => {
@@ -214,7 +249,7 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
 
     // If the section/index is valid
     if (newSection[index]) {
-      if (text.trim() === '') {
+      if (text.trim() === "") {
         // Remove if empty (cancelling an add, or clearing a task)
         newSection.splice(index, 1);
         updateDocumentNonBlocking(roadmapRef, { [section]: newSection });
@@ -228,9 +263,9 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSaveEdit();
-    } else if (e.key === 'Escape') {
+    } else if (e.key === "Escape") {
       // If we are escaping a new item that is empty, handleSaveEdit will remove it because text is empty in state?
       // Wait, editing.text is whatever was typed. If they typed nothing, it's empty.
       handleSaveEdit();
@@ -240,7 +275,11 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
   return (
     <Card className="w-full shadow-sm">
       <CardContent className="p-4 sm:p-6">
-        <Accordion type="multiple" defaultValue={['dailyHabits']} className="w-full space-y-6">
+        <Accordion
+          type="multiple"
+          defaultValue={["dailyHabits"]}
+          className="w-full space-y-6"
+        >
           {roadmapSections.map((section) => {
             const items = roadmap[section.key];
             if (!items || items.length === 0) return null;
@@ -248,7 +287,11 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
             const progress = calculateProgress(items);
 
             return (
-              <AccordionItem key={section.key} value={section.key} className="border border-border/60 rounded-xl overflow-hidden">
+              <AccordionItem
+                key={section.key}
+                value={section.key}
+                className="border border-border/60 rounded-xl overflow-hidden"
+              >
                 <div className="flex flex-col">
                   <div className="px-4 py-3 flex items-center justify-between w-full hover:bg-muted/30 transition-colors">
                     <AccordionTrigger className="p-0 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline [&>svg]:hidden flex-1 py-0 justify-start">
@@ -268,9 +311,10 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
                               size="icon"
                               className={cn(
                                 "h-8 w-8 shrink-0 ml-2 transition-all",
-                                shouldTellUserToRegenerate(section.key, items).should
+                                shouldTellUserToRegenerate(section.key, items)
+                                  .should
                                   ? "text-amber-500 hover:text-amber-600 hover:bg-amber-100 animate-pulse"
-                                  : "text-muted-foreground hover:text-primary"
+                                  : "text-muted-foreground hover:text-primary",
                               )}
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -281,9 +325,16 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
                             </Button>
                           )}
                         </TooltipTrigger>
-                        {shouldTellUserToRegenerate(section.key, items).should && (
+                        {shouldTellUserToRegenerate(section.key, items)
+                          .should && (
                           <TooltipContent>
-                            <p>{shouldTellUserToRegenerate(section.key, items).reason} - Click to regenerate</p>
+                            <p>
+                              {
+                                shouldTellUserToRegenerate(section.key, items)
+                                  .reason
+                              }{" "}
+                              - Click to regenerate
+                            </p>
                           </TooltipContent>
                         )}
                       </Tooltip>
@@ -302,14 +353,21 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
                 <AccordionContent className="p-0">
                   <ul className="divide-y divide-border/50">
                     {items.map((item: RoadmapItem, index: number) => {
-                      const isEditing = editing?.section === section.key && editing.index === index;
+                      const isEditing =
+                        editing?.section === section.key &&
+                        editing.index === index;
                       const uniqueId = `${section.key}-${index}`;
                       return (
-                        <li key={index} className="group flex items-start gap-3 p-4 hover:bg-muted/20 transition-colors">
+                        <li
+                          key={index}
+                          className="group flex items-start gap-3 p-4 hover:bg-muted/20 transition-colors"
+                        >
                           <Checkbox
                             id={`check-${uniqueId}`}
                             checked={item.completed}
-                            onCheckedChange={(checked) => handleCheckChange(section.key, index, !!checked)}
+                            onCheckedChange={(checked) =>
+                              handleCheckChange(section.key, index, !!checked)
+                            }
                             disabled={readOnly}
                             className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                           />
@@ -318,7 +376,12 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
                               <Input
                                 id={`input-${uniqueId}`}
                                 value={editing.text}
-                                onChange={(e) => setEditing({ ...editing, text: e.target.value })}
+                                onChange={(e) =>
+                                  setEditing({
+                                    ...editing,
+                                    text: e.target.value,
+                                  })
+                                }
                                 onBlur={handleSaveEdit}
                                 onKeyDown={handleInputKeyDown}
                                 autoFocus
@@ -329,8 +392,9 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
                                 htmlFor={`check-${uniqueId}`}
                                 className={cn(
                                   "text-sm sm:text-base text-foreground/90 cursor-pointer flex-1 leading-relaxed min-w-0 break-words",
-                                  item.completed && "line-through text-muted-foreground opacity-70",
-                                  readOnly && "cursor-default"
+                                  item.completed &&
+                                    "line-through text-muted-foreground opacity-70",
+                                  readOnly && "cursor-default",
                                 )}
                               >
                                 {item.text}
@@ -338,28 +402,32 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
                             )}
                           </div>
 
-                          {
-                            !item.completed && !isEditing && !readOnly && (
-                              <div className="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
-                                  onClick={() => handleDelete(section.key, index)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={() => setEditing({ section: section.key, index, text: item.text })}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )
-                          }
+                          {!item.completed && !isEditing && !readOnly && (
+                            <div className="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                                onClick={() => handleDelete(section.key, index)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={() =>
+                                  setEditing({
+                                    section: section.key,
+                                    index,
+                                    text: item.text,
+                                  })
+                                }
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </li>
                       );
                     })}
@@ -383,7 +451,10 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
           })}
 
           {roadmap.history && roadmap.history.length > 0 && (
-            <AccordionItem value="history" className="border border-border/60 rounded-xl overflow-hidden">
+            <AccordionItem
+              value="history"
+              className="border border-border/60 rounded-xl overflow-hidden"
+            >
               <AccordionTrigger className="px-4 py-3 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline hover:bg-muted/30 transition-colors [&>svg]:hidden">
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-3">
@@ -392,13 +463,18 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
                     </div>
                     <span>Past Achievements</span>
                   </div>
-                  <span className="text-sm text-muted-foreground mr-2">{roadmap.history.length} completed</span>
+                  <span className="text-sm text-muted-foreground mr-2">
+                    {roadmap.history.length} completed
+                  </span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-0">
                 <ul className="divide-y divide-border/50">
                   {roadmap.history.map((item, index) => (
-                    <li key={index} className="flex items-center gap-3 p-4 hover:bg-muted/20 transition-colors">
+                    <li
+                      key={index}
+                      className="flex items-center gap-3 p-4 hover:bg-muted/20 transition-colors"
+                    >
                       <CheckCircle2 className="h-5 w-5 text-muted-foreground opacity-50 flex-shrink-0" />
                       <div className="flex-1">
                         <span className="text-sm sm:text-base text-muted-foreground line-through opacity-70">
@@ -406,16 +482,17 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
                         </span>
                       </div>
                       <span className="text-xs text-muted-foreground">
-                        {item.completedAt ? (
-                          (item.completedAt instanceof Date
-                            ? item.completedAt
-                            : (item.completedAt as Timestamp).toDate
-                              ? (item.completedAt as Timestamp).toDate()
-                              : new Date((item.completedAt as { seconds: number }).seconds * 1000)
-                          ).toLocaleDateString()
-                        ) : (
-                          'Archived'
-                        )}
+                        {item.completedAt
+                          ? (item.completedAt instanceof Date
+                              ? item.completedAt
+                              : (item.completedAt as Timestamp).toDate
+                                ? (item.completedAt as Timestamp).toDate()
+                                : new Date(
+                                    (item.completedAt as { seconds: number })
+                                      .seconds * 1000,
+                                  )
+                            ).toLocaleDateString()
+                          : "Archived"}
                       </span>
                     </li>
                   ))}
@@ -425,6 +502,6 @@ export function RoadmapDisplay({ roadmap, roadmapRef, onRegenerateSection, readO
           )}
         </Accordion>
       </CardContent>
-    </Card >
+    </Card>
   );
 }

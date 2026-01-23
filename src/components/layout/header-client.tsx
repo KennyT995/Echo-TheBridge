@@ -1,10 +1,10 @@
-'use client';
-import { useState } from 'react';
-import { useUser, useAuth } from '@/firebase';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Menu } from 'lucide-react';
+"use client";
+import { useState } from "react";
+import { useUser, useAuth } from "@/firebase";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import Image from "next/image";
+import { Menu } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -12,12 +12,12 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetDescription,
-} from '@/components/ui/sheet';
-import { UserNav } from './user-nav';
-import AppSidebar from './app-sidebar';
-import { InstallPrompt } from '@/components/pwa/install-prompt';
+} from "@/components/ui/sheet";
+import { UserNav } from "./user-nav";
+import AppSidebar from "./app-sidebar";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 
-import { mainNavLinks } from '@/lib/navigation';
+import { mainNavLinks } from "@/lib/navigation";
 
 export default function HeaderClient() {
   const { user, isUserLoading } = useUser();
@@ -66,7 +66,6 @@ export default function HeaderClient() {
                 {item.label}
               </Link>
             ))}
-
           </nav>
         </div>
 
@@ -74,7 +73,12 @@ export default function HeaderClient() {
           {authSection}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                aria-label="Open menu"
+              >
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle Menu</span>
               </Button>
@@ -104,7 +108,11 @@ export default function HeaderClient() {
                   </nav>
                   <div className="mt-auto p-4 border-t">
                     <div className="flex flex-col gap-2">
-                      <Button asChild variant="outline" className="w-full justify-start">
+                      <Button
+                        asChild
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
                         <Link href="/login">Login</Link>
                       </Button>
                       <Button asChild className="w-full justify-start">

@@ -1,22 +1,22 @@
 {
-    "name": "Echo: The Bridge",
-    "short_name": "Echo",
-    "description": "Bridge the gap between long-term vision and daily action.",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#020817",
-    "theme_color": "#10b981",
-    "orientation": "portrait-primary",
-    "icons": [
-        {
-            "src": "/logo.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "/logo.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        }
-    ]
+  "name": "Echo: The Bridge",
+  "short_name": "Echo",
+  "description": "Bridge the gap between long-term vision and daily action.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020817",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
 }

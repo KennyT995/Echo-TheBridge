@@ -1,103 +1,98 @@
 import { cn } from "@/lib/utils";
 
 interface BridgeVisualizerProps {
-    progress: number; // 0 to 100
-    totalPlanks?: number;
-    className?: string;
+  progress: number; // 0 to 100
+  totalPlanks?: number;
+  className?: string;
 }
 
-export function BridgeVisualizer({ progress, totalPlanks = 10, className }: BridgeVisualizerProps) {
-    // Ensure progress is clamped between 0 and 100
-    const clampedProgress = Math.min(100, Math.max(0, progress));
+export function BridgeVisualizer({
+  progress,
+  totalPlanks = 15,
+  className,
+}: BridgeVisualizerProps) {
+  // Ensure progress is clamped between 0 and 100
+  const clampedProgress = Math.min(100, Math.max(0, progress));
 
-    // Calculate how many planks should be "built"
-    // If progress is 50%, 5 out of 10 planks show up.
-    // However, for a bridge, we might want to show the whole bridge structure in a "ghost" state
-    // and fill it in as we go.
+  // Plank Generation Logic
+  const startPoint = { x: 10, y: 50 };
+  const controlPoint = { x: 150, y: 5 };
+  const endPoint = { x: 290, y: 50 };
 
-    // Let's optimize visual balance: 
-    // We want the bridge to be fully built at 100%. 
-    // So distinct plank indices 0 to totalPlanks-1.
-    // A plank i is "built" if (i + 1) / totalPlanks <= progress / 100
+  const planks = Array.from({ length: totalPlanks }, (_, i) => {
+    const t = i / (totalPlanks - 1);
 
-    // For smoother animation, we can animate the width of the "filled" path?
-    // But individual planks look cooler for "building".
+    // Position: Quadratic Bezier
+    // B(t) = (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
+    const x =
+      Math.pow(1 - t, 2) * startPoint.x +
+      2 * (1 - t) * t * controlPoint.x +
+      Math.pow(t, 2) * endPoint.x;
+    const y =
+      Math.pow(1 - t, 2) * startPoint.y +
+      2 * (1 - t) * t * controlPoint.y +
+      Math.pow(t, 2) * endPoint.y;
 
-    const planks = Array.from({ length: totalPlanks }, (_, i) => i);
-    const planksBuiltCount = Math.floor((clampedProgress / 100) * totalPlanks);
+    // Rotation: Tangent vector
+    // B'(t) = 2(1-t)(P1 - P0) + 2t(P2 - P1)
+    const dx =
+      2 * (1 - t) * (controlPoint.x - startPoint.x) +
+      2 * t * (endPoint.x - controlPoint.x);
+    const dy =
+      2 * (1 - t) * (controlPoint.y - startPoint.y) +
+      2 * t * (endPoint.y - controlPoint.y);
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
 
-    return (
-        <div className={cn("relative w-full h-12 flex items-center justify-center", className)}>
-            {/* The Chasm / Background decorations */}
-            <div className="absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-indigo-950/10 to-transparent" />
+    return { index: i, x, y, angle };
+  });
 
-            <svg
-                width="100%"
-                height="100%"
-                viewBox="0 0 300 60"
-                preserveAspectRatio="none"
-                xmlns="http://www.w3.org/2000/svg"
-                className="overflow-visible"
+  const planksBuiltCount = Math.round((clampedProgress / 100) * totalPlanks);
+
+  return (
+    <div
+      className={cn(
+        "relative w-full h-16 flex items-center justify-center",
+        className,
+      )}
+    >
+      <svg
+        width="100%"
+        height="100%"
+        viewBox="0 0 300 60"
+        preserveAspectRatio="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="overflow-visible"
+      >
+        {/* Planks */}
+        {planks.map(({ index, x, y, angle }) => {
+          const isBuilt = index < planksBuiltCount;
+
+          return (
+            <g
+              key={index}
+              style={{
+                transformOrigin: `${x}px ${y}px`,
+                transform: `rotate(${angle}deg)`,
+              }}
             >
-                {/* Bridge Arch / Support Structure (Ghost) */}
-                <path
-                    d="M10,50 Q150,5 290,50"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="text-muted-foreground/20"
-                    strokeDasharray="4 4"
-                />
-
-                {/* Bridge Arch / Support Structure (Filled) */}
-                {/* We only draw the arch as far as we have progressed? 
-                    Maybe just keep the arch static as the "Blueprint" and build planks.
-                */}
-
-                {/* Planks */}
-                {planks.map((i) => {
-                    // Calculate position along the quadratic bezier curve
-                    // simple approx: linear x, quadratic y
-                    // t goes from 0 to 1
-                    const t = i / (totalPlanks - 1);
-                    const x = 10 + t * (290 - 10);
-
-                    // Bezier calc for Y: (1-t)^2 * P0 + 2(1-t)t * P1 + t^2 * P2
-                    // P0=(10,50), P1=(150, 5), P2=(290, 50)
-                    // y = (1-t)^2*50 + 2*(1-t)*t*5 + t^2*50
-                    const y = Math.pow(1 - t, 2) * 50 + 2 * (1 - t) * t * 5 + Math.pow(t, 2) * 50;
-
-                    const isBuilt = i < planksBuiltCount;
-
-                    return (
-                        <g key={i}>
-                            {/* Ghost Plank */}
-                            <rect
-                                x={x - 4}
-                                y={y - 2}
-                                width="8"
-                                height="4"
-                                rx="1"
-                                className="fill-muted-foreground/10"
-                            />
-                            {/* Built Plank */}
-                            <rect
-                                x={x - 4}
-                                y={y - 2}
-                                width="8"
-                                height="4"
-                                rx="1"
-                                className={cn(
-                                    "transition-all duration-700 ease-out",
-                                    isBuilt ? "fill-indigo-500 dark:fill-indigo-400 opacity-100" : "opacity-0 translate-y-4"
-                                )}
-                            />
-                        </g>
-                    );
-                })}
-            </svg>
-
-            {/* Future Self Icon at the end? */}
-        </div>
-    );
+              {/* Plank Dash */}
+              <rect
+                x={x - 6} // Centered horizontally
+                y={y - 1.5} // Centered vertically
+                width="12"
+                height="3"
+                rx="1.5"
+                className={cn(
+                  "transition-all duration-700 ease-out",
+                  isBuilt
+                    ? "fill-indigo-500 dark:fill-indigo-400 drop-shadow-[0_0_3px_rgba(99,102,241,0.6)]"
+                    : "fill-muted-foreground/20",
+                )}
+              />
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
 }

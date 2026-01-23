@@ -1,31 +1,42 @@
-import { ai } from '@/ai/genkit';
-import { z } from 'zod';
+import { ai } from "@/ai/genkit";
+import { z } from "zod";
 
 export const AnalyzeVisionIntentInputSchema = z.object({
-    goal: z.string(),
+  goal: z.string(),
 });
 
 export const VisionIntentSchema = z.object({
-    title: z.string(),
-    goal: z.string(),
-    category: z.enum(['Career', 'Health', 'Financial', 'Personal Growth', 'Relationships', 'Legacy']),
+  title: z.string(),
+  goal: z.string(),
+  category: z.enum([
+    "Career",
+    "Health",
+    "Financial",
+    "Personal Growth",
+    "Relationships",
+    "Legacy",
+  ]),
 });
 
 export const AnalyzeVisionIntentOutputSchema = z.object({
-    isMultiVision: z.boolean(),
-    reasoning: z.string(),
-    proposedVisions: z.array(VisionIntentSchema),
-    unifiedVision: VisionIntentSchema,
+  isMultiVision: z.boolean(),
+  reasoning: z.string(),
+  proposedVisions: z.array(VisionIntentSchema),
+  unifiedVision: VisionIntentSchema,
 });
 
-export type AnalyzeVisionIntentInput = z.infer<typeof AnalyzeVisionIntentInputSchema>;
-export type AnalyzeVisionIntentOutput = z.infer<typeof AnalyzeVisionIntentOutputSchema>;
+export type AnalyzeVisionIntentInput = z.infer<
+  typeof AnalyzeVisionIntentInputSchema
+>;
+export type AnalyzeVisionIntentOutput = z.infer<
+  typeof AnalyzeVisionIntentOutputSchema
+>;
 
 const prompt = ai.definePrompt({
-    name: 'analyzeVisionIntentPrompt',
-    input: { schema: AnalyzeVisionIntentInputSchema },
-    output: { schema: AnalyzeVisionIntentOutputSchema },
-    prompt: `Analyze the following user goal for a "Vision Board" application.
+  name: "analyzeVisionIntentPrompt",
+  input: { schema: AnalyzeVisionIntentInputSchema },
+  output: { schema: AnalyzeVisionIntentOutputSchema },
+  prompt: `Analyze the following user goal for a "Vision Board" application.
       
       User Goal: "{{{goal}}}"
 
@@ -45,16 +56,16 @@ const prompt = ai.definePrompt({
 });
 
 export const analyzeVisionIntent = ai.defineFlow(
-    {
-        name: 'analyzeVisionIntent',
-        inputSchema: AnalyzeVisionIntentInputSchema,
-        outputSchema: AnalyzeVisionIntentOutputSchema,
-    },
-    async (input) => {
-        const { output } = await prompt(input);
-        if (!output) {
-            throw new Error('Failed to analyze vision intent');
-        }
-        return output;
+  {
+    name: "analyzeVisionIntent",
+    inputSchema: AnalyzeVisionIntentInputSchema,
+    outputSchema: AnalyzeVisionIntentOutputSchema,
+  },
+  async (input) => {
+    const { output } = await prompt(input);
+    if (!output) {
+      throw new Error("Failed to analyze vision intent");
     }
+    return output;
+  },
 );
