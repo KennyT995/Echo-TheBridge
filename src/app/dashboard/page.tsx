@@ -76,20 +76,7 @@ import { GenerateFutureLetterOutput } from "@/ai/flows/generate-future-letter";
 import { CrossingCelebration } from "@/features/roadmaps/components/crossing-celebration";
 import { WeeklyRetroDialog } from "@/features/journal/components/weekly-retro-dialog";
 import { BridgeVisualizer } from "@/features/roadmaps/components/bridge-visualizer";
-
-function usePlan(userData: UserData | null | undefined) {
-  const firestore = useFirestore();
-
-  const planRef = useMemoFirebase(() => {
-    if (!firestore || !userData?.planTierId) return null;
-    return doc(firestore, "plan_tiers", userData.planTierId);
-  }, [userData, firestore]);
-
-  const { data: planData, isLoading: isPlanLoading } =
-    useDoc<PlanTier>(planRef);
-
-  return { plan: planData, isPlanLoading };
-}
+import { usePlan } from "@/hooks/use-plan";
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();

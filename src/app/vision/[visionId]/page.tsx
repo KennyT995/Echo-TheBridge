@@ -68,20 +68,7 @@ import {
 } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-
-function usePlan(userData: UserData | null | undefined) {
-  const firestore = useFirestore();
-
-  const planRef = useMemoFirebase(() => {
-    if (!firestore || !userData?.planTierId) return null;
-    return doc(firestore, "plan_tiers", userData.planTierId);
-  }, [userData, firestore]);
-
-  const { data: planData, isLoading: isPlanLoading } =
-    useDoc<PlanTier>(planRef);
-
-  return { plan: planData, isPlanLoading };
-}
+import { usePlan } from "@/hooks/use-plan";
 
 export default function VisionDetailPage() {
   const { visionId } = useParams();
