@@ -8,6 +8,7 @@ interface VisionConfirmationDialogProps {
   onConfirmUnified: () => void;
   onConfirmSeparate: () => void;
   isCreating: boolean;
+  onCancel: () => void;
 }
 
 export function VisionConfirmationDialog({
@@ -15,8 +16,8 @@ export function VisionConfirmationDialog({
   onConfirmUnified,
   onConfirmSeparate,
   isCreating,
-  onCancel, // Added cancel prop
-}: VisionConfirmationDialogProps & { onCancel: () => void }) {
+  onCancel,
+}: VisionConfirmationDialogProps) {
   if (!analysis) return null;
 
   return (

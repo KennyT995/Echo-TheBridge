@@ -114,7 +114,7 @@ export default function DashboardPage() {
   const [visionToDelete, setVisionToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
-  const deleteConfirmationPhrase = "delete this vision";
+  const deleteConfirmationPhrase = "I want to delete this vision";
 
   const handleDeleteVision = async () => {
     if (!visionToDelete || !user) return;
