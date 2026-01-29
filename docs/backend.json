@@ -197,6 +197,90 @@
         "weeklyTactics",
         "dailyHabits"
       ]
+    },
+    "DailyPlan": {
+      "title": "Daily Plan",
+      "description": "Stores user's daily plans, including anti-goals.",
+      "type": "object",
+      "properties": {
+        "antiGoals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "text": { "type": "string" },
+              "completed": { "type": "boolean" }
+            },
+            "required": ["id", "text", "completed"]
+          }
+        }
+      }
+    },
+    "DailyLog": {
+      "title": "Daily Log",
+      "description": "Represents different types of daily or weekly user logs.",
+      "type": "object",
+      "properties": {
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["evening_reflection", "nightly_review", "weekly_retro"]
+        }
+      },
+      "required": ["createdAt", "type"],
+      "oneOf": [
+        {
+          "properties": {
+            "type": { "const": "evening_reflection" },
+            "content": { "type": "string" }
+          },
+          "required": ["content"]
+        },
+        {
+          "properties": {
+            "type": { "const": "nightly_review" },
+            "date": { "type": "string" },
+            "win": { "type": "string" },
+            "learning": { "type": "string" },
+            "gratitude": { "type": "string" }
+          },
+          "required": ["date", "win", "learning", "gratitude"]
+        },
+        {
+          "properties": {
+            "type": { "const": "weekly_retro" },
+            "date": { "type": "string" },
+            "wins": { "type": "string" },
+            "challenges": { "type": "string" },
+            "next-week": { "type": "string" }
+          },
+          "required": ["date", "wins", "challenges", "next-week"]
+        }
+      ]
+    },
+    "DecisionJournal": {
+      "title": "Decision Journal",
+      "description": "A record of a user's decision and its alignment with their visions.",
+      "type": "object",
+      "properties": {
+        "decision": { "type": "string" },
+        "visions": { "type": "array", "items": { "type": "string" } },
+        "analysis": {
+          "type": "object",
+          "properties": {
+            "score": { "type": "number" },
+            "explanation": { "type": "string" },
+            "recommendation": { "type": "string" }
+          },
+          "required": ["score", "explanation", "recommendation"]
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["decision", "visions", "analysis", "createdAt"]
     }
   },
   "auth": {
@@ -226,6 +310,24 @@
         "$ref": "#/entities/Roadmap"
       },
       "description": "Stores the AI-generated roadmaps for a user's vision. Access is restricted to the owner, or public if the corresponding vision is public."
+    },
+    "/users/{userId}/daily_plans/{planId}": {
+      "schema": {
+        "$ref": "#/entities/DailyPlan"
+      },
+      "description": "Stores user's daily plans, including the 'Not-To-Do List'. The document ID is the date (YYYY-MM-DD). Secured by ownership."
+    },
+    "/users/{userId}/daily_logs/{logId}": {
+      "schema": {
+        "$ref": "#/entities/DailyLog"
+      },
+      "description": "Stores various journal entries, like evening reflections and weekly reviews. Secured by ownership."
+    },
+    "/users/{userId}/decision_journal/{decisionId}": {
+      "schema": {
+        "$ref": "#/entities/DecisionJournal"
+      },
+      "description": "Stores records of decisions and their AI-powered alignment analysis. Secured by ownership."
     }
   }
 }

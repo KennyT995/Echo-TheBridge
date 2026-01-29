@@ -12,13 +12,15 @@
  *   `isPublic` is a boolean). On update, immutable fields like `userId` and `id` are protected.
  * - /users/{userId}/roadmaps/{roadmapId}: User-owned roadmaps. Schema is validated on creation,
  *   and immutable fields are protected on update.
+ * - Journaling Collections: `daily_plans`, `daily_logs`, and `decision_journal` are secured by
+ *   ownership and have strict schema validation on write to ensure data integrity and immutability.
  *
  * Key Security Decisions:
  * - Schema Enforcement: Write operations are protected by functions that validate the incoming
  *   `request.resource.data` against the expected data types and structure. This prevents
  *   malformed or malicious data from being saved.
- * - Immutability: Key identifiers (`id`, `userId`, `visionId`) are locked down after creation,
- *   preventing documents from being re-associated.
+ * - Immutability: Key identifiers (`id`, `userId`, `visionId`) are locked down after creation.
+ *   Journaling collections (`daily_logs`, `decision_journal`) are immutable (create-only).
  * - User Enumeration Disabled: `list` on `/users` is forbidden to prevent scraping user data.
  */
 rules_version = '2';
@@ -67,6 +69,42 @@ service cloud.firestore {
              data.weeklyTactics is list &&
              data.dailyHabits is list;
     }
+    
+    function incomingDailyPlanIsValid(data) {
+      // Basic validation: check for the presence and type of 'antiGoals' list.
+      // Firestore rules cannot iterate, so we can't check every item.
+      return data.antiGoals is list;
+    }
+
+    function incomingDailyLogIsValid(data) {
+        let baseValid = data.createdAt == request.time && data.type is string;
+        if (data.type == 'evening_reflection') {
+            return baseValid && data.content is string && data.content.size() > 0;
+        }
+        if (data.type == 'nightly_review') {
+            return baseValid && data.date is string &&
+                   data.win is string && data.win.size() > 0 &&
+                   data.learning is string && data.learning.size() > 0 &&
+                   data.gratitude is string && data.gratitude.size() > 0;
+        }
+        if (data.type == 'weekly_retro') {
+            return baseValid && data.date is string &&
+                   data.wins is string && data.wins.size() > 0 &&
+                   data.challenges is string && data.challenges.size() > 0 &&
+                   data['next-week'] is string && data['next-week'].size() > 0;
+        }
+        return false;
+    }
+
+    function incomingDecisionJournalIsValid(data) {
+        return data.createdAt == request.time &&
+               data.decision is string && data.decision.size() > 0 &&
+               data.visions is list &&
+               data.analysis is map &&
+               data.analysis.score is number &&
+               data.analysis.explanation is string &&
+               data.analysis.recommendation is string;
+    }
 
     //-------------------------------------------------------------------------
     // Collection Rules
@@ -112,15 +150,20 @@ service cloud.firestore {
 
       // New Feature Collections
       match /daily_plans/{planId} {
-        allow read, write: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId) && incomingDailyPlanIsValid(request.resource.data);
       }
       
       match /daily_logs/{logId} {
-        allow read, write: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && incomingDailyLogIsValid(request.resource.data);
+        allow update, delete: if false; // Journal entries should be immutable.
       }
       
       match /decision_journal/{decisionId} {
-        allow read, write: if isOwner(userId);
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && incomingDecisionJournalIsValid(request.resource.data);
+        allow update, delete: if false; // Journal entries should be immutable.
       }
     }
 
