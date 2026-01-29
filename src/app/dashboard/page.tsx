@@ -25,6 +25,7 @@ import {
   Compass,
   Mail,
   CalendarDays,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -77,6 +78,8 @@ import { CrossingCelebration } from "@/features/roadmaps/components/crossing-cel
 import { WeeklyRetroDialog } from "@/features/journal/components/weekly-retro-dialog";
 import { BridgeVisualizer } from "@/features/roadmaps/components/bridge-visualizer";
 import { usePlan } from "@/hooks/use-plan";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 function usePrevious<T>(value: T) {
   const ref = useRef<T>();
@@ -110,6 +113,8 @@ export default function DashboardPage() {
 
   const [visionToDelete, setVisionToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
+  const deleteConfirmationPhrase = "delete this vision";
 
   const handleDeleteVision = async () => {
     if (!visionToDelete || !user) return;
@@ -135,6 +140,7 @@ export default function DashboardPage() {
     } finally {
       setIsDeleting(false);
       setVisionToDelete(null);
+      setDeleteConfirmationInput("");
     }
   };
 
@@ -526,7 +532,12 @@ export default function DashboardPage() {
 
         <AlertDialog
           open={!!visionToDelete}
-          onOpenChange={(open) => !open && setVisionToDelete(null)}
+          onOpenChange={(open) => {
+            if (!open) {
+              setVisionToDelete(null);
+              setDeleteConfirmationInput("");
+            }
+          }}
         >
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -536,19 +547,38 @@ export default function DashboardPage() {
                 vision and its associated roadmap.
               </AlertDialogDescription>
             </AlertDialogHeader>
+            <div className="py-2 space-y-4">
+              <Label htmlFor="delete-confirm-dashboard">
+                To confirm, type:{" "}
+                <span className="font-mono text-primary/90">
+                  &quot;{deleteConfirmationPhrase}&quot;
+                </span>
+              </Label>
+              <Input
+                id="delete-confirm-dashboard"
+                value={deleteConfirmationInput}
+                onChange={(e) => setDeleteConfirmationInput(e.target.value)}
+                placeholder={deleteConfirmationPhrase}
+                className="border-destructive/50 focus:ring-destructive/50"
+              />
+            </div>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeleting}>
-                Cancel
-              </AlertDialogCancel>
+              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={(e) => {
                   e.preventDefault();
                   handleDeleteVision();
                 }}
-                disabled={isDeleting}
+                disabled={
+                  isDeleting ||
+                  deleteConfirmationInput !== deleteConfirmationPhrase
+                }
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                {isDeleting ? "Deleting..." : "Delete"}
+                {isDeleting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                {isDeleting ? "Deleting..." : "Delete Vision"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -596,5 +626,3 @@ function calculateOverallProgress(roadmap: Roadmap): number {
   const completedItems = allItems.filter((item) => item.completed).length;
   return (completedItems / allItems.length) * 100;
 }
-
-    
