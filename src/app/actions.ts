@@ -53,15 +53,21 @@ export async function generateRoadmap(
     });
     const correctedGoal = correctionResult.correctedText;
 
+    const isPartialRegen =
+      !!values.sectionToRegenerate && values.sectionToRegenerate !== "all";
+
     // Then, generate the roadmap with the corrected goal.
     const roadmap = await generateRoadmapFromVision({
       title: validatedFields.data.title,
       goal: correctedGoal,
+      timelineFocus: values.timelineFocus,
       yearlyFocus: values.yearlyFocus,
       monthlyFocus: values.monthlyFocus,
       weeklyFocus: values.weeklyFocus,
       dailyFocus: values.dailyFocus,
       completedTasks: values.completedTasks,
+      sectionToRegenerate: values.sectionToRegenerate,
+      isPartialRegen: isPartialRegen,
     });
     return { roadmap, correctedGoal };
   } catch (error: unknown) {

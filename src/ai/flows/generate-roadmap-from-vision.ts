@@ -51,6 +51,10 @@ const GenerateRoadmapFromVisionInputSchema = z.object({
     .describe(
       "If provided, only this section of the roadmap should be regenerated.",
     ),
+  isPartialRegen: z
+    .boolean()
+    .optional()
+    .describe("Flag to indicate if this is a partial regeneration."),
 });
 export type GenerateRoadmapFromVisionInput = z.infer<
   typeof GenerateRoadmapFromVisionInputSchema
@@ -135,16 +139,19 @@ Weekly Focus: {{{weeklyFocus}}}
 Daily Focus: {{{dailyFocus}}}
 {{/if}}
 
+{{#if isPartialRegen}}
 CRITICAL TASK INSTRUCTION:
-- A 'sectionToRegenerate' parameter may be provided.
-- If 'sectionToRegenerate' is provided AND it is NOT 'all', you are regenerating a part of an existing roadmap. You MUST only generate tasks for the '{{sectionToRegenerate}}' section. Your output JSON should ONLY contain the key and value for '{{sectionToRegenerate}}'.
-- If 'sectionToRegenerate' is 'all' or is not provided, you MUST generate the full roadmap with ALL of the following sections:
-
+You are regenerating ONLY ONE part of an existing roadmap. The section to regenerate is '{{sectionToRegenerate}}'.
+Your output JSON MUST ONLY contain the key and value for '{{sectionToRegenerate}}'. Do NOT include any other keys in the JSON output.
+{{else}}
+CRITICAL TASK INSTRUCTION:
+You MUST generate the full roadmap with ALL of the following sections:
 1. Vision Timeline: The chronological phases of the entire journey (e.g. Phase 1: Foundation, Phase 2: Growth).
 2. Yearly Milestones: Key achievements to hit within the year.
 3. Monthly Sprints: The recurring monthly themes or focus areas.
 4. Weekly Tactics: The standard weekly routine or key actions to take every week.
 5. Daily Habits: The atomic units of behavior to do every single day.
+{{/if}}
 
 ADDITIONAL INSTRUCTIONS:
 - DO NOT generate sequential lists like "Week 1", "Week 2". Instead, generate RECURRING or FOCUS-BASED actions for that timeframe.
