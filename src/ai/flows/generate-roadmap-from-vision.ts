@@ -38,6 +38,19 @@ const GenerateRoadmapFromVisionInputSchema = z.object({
     .array(z.string())
     .optional()
     .describe("A list of tasks the user has already completed."),
+  sectionToRegenerate: z
+    .enum([
+      "visionTimeline",
+      "yearlyMilestones",
+      "monthlySprints",
+      "weeklyTactics",
+      "dailyHabits",
+      "all",
+    ])
+    .optional()
+    .describe(
+      "If provided, only this section of the roadmap should be regenerated.",
+    ),
 });
 export type GenerateRoadmapFromVisionInput = z.infer<
   typeof GenerateRoadmapFromVisionInputSchema
@@ -73,7 +86,7 @@ const RoadmapSchema = z.object({
     .describe("Atomic units of action required daily."),
 });
 
-const GenerateRoadmapFromVisionOutputSchema = RoadmapSchema.describe(
+const GenerateRoadmapFromVisionOutputSchema = RoadmapSchema.partial().describe(
   "A structured roadmap with vision timeline, yearly milestones, monthly sprints, weekly tactics, and daily habits.",
 );
 export type GenerateRoadmapFromVisionOutput = z.infer<
@@ -122,7 +135,10 @@ Weekly Focus: {{{weeklyFocus}}}
 Daily Focus: {{{dailyFocus}}}
 {{/if}}
 
-Generate the roadmap with these sections. DO NOT generate sequential lists like "Week 1", "Week 2" or "Month 1", "Month 2". Instead, generate the RECURRING or FOCUS-BASED actions for that timeframe.
+CRITICAL TASK INSTRUCTION:
+- A 'sectionToRegenerate' parameter may be provided.
+- If 'sectionToRegenerate' is provided AND it is NOT 'all', you are regenerating a part of an existing roadmap. You MUST only generate tasks for the '{{sectionToRegenerate}}' section. Your output JSON should ONLY contain the key and value for '{{sectionToRegenerate}}'.
+- If 'sectionToRegenerate' is 'all' or is not provided, you MUST generate the full roadmap with ALL of the following sections:
 
 1. Vision Timeline: The chronological phases of the entire journey (e.g. Phase 1: Foundation, Phase 2: Growth).
 2. Yearly Milestones: Key achievements to hit within the year.
@@ -130,9 +146,9 @@ Generate the roadmap with these sections. DO NOT generate sequential lists like 
 4. Weekly Tactics: The standard weekly routine or key actions to take every week.
 5. Daily Habits: The atomic units of behavior to do every single day.
 
-CRITICAL INSTRUCTIONS:
+ADDITIONAL INSTRUCTIONS:
+- DO NOT generate sequential lists like "Week 1", "Week 2". Instead, generate RECURRING or FOCUS-BASED actions for that timeframe.
 - Be uncomfortably specific. Avoid generic filler.
-- For Weekly and Daily items, focus on RECURRING ROUTINES, not a schedule.
 - Focus on High-Leverage Activities (80/20 rule).
 
 Return ONLY the raw JSON matching the schema.`,
