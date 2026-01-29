@@ -595,6 +595,7 @@ export default function DashboardPage() {
 
 function calculateOverallProgress(roadmap: Roadmap): number {
   const allItems = [
+    ...(roadmap.visionTimeline || []),
     ...(roadmap.dailyHabits || []),
     ...(roadmap.weeklyTactics || []),
     ...(roadmap.monthlySprints || []),
