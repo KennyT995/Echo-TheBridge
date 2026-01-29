@@ -154,30 +154,6 @@ export function FutureSelfChat({
                     I am you, 5 years from now. I know what you&apos;re going
                     through, and I know we make it. What&apos;s on your mind?
                   </p>
-                  <div className="mt-6 space-y-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start text-xs"
-                      onClick={() => {
-                        setInput("I'm feeling stuck. How did we get past this?");
-                        handleSend();
-                      }}
-                    >
-                      &quot;I&apos;m feeling stuck...&quot;
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-full justify-start text-xs"
-                      onClick={() => {
-                        setInput("Is all this effort really worth it?");
-                        handleSend();
-                      }}
-                    >
-                      &quot;Is it worth it?&quot;
-                    </Button>
-                  </div>
                 </div>
               )}
 
