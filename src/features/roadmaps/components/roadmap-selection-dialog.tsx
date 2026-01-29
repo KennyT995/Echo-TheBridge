@@ -60,7 +60,7 @@ export function RoadmapSelectionDialog({
   // Just initialize state with the values, and use key={proposedRoadmap.id} in the parent if possible.
   // Since I can't touch parent easily, I'll use the "state from props" pattern with an effect but ensure it's clean.
   // Actually, the lint error was "Calling setState synchronously within an effect".
-  // I'll assume the previous code was doing it synchronously because of missing dependency or something?
+  // I can't assume the previous code was doing it synchronously because of missing dependency or something?
   // No, it was just inside useEffect.
 
   // Alternative: Use a key on the Dialog content content? No.
@@ -139,33 +139,37 @@ export function RoadmapSelectionDialog({
         <ScrollArea className="flex-1 pr-4">
           <Accordion
             type="multiple"
-            defaultValue={[
-              "dailyHabits",
-              "weeklyTactics",
-              "monthlySprints",
-              "yearlyMilestones",
-            ]}
+            defaultValue={sections.map((s) => s.key)}
             className="space-y-4"
           >
-            {sections.map((section) => (
-              <AccordionItem
-                key={section.key}
-                value={section.key}
-                className="border rounded-md px-4"
-              >
-                <AccordionTrigger className="hover:no-underline py-3">
-                  <div className="flex items-center gap-2">
-                    <section.icon className="w-5 h-5 text-primary" />
-                    <span>{section.label}</span>
-                    <span className="text-xs text-muted-foreground ml-2 font-normal">
-                      ({filterSection(section.key).length} selected)
-                    </span>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent className="pt-2 pb-4">
-                  <div className="space-y-2">
-                    {(proposedRoadmap[section.key] as RoadmapItem[]).map(
-                      (item, index) => {
+            {sections.map((section) => {
+              const items = proposedRoadmap[section.key] as
+                | RoadmapItem[]
+                | undefined;
+
+              // If the proposed roadmap doesn't contain this section, don't render it.
+              if (!items) {
+                return null;
+              }
+
+              return (
+                <AccordionItem
+                  key={section.key}
+                  value={section.key}
+                  className="border rounded-md px-4"
+                >
+                  <AccordionTrigger className="hover:no-underline py-3">
+                    <div className="flex items-center gap-2">
+                      <section.icon className="w-5 h-5 text-primary" />
+                      <span>{section.label}</span>
+                      <span className="text-xs text-muted-foreground ml-2 font-normal">
+                        ({filterSection(section.key).length} selected)
+                      </span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pt-2 pb-4">
+                    <div className="space-y-2">
+                      {items.map((item, index) => {
                         const id = `${section.key}-${index}`;
                         const selected = isSelected(section.key, index);
                         return (
@@ -182,18 +186,22 @@ export function RoadmapSelectionDialog({
                             />
                             <label
                               htmlFor={id}
-                              className={`text-sm cursor-pointer leading-tight ${selected ? "text-foreground" : "text-muted-foreground line-through opacity-70"}`}
+                              className={`text-sm cursor-pointer leading-tight ${
+                                selected
+                                  ? "text-foreground"
+                                  : "text-muted-foreground line-through opacity-70"
+                              }`}
                             >
                               {item.text}
                             </label>
                           </div>
                         );
-                      },
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+                      })}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
           </Accordion>
         </ScrollArea>
 
