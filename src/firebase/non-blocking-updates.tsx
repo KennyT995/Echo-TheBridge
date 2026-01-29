@@ -64,7 +64,8 @@ export function updateDocumentNonBlocking(
   docRef: DocumentReference,
   data: Record<string, any>,
 ) {
-  updateDoc(docRef, data).catch(() => {
+  // Use set with merge to be consistent with other updates and security rules.
+  setDoc(docRef, data, { merge: true }).catch(() => {
     errorEmitter.emit(
       "permission-error",
       new FirestorePermissionError({

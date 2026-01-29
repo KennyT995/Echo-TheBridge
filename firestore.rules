@@ -76,7 +76,19 @@ service cloud.firestore {
       allow get: if isOwner(userId);
       allow list: if false; // Prevent user enumeration
       allow create: if isOwner(userId) && incomingUserDataIsValid(request.resource.data);
-      allow update: if isOwner(userId) && request.resource.data.id == resource.data.id && request.resource.data.email == resource.data.email;
+      allow update: if isOwner(userId)
+                    // Immutable fields must not change.
+                    && request.resource.data.id == resource.data.id
+                    && request.resource.data.email == resource.data.email
+                    // Stripe fields are managed by the backend webhook, not the client.
+                    && request.resource.data.stripeCustomerId == resource.data.stripeCustomerId
+                    && request.resource.data.stripeSubscriptionId == resource.data.stripeSubscriptionId
+                    && request.resource.data.stripePriceId == resource.data.stripePriceId
+                    // Client is allowed to update their display name.
+                    && request.resource.data.displayName is string
+                    // Client is allowed to keep their plan or downgrade to the free 'trailblazer' plan.
+                    && (request.resource.data.planTierId == resource.data.planTierId ||
+                        request.resource.data.planTierId == 'trailblazer');
       allow delete: if isOwner(userId);
 
       // Visions Subcollection

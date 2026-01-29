@@ -22,6 +22,18 @@
         "planTierId": {
           "type": "string",
           "description": "Reference to the PlanTier. (Relationship: PlanTier 1:N User)"
+        },
+        "stripeCustomerId": {
+          "type": "string",
+          "description": "The user's Stripe Customer ID."
+        },
+        "stripeSubscriptionId": {
+          "type": "string",
+          "description": "The user's active Stripe Subscription ID."
+        },
+        "stripePriceId": {
+          "type": "string",
+          "description": "The Stripe Price ID of the user's current plan."
         }
       },
       "required": ["id", "email", "displayName", "planTierId"]
