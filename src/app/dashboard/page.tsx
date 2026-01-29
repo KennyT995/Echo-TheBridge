@@ -194,29 +194,12 @@ export default function DashboardPage() {
     );
   }, [roadmaps]);
 
-  const { overallStats, dailyProgress } = useMemo(() => {
-    if (!roadmaps)
-      return {
-        overallStats: { currentStreak: 0, longestStreak: 0 },
-        dailyProgress: { completed: 0, total: 0 },
-      };
-
-    // Consolidate history for streak
+  const overallStats = useMemo(() => {
+    if (!roadmaps) {
+      return { currentStreak: 0, longestStreak: 0 };
+    }
     const allHistory = roadmaps.flatMap((r) => r.history || []);
-    const stats = calculateStreak(allHistory);
-
-    // Calculate daily progress
-    let completed = 0;
-    let total = 0;
-
-    roadmaps.forEach((r) => {
-      if (r.dailyHabits) {
-        total += r.dailyHabits.length;
-        completed += r.dailyHabits.filter((h) => h.completed).length;
-      }
-    });
-
-    return { overallStats: stats, dailyProgress: { completed, total } };
+    return calculateStreak(allHistory);
   }, [roadmaps]);
 
   useEffect(() => {
@@ -592,3 +575,5 @@ function calculateOverallProgress(roadmap: Roadmap): number {
   const completedItems = allItems.filter((item) => item.completed).length;
   return (completedItems / allItems.length) * 100;
 }
+
+    

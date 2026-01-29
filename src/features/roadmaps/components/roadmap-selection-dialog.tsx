@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -38,42 +38,18 @@ export function RoadmapSelectionDialog({
   proposedRoadmap,
   onConfirm,
 }: RoadmapSelectionDialogProps) {
-  // Store user overrides: true = checked, false = unchecked, undefined = default (checked)
   const [userOverrides, setUserOverrides] = useState<Record<string, boolean>>(
     {},
   );
 
-  // Reset overrides when roadmap changes (effectively a new session)
-  // We can use a key on the parent, but since we are inside, we can just clear overrides if ID changes?
-  // For now, simpler: just rely on the user manually unchecking things.
-  // If we want to strictly reset when `proposedRoadmap` object changes reference:
-  /*
-    const [prevRoadmap, setPrevRoadmap] = useState(proposedRoadmap);
-    if (proposedRoadmap !== prevRoadmap) {
-        setPrevRoadmap(proposedRoadmap);
-        setUserOverrides({});
-    }
-    */
-  // Actually, the useEffect pattern is fine if we suppress strict mode warning,
-  // BUT the derived state pattern is better.
-  // Let's stick to the simplest fix for the lint:
-  // Just initialize state with the values, and use key={proposedRoadmap.id} in the parent if possible.
-  // Since I can't touch parent easily, I'll use the "state from props" pattern with an effect but ensure it's clean.
-  // Actually, the lint error was "Calling setState synchronously within an effect".
-  // I can't assume the previous code was doing it synchronously because of missing dependency or something?
-  // No, it was just inside useEffect.
-
-  // Alternative: Use a key on the Dialog content content? No.
-
-  // Let's implement the "userOverrides" pattern.
-  // Default is ALL selected.
+  useEffect(() => {
+    // When a new roadmap is proposed, reset any user selections.
+    setUserOverrides({});
+  }, [proposedRoadmap]);
 
   const toggleSelection = (key: string, index: number) => {
     const id = `${key}-${index}`;
     setUserOverrides((prev) => {
-      // If currently true (default), setting to false.
-      // If currently false (overridden), setting to true (default).
-      // We can just toggle boolean.
       const isSelected = prev[id] !== false; // Default is true
       return { ...prev, [id]: !isSelected };
     });
@@ -81,7 +57,6 @@ export function RoadmapSelectionDialog({
 
   const isSelected = (key: string, index: number) => {
     const id = `${key}-${index}`;
-    // Default true, unless overridden to false
     return userOverrides[id] !== false;
   };
 
@@ -116,15 +91,6 @@ export function RoadmapSelectionDialog({
     },
   ] as const;
 
-  // Clear overrides when dialog closes or opens?
-  // Better to clear when `proposedRoadmap` changes.
-  // We can use the stash-state pattern.
-  const [prevRoadmapRef, setPrevRoadmapRef] = useState(proposedRoadmap);
-  if (proposedRoadmap !== prevRoadmapRef) {
-    setPrevRoadmapRef(proposedRoadmap);
-    setUserOverrides({});
-  }
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
@@ -147,7 +113,6 @@ export function RoadmapSelectionDialog({
                 | RoadmapItem[]
                 | undefined;
 
-              // If the proposed roadmap doesn't contain this section, don't render it.
               if (!items) {
                 return null;
               }
@@ -215,3 +180,5 @@ export function RoadmapSelectionDialog({
     </Dialog>
   );
 }
+
+    
