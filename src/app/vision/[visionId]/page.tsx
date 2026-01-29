@@ -182,6 +182,7 @@ export default function VisionDetailPage() {
       isPublic: vision.isPublic,
       completedTasks,
       sectionToRegenerate: sectionToRegenerate,
+      isPartialRegen: sectionToRegenerate !== "all",
       ...((sectionToRegenerate === "all" ||
         sectionToRegenerate === "visionTimeline") && { timelineFocus }),
       ...((sectionToRegenerate === "all" ||
@@ -660,6 +661,7 @@ export default function VisionDetailPage() {
           userName={userData?.displayName || user?.displayName}
           visionTitle={vision.title}
           visionGoal={vision.goal}
+          aiFeaturesEnabled={plan?.aiFeaturesEnabled ?? false}
         />
       )}
     </>

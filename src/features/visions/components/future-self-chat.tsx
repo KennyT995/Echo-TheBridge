@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, Sparkles, User, Loader2, X } from "lucide-react";
 import { getFutureSelfChat } from "@/app/actions";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 interface Message {
   role: "user" | "model";
@@ -25,6 +26,7 @@ interface FutureSelfChatProps {
   visionTitle: string;
   visionGoal: string;
   className?: string;
+  aiFeaturesEnabled: boolean;
 }
 
 export function FutureSelfChat({
@@ -32,6 +34,7 @@ export function FutureSelfChat({
   visionTitle,
   visionGoal,
   className,
+  aiFeaturesEnabled,
 }: FutureSelfChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -125,118 +128,137 @@ export function FutureSelfChat({
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 p-0 overflow-hidden relative">
-        <ScrollArea className="h-full p-4">
-          {messages.length === 0 && (
-            <div className="text-center text-muted-foreground mt-20 px-6">
-              <Sparkles className="w-12 h-12 mx-auto mb-4 text-indigo-200" />
-              <p className="text-sm">
-                I am you, 5 years from now. I know what you&apos;re going
-                through, and I know we make it. What&apos;s on your mind?
-              </p>
-              <div className="mt-6 space-y-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-xs"
-                  onClick={() => {
-                    setInput("I'm feeling stuck. How did we get past this?");
-                    handleSend();
-                  }}
-                >
-                  &quot;I&apos;m feeling stuck...&quot;
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start text-xs"
-                  onClick={() => {
-                    setInput("Is all this effort really worth it?");
-                    handleSend();
-                  }}
-                >
-                  &quot;Is it worth it?&quot;
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-col gap-4 pb-4">
-            {messages.map((m, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "flex gap-3",
-                  m.role === "user" ? "flex-row-reverse" : "flex-row",
-                )}
-              >
-                <Avatar className="h-8 w-8 shrink-0">
-                  {m.role === "user" ? (
-                    <>
-                      <AvatarImage src="" />
-                      <AvatarFallback>
-                        <User className="w-4 h-4" />
-                      </AvatarFallback>
-                    </>
-                  ) : (
-                    <AvatarFallback className="bg-indigo-100 text-indigo-600">
-                      <Sparkles className="w-4 h-4" />
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <div
-                  className={cn(
-                    "rounded-lg p-3 text-sm max-w-[80%]",
-                    m.role === "user"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground",
-                  )}
-                >
-                  {m.content}
-                </div>
-              </div>
-            ))}
-            {isLoading && (
-              <div className="flex gap-3">
-                <Avatar className="h-8 w-8 shrink-0">
-                  <AvatarFallback className="bg-indigo-100 text-indigo-600">
-                    <Sparkles className="w-4 h-4" />
-                  </AvatarFallback>
-                </Avatar>
-                <div className="bg-muted rounded-lg p-3 flex items-center">
-                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
-                </div>
-              </div>
-            )}
-            <div ref={scrollRef} />
+      {!aiFeaturesEnabled ? (
+        <CardContent className="flex-1 p-4 flex flex-col items-center justify-center text-center">
+          <div className="p-3 bg-indigo-100 rounded-full mb-4">
+            <Sparkles className="w-8 h-8 text-indigo-600" />
           </div>
-        </ScrollArea>
-      </CardContent>
-
-      <CardFooter className="p-3 border-t border-border bg-background/50">
-        <form
-          className="flex w-full gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
-          }}
-        >
-          <Input
-            placeholder="Message your future self..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={isLoading}
-            className="flex-1"
-          />
-          <Button
-            type="submit"
-            size="icon"
-            disabled={isLoading || !input.trim()}
-          >
-            <Send className="w-4 h-4" />
+          <h3 className="font-bold mb-2">Speak With Your Future Self</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            This is a premium feature. Upgrade to the Pathfinder plan or higher
+            to get advice from the version of you that has already achieved this
+            vision.
+          </p>
+          <Button asChild>
+            <Link href="/plans">Upgrade Your Plan</Link>
           </Button>
-        </form>
-      </CardFooter>
+        </CardContent>
+      ) : (
+        <>
+          <CardContent className="flex-1 p-0 overflow-hidden relative">
+            <ScrollArea className="h-full p-4">
+              {messages.length === 0 && (
+                <div className="text-center text-muted-foreground mt-20 px-6">
+                  <Sparkles className="w-12 h-12 mx-auto mb-4 text-indigo-200" />
+                  <p className="text-sm">
+                    I am you, 5 years from now. I know what you&apos;re going
+                    through, and I know we make it. What&apos;s on your mind?
+                  </p>
+                  <div className="mt-6 space-y-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start text-xs"
+                      onClick={() => {
+                        setInput("I'm feeling stuck. How did we get past this?");
+                        handleSend();
+                      }}
+                    >
+                      &quot;I&apos;m feeling stuck...&quot;
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start text-xs"
+                      onClick={() => {
+                        setInput("Is all this effort really worth it?");
+                        handleSend();
+                      }}
+                    >
+                      &quot;Is it worth it?&quot;
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-4 pb-4">
+                {messages.map((m, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "flex gap-3",
+                      m.role === "user" ? "flex-row-reverse" : "flex-row",
+                    )}
+                  >
+                    <Avatar className="h-8 w-8 shrink-0">
+                      {m.role === "user" ? (
+                        <>
+                          <AvatarImage src="" />
+                          <AvatarFallback>
+                            <User className="w-4 h-4" />
+                          </AvatarFallback>
+                        </>
+                      ) : (
+                        <AvatarFallback className="bg-indigo-100 text-indigo-600">
+                          <Sparkles className="w-4 h-4" />
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div
+                      className={cn(
+                        "rounded-lg p-3 text-sm max-w-[80%]",
+                        m.role === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-foreground",
+                      )}
+                    >
+                      {m.content}
+                    </div>
+                  </div>
+                ))}
+                {isLoading && (
+                  <div className="flex gap-3">
+                    <Avatar className="h-8 w-8 shrink-0">
+                      <AvatarFallback className="bg-indigo-100 text-indigo-600">
+                        <Sparkles className="w-4 h-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="bg-muted rounded-lg p-3 flex items-center">
+                      <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                    </div>
+                  </div>
+                )}
+                <div ref={scrollRef} />
+              </div>
+            </ScrollArea>
+          </CardContent>
+
+          <CardFooter className="p-3 border-t border-border bg-background/50">
+            <form
+              className="flex w-full gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSend();
+              }}
+            >
+              <Input
+                placeholder="Message your future self..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={isLoading || !input.trim()}
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </form>
+          </CardFooter>
+        </>
+      )}
     </Card>
   );
 }
