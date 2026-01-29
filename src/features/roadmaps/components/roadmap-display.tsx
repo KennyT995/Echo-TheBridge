@@ -29,6 +29,7 @@ import confetti from "canvas-confetti";
 import { triggerMilestoneCelebration } from "@/lib/celebrations";
 import { useToast } from "@/hooks/use-toast";
 import { History } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 import {
   Tooltip,
@@ -351,87 +352,95 @@ export function RoadmapDisplay({
                 </div>
 
                 <AccordionContent className="p-0">
-                  <ul className="divide-y divide-border/50">
-                    {items.map((item: RoadmapItem, index: number) => {
-                      const isEditing =
-                        editing?.section === section.key &&
-                        editing.index === index;
-                      const uniqueId = `${section.key}-${index}`;
-                      return (
-                        <li
-                          key={index}
-                          className="group flex items-start gap-3 p-4 hover:bg-muted/20 transition-colors"
-                        >
-                          <Checkbox
-                            id={`check-${uniqueId}`}
-                            checked={item.completed}
-                            onCheckedChange={(checked) =>
-                              handleCheckChange(section.key, index, !!checked)
-                            }
-                            disabled={readOnly}
-                            className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                          />
-                          <div className="flex-1 min-w-0">
-                            {isEditing ? (
-                              <Input
-                                id={`input-${uniqueId}`}
-                                value={editing.text}
-                                onChange={(e) =>
-                                  setEditing({
-                                    ...editing,
-                                    text: e.target.value,
-                                  })
-                                }
-                                onBlur={handleSaveEdit}
-                                onKeyDown={handleInputKeyDown}
-                                autoFocus
-                                className="text-base h-8"
-                              />
-                            ) : (
-                              <label
-                                htmlFor={`check-${uniqueId}`}
-                                className={cn(
-                                  "text-sm sm:text-base text-foreground/90 cursor-pointer flex-1 leading-relaxed min-w-0 break-words",
-                                  item.completed &&
-                                    "line-through text-muted-foreground opacity-70",
-                                  readOnly && "cursor-default",
-                                )}
-                              >
-                                {item.text}
-                              </label>
-                            )}
-                          </div>
-
-                          {!item.completed && !isEditing && !readOnly && (
-                            <div className="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
-                                onClick={() => handleDelete(section.key, index)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8"
-                                onClick={() =>
-                                  setEditing({
-                                    section: section.key,
-                                    index,
-                                    text: item.text,
-                                  })
-                                }
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
+                  <ScrollArea className="max-h-[400px]">
+                    <ul className="divide-y divide-border/50">
+                      {items.map((item: RoadmapItem, index: number) => {
+                        const isEditing =
+                          editing?.section === section.key &&
+                          editing.index === index;
+                        const uniqueId = `${section.key}-${index}`;
+                        return (
+                          <li
+                            key={index}
+                            className="group flex items-start gap-3 p-4 hover:bg-muted/20 transition-colors"
+                          >
+                            <Checkbox
+                              id={`check-${uniqueId}`}
+                              checked={item.completed}
+                              onCheckedChange={(checked) =>
+                                handleCheckChange(
+                                  section.key,
+                                  index,
+                                  !!checked,
+                                )
+                              }
+                              disabled={readOnly}
+                              className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                            />
+                            <div className="flex-1 min-w-0">
+                              {isEditing ? (
+                                <Input
+                                  id={`input-${uniqueId}`}
+                                  value={editing.text}
+                                  onChange={(e) =>
+                                    setEditing({
+                                      ...editing,
+                                      text: e.target.value,
+                                    })
+                                  }
+                                  onBlur={handleSaveEdit}
+                                  onKeyDown={handleInputKeyDown}
+                                  autoFocus
+                                  className="text-base h-8"
+                                />
+                              ) : (
+                                <label
+                                  htmlFor={`check-${uniqueId}`}
+                                  className={cn(
+                                    "text-sm sm:text-base text-foreground/90 cursor-pointer flex-1 leading-relaxed min-w-0 break-words",
+                                    item.completed &&
+                                      "line-through text-muted-foreground opacity-70",
+                                    readOnly && "cursor-default",
+                                  )}
+                                >
+                                  {item.text}
+                                </label>
+                              )}
                             </div>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
+
+                            {!item.completed && !isEditing && !readOnly && (
+                              <div className="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                                  onClick={() =>
+                                    handleDelete(section.key, index)
+                                  }
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() =>
+                                    setEditing({
+                                      section: section.key,
+                                      index,
+                                      text: item.text,
+                                    })
+                                  }
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </ScrollArea>
                   {!readOnly && (
                     <div className="p-2 border-t border-border/50">
                       <Button
@@ -469,34 +478,36 @@ export function RoadmapDisplay({
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-0">
-                <ul className="divide-y divide-border/50">
-                  {roadmap.history.map((item, index) => (
-                    <li
-                      key={index}
-                      className="flex items-center gap-3 p-4 hover:bg-muted/20 transition-colors"
-                    >
-                      <CheckCircle2 className="h-5 w-5 text-muted-foreground opacity-50 flex-shrink-0" />
-                      <div className="flex-1">
-                        <span className="text-sm sm:text-base text-muted-foreground line-through opacity-70">
-                          {item.text}
+                <ScrollArea className="max-h-[400px]">
+                  <ul className="divide-y divide-border/50">
+                    {roadmap.history.map((item, index) => (
+                      <li
+                        key={index}
+                        className="flex items-center gap-3 p-4 hover:bg-muted/20 transition-colors"
+                      >
+                        <CheckCircle2 className="h-5 w-5 text-muted-foreground opacity-50 flex-shrink-0" />
+                        <div className="flex-1">
+                          <span className="text-sm sm:text-base text-muted-foreground line-through opacity-70">
+                            {item.text}
+                          </span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {item.completedAt
+                            ? (item.completedAt instanceof Date
+                                ? item.completedAt
+                                : (item.completedAt as Timestamp).toDate
+                                  ? (item.completedAt as Timestamp).toDate()
+                                  : new Date(
+                                      (item.completedAt as { seconds: number })
+                                        .seconds * 1000,
+                                    )
+                              ).toLocaleDateString()
+                            : "Archived"}
                         </span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {item.completedAt
-                          ? (item.completedAt instanceof Date
-                              ? item.completedAt
-                              : (item.completedAt as Timestamp).toDate
-                                ? (item.completedAt as Timestamp).toDate()
-                                : new Date(
-                                    (item.completedAt as { seconds: number })
-                                      .seconds * 1000,
-                                  )
-                            ).toLocaleDateString()
-                          : "Archived"}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                      </li>
+                    ))}
+                  </ul>
+                </ScrollArea>
               </AccordionContent>
             </AccordionItem>
           )}
