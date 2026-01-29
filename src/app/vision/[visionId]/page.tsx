@@ -181,6 +181,7 @@ export default function VisionDetailPage() {
       category: vision.category,
       isPublic: vision.isPublic,
       completedTasks,
+      sectionToRegenerate: sectionToRegenerate,
       ...((sectionToRegenerate === "all" ||
         sectionToRegenerate === "visionTimeline") && { timelineFocus }),
       ...((sectionToRegenerate === "all" ||
