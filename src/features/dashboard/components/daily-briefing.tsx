@@ -9,8 +9,8 @@ import { useEffect, useState, useMemo } from "react";
 import { getDailyBriefing } from "@/app/actions";
 import { GenerateDailyBriefingOutput } from "@/ai/flows/generate-daily-briefing";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useUser, useFirestore } from "@/firebase";
-import { doc, onSnapshot, setDoc } from "firebase/firestore";
+import { useUser, useFirestore, setDocumentNonBlocking } from "@/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
 
 interface AntiGoal {
   id: string;
@@ -120,7 +120,7 @@ export function DailyBriefing({
     return () => unsubscribe();
   }, [user, firestore, dateKey]);
 
-  const handleAddAntiGoal = async () => {
+  const handleAddAntiGoal = () => {
     if (!newAntiGoal.trim() || !user || !firestore) return;
 
     const newItem: AntiGoal = {
@@ -132,11 +132,11 @@ export function DailyBriefing({
     const updatedList = [...antiGoals, newItem];
     const docRef = doc(firestore, "users", user.uid, "daily_plans", dateKey);
 
-    await setDoc(docRef, { antiGoals: updatedList }, { merge: true });
+    setDocumentNonBlocking(docRef, { antiGoals: updatedList }, { merge: true });
     setNewAntiGoal("");
   };
 
-  const toggleAntiGoal = async (id: string, currentStatus: boolean) => {
+  const toggleAntiGoal = (id: string, currentStatus: boolean) => {
     if (!user || !firestore) return;
 
     const updatedList = antiGoals.map((item) =>
@@ -144,14 +144,14 @@ export function DailyBriefing({
     );
 
     const docRef = doc(firestore, "users", user.uid, "daily_plans", dateKey);
-    await setDoc(docRef, { antiGoals: updatedList }, { merge: true });
+    setDocumentNonBlocking(docRef, { antiGoals: updatedList }, { merge: true });
   };
 
-  const deleteAntiGoal = async (id: string) => {
+  const deleteAntiGoal = (id: string) => {
     if (!user || !firestore) return;
     const updatedList = antiGoals.filter((item) => item.id !== id);
     const docRef = doc(firestore, "users", user.uid, "daily_plans", dateKey);
-    await setDoc(docRef, { antiGoals: updatedList }, { merge: true });
+    setDocumentNonBlocking(docRef, { antiGoals: updatedList }, { merge: true });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

@@ -224,30 +224,33 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
     if ("error" in analysisResult) {
       // Fallback to normal flow if analysis fails
       console.error(analysisResult.error);
-      await createVision(values);
-      // We will handle the "one vision" case immediately below via existing prop
-      if (onVisionCreated) onVisionCreated("fallback");
-    } else {
-      setAnalysis(analysisResult as unknown as VisionAnalysis);
-      if (analysisResult.isMultiVision) {
-        setIsLoading(false);
-        setIsConfirmOpen(true);
-        return; // Stop here and wait for dialog
-      } else {
-        // Auto-inject inferred category if missing
-        if (!values.category && analysisResult.unifiedVision.category) {
-          // We need to match the enum
-          const category = analysisResult.unifiedVision
-            .category as VisionCategory;
-          form.setValue("category", category);
-          values.category = category;
-        }
-        // Auto-inject title if missing
-        if (!values.title && analysisResult.unifiedVision.title) {
-          form.setValue("title", analysisResult.unifiedVision.title);
-          values.title = analysisResult.unifiedVision.title;
-        }
+      const vid = await createVision(values);
+      if (vid) {
+        onVisionCreated(vid);
       }
+      setIsLoading(false);
+      return;
+    }
+
+    setAnalysis(analysisResult as unknown as VisionAnalysis);
+    if (analysisResult.isMultiVision) {
+      setIsLoading(false);
+      setIsConfirmOpen(true);
+      return; // Stop here and wait for dialog
+    }
+
+    // Auto-inject inferred category if missing
+    if (!values.category && analysisResult.unifiedVision.category) {
+      // We need to match the enum
+      const category = analysisResult.unifiedVision
+        .category as VisionCategory;
+      form.setValue("category", category);
+      values.category = category;
+    }
+    // Auto-inject title if missing
+    if (!values.title && analysisResult.unifiedVision.title) {
+      form.setValue("title", analysisResult.unifiedVision.title);
+      values.title = analysisResult.unifiedVision.title;
     }
 
     // Proceed to creation (Unified or Single Normal)

@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useUser, useAuth } from "@/firebase";
+import { useUser } from "@/firebase";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image from "next/image";
@@ -21,8 +21,6 @@ import { mainNavLinks } from "@/lib/navigation";
 
 export default function HeaderClient() {
   const { user, isUserLoading } = useUser();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _auth = useAuth(); // Keeping import but renaming to suppress unused if needed
   const [open, setOpen] = useState(false);
 
   const authSection = (
