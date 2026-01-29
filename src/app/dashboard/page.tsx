@@ -233,27 +233,6 @@ export default function DashboardPage() {
   }, [roadmaps]);
 
   useEffect(() => {
-    // This useEffect seems to be incomplete or referencing undefined variables like 'complete' and 'vision'.
-    // Assuming it was meant to be part of a conditional block or a different logic.
-    // For now, I'm adding a placeholder comment and fixing the syntax.
-    // If 'complete' and 'vision' are meant to be defined elsewhere, they should be added.
-    // As per the instruction, I'm just restoring a missing brace to make it syntactically valid.
-    // The original code had an extra '}' after the setCompletedRoadmap call, making it invalid.
-    // The instruction implies a missing brace *before* the setCompletedRoadmap, but the context
-    // suggests the existing `}` was misplaced.
-    // Given the instruction "restore missing brace" and the provided snippet,
-    // the most likely fix to make the code syntactically correct is to remove the extra `}`.
-    // However, if the intent was to wrap `setCompletedRoadmap` in a block, that block is missing.
-    // Without further context, I will remove the extra `}` to fix the immediate syntax error.
-    // If 'complete' and 'vision' are indeed undefined, this line will still cause a runtime error.
-    // The instruction is to restore a missing brace, not to fix logical errors.
-    // The snippet shows `setCompletedRoadmap(...) } }`, which is an extra `}`.
-    // The instruction's snippet `setCompletedRoadmap({ id: complete.id, visionTitle: vision?.title || 'Unknown Vision' }); }`
-    // implies that the `}` should be there, but the full code has `}}`.
-    // Let's assume the instruction meant to add a block around `setCompletedRoadmap` if it was missing,
-    // but the current code has an extra `}`.
-    // The most faithful interpretation of "restore missing brace" in the context of the provided snippet
-    // `setCompletedRoadmap({ id: complete.id, visionTitle: vision?.title || 'Unknown Vision' }); }`
     if (!roadmaps || !visions) return;
 
     // Check if any roadmap just hit 100%
@@ -281,8 +260,6 @@ export default function DashboardPage() {
         title: "Visions Created",
         description: "Your new visions have been added to your dashboard.",
       });
-      // We are already on the dashboard, and the subscription will auto-update
-      // passing 'dashboard' prevents redirection to /vision/dashboard (which is invalid)
     } else {
       toast({
         title: "Success!",
@@ -430,15 +407,6 @@ export default function DashboardPage() {
                   const progress = visionRoadmap
                     ? calculateOverallProgress(visionRoadmap)
                     : 0;
-                  const allItems = visionRoadmap
-                    ? [
-                        ...(visionRoadmap.dailyHabits || []),
-                        ...(visionRoadmap.weeklyTactics || []),
-                        ...(visionRoadmap.monthlySprints || []),
-                        ...(visionRoadmap.yearlyMilestones || []),
-                      ]
-                    : [];
-                  const totalTasks = allItems.length;
 
                   return (
                     <Card key={vision.id} className="flex flex-col">
@@ -499,7 +467,6 @@ export default function DashboardPage() {
                             </div>
                             <BridgeVisualizer
                               progress={progress}
-                              totalPlanks={Math.min(totalTasks, 15)}
                               className="h-10"
                             />
                           </div>
@@ -626,7 +593,6 @@ export default function DashboardPage() {
   );
 }
 
-// Add this helper function at the top or inside the component
 function calculateOverallProgress(roadmap: Roadmap): number {
   const allItems = [
     ...(roadmap.dailyHabits || []),
@@ -638,5 +604,3 @@ function calculateOverallProgress(roadmap: Roadmap): number {
   const completedItems = allItems.filter((item) => item.completed).length;
   return (completedItems / allItems.length) * 100;
 }
-
-    
