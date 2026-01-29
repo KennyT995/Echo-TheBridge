@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { EditVisionDialog } from "@/features/visions/components/edit-vision-dialog";
-import { getReflection, generateRoadmap } from "@/app/actions";
+import { getReflection, generateRoadmap, deleteVision } from "@/app/actions";
 import type { GenerateRoadmapFromVisionInput } from "@/ai/flows/generate-roadmap-from-vision";
 import { RoadmapSelectionDialog } from "@/features/roadmaps/components/roadmap-selection-dialog";
 import { RoadmapDisplay } from "@/features/roadmaps/components/roadmap-display";
@@ -63,7 +63,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
-  deleteDocumentNonBlocking,
   updateDocumentNonBlocking,
 } from "@/firebase/non-blocking-updates";
 import { useToast } from "@/hooks/use-toast";
@@ -89,6 +88,7 @@ export default function VisionDetailPage() {
       ? `${window.location.origin}/share/${user.uid}/${visionId}`
       : "";
   const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
   const deleteConfirmationPhrase = "I want to delete this vision";
 
   const [isRefocusModalOpen, setRefocusModalOpen] = useState(false);
@@ -272,15 +272,25 @@ export default function VisionDetailPage() {
     setRefocusModalOpen(true);
   };
 
-  const handleDelete = () => {
-    if (visionRef && roadmapRef) {
-      deleteDocumentNonBlocking(visionRef);
-      deleteDocumentNonBlocking(roadmapRef);
+  const handleDelete = async () => {
+    if (!visionId || !user) return;
+    setIsDeleting(true);
+
+    const result = await deleteVision(visionId as string, user.uid);
+
+    if (result.success) {
       toast({
         title: "Vision Deleted",
-        description: "Your vision has been removed.",
+        description: "Your vision and its roadmap have been removed.",
       });
       router.push("/dashboard");
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: result.error || "Failed to delete vision.",
+      });
+      setIsDeleting(false);
     }
   };
 
@@ -422,11 +432,15 @@ export default function VisionDetailPage() {
                     <AlertDialogAction
                       onClick={handleDelete}
                       disabled={
-                        deleteConfirmationInput !== deleteConfirmationPhrase
+                        deleteConfirmationInput !== deleteConfirmationPhrase ||
+                        isDeleting
                       }
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      Delete Vision
+                      {isDeleting && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      {isDeleting ? "Deleting..." : "Delete Vision"}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

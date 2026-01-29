@@ -9,7 +9,7 @@ import {
   useMemoFirebase,
 } from "@/firebase";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import Loading from "../loading";
 
 import { Button } from "@/components/ui/button";
@@ -77,6 +77,14 @@ import { CrossingCelebration } from "@/features/roadmaps/components/crossing-cel
 import { WeeklyRetroDialog } from "@/features/journal/components/weekly-retro-dialog";
 import { BridgeVisualizer } from "@/features/roadmaps/components/bridge-visualizer";
 import { usePlan } from "@/hooks/use-plan";
+
+function usePrevious<T>(value: T) {
+  const ref = useRef<T>();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -182,6 +190,8 @@ export default function DashboardPage() {
     useDoc<UserData>(userDocRef);
   const { plan, isPlanLoading } = usePlan(userData);
 
+  const prevRoadmaps = usePrevious(roadmaps);
+
   const roadmapsById = useMemo(() => {
     return (
       roadmaps?.reduce(
@@ -203,18 +213,29 @@ export default function DashboardPage() {
   }, [roadmaps]);
 
   useEffect(() => {
-    if (!roadmaps || !visions) return;
+    if (!roadmaps || !visions || !prevRoadmaps) return;
 
-    // Check if any roadmap just hit 100%
-    const complete = roadmaps.find((r) => calculateOverallProgress(r) === 100);
-    if (complete) {
-      const vision = visions.find((v) => v.id === complete.visionId);
+    // Find a roadmap that just newly reached 100%
+    const newlyCompleted = roadmaps.find((roadmap) => {
+      const prevRoadmap = prevRoadmaps.find((pr) => pr.id === roadmap.id);
+      // Don't celebrate on initial load if it's already 100%
+      if (!prevRoadmap) {
+        return false;
+      }
+
+      const prevProgress = calculateOverallProgress(prevRoadmap);
+      const currentProgress = calculateOverallProgress(roadmap);
+      return currentProgress === 100 && prevProgress < 100;
+    });
+
+    if (newlyCompleted) {
+      const vision = visions.find((v) => v.id === newlyCompleted.visionId);
       setCompletedRoadmap({
-        id: complete.id,
+        id: newlyCompleted.id,
         visionTitle: vision?.title || "Unknown Vision",
       });
     }
-  }, [roadmaps, visions]);
+  }, [roadmaps, visions, prevRoadmaps]);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
