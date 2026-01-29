@@ -438,7 +438,7 @@ export function RoadmapDisplay({
                             )}
                           </li>
                         );
-                      })}
+})}
                     </ul>
                   </ScrollArea>
                   {!readOnly && (
@@ -457,7 +457,7 @@ export function RoadmapDisplay({
                 </AccordionContent>
               </AccordionItem>
             );
-          })}
+})}
 
           {roadmap.history && roadmap.history.length > 0 && (
             <AccordionItem
