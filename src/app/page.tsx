@@ -16,7 +16,7 @@ const featureData = [
     icon: Target,
     title: "Define Your Vision",
     description:
-      "Structure your long-term aspirations across different life categories and time horizons, from 2 to 10 years.",
+      "Articulate your most ambitious goals. Our AI helps you clarify your destination, from 2 to 10 years out.",
     image: placeholderData.features[0].image,
     hint: placeholderData.features[0].hint,
   },
@@ -24,7 +24,7 @@ const featureData = [
     icon: Rocket,
     title: "Generate Your Roadmap",
     description:
-      "Our AI reverse-engineers your vision into a concrete, actionable plan with yearly, monthly, weekly, and daily goals.",
+      "Watch as our AI instantly builds your strategic roadmap. It reverse-engineers your goal into daily habits, weekly tactics, and yearly milestones.",
     image: placeholderData.features[1].image,
     hint: placeholderData.features[1].hint,
   },
@@ -32,7 +32,7 @@ const featureData = [
     icon: BrainCircuit,
     title: "Stay on Track with AI Coach",
     description:
-      "Check in with your AI coach to analyze progress, celebrate wins, and get strategic advice to overcome obstacles.",
+      "Your AI partner is always on hand. Get strategic briefings, celebrate wins, and find solutions to obstacles on your path to success.",
     image: placeholderData.features[2].image,
     hint: placeholderData.features[2].hint,
   },
