@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -240,7 +241,7 @@ export default function DashboardPage() {
     // The original code had an extra '}' after the setCompletedRoadmap call, making it invalid.
     // The instruction implies a missing brace *before* the setCompletedRoadmap, but the context
     // suggests the existing `}` was misplaced.
-    // Given the instruction "Restore missing brace" and the provided snippet,
+    // Given the instruction "restore missing brace" and the provided snippet,
     // the most likely fix to make the code syntactically correct is to remove the extra `}`.
     // However, if the intent was to wrap `setCompletedRoadmap` in a block, that block is missing.
     // Without further context, I will remove the extra `}` to fix the immediate syntax error.
@@ -426,13 +427,18 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {visions.map((vision) => {
                   const visionRoadmap = roadmapsById[vision.id];
-                  const dailyHabits = visionRoadmap?.dailyHabits || [];
-                  const totalHabits = dailyHabits.length;
-                  const completedHabits = dailyHabits.filter(
-                    (h) => h.completed,
-                  ).length;
-                  const progress =
-                    totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0;
+                  const progress = visionRoadmap
+                    ? calculateOverallProgress(visionRoadmap)
+                    : 0;
+                  const allItems = visionRoadmap
+                    ? [
+                        ...(visionRoadmap.dailyHabits || []),
+                        ...(visionRoadmap.weeklyTactics || []),
+                        ...(visionRoadmap.monthlySprints || []),
+                        ...(visionRoadmap.yearlyMilestones || []),
+                      ]
+                    : [];
+                  const totalTasks = allItems.length;
 
                   return (
                     <Card key={vision.id} className="flex flex-col">
@@ -445,9 +451,9 @@ export default function DashboardPage() {
                             Created{" "}
                             {vision.createdAt && toJsDate(vision.createdAt)
                               ? formatDistanceToNow(
-                                toJsDate(vision.createdAt)!,
-                                { addSuffix: true },
-                              )
+                                  toJsDate(vision.createdAt)!,
+                                  { addSuffix: true },
+                                )
                               : "just now"}
                           </CardDescription>
                         </div>
@@ -481,11 +487,11 @@ export default function DashboardPage() {
                           {vision.goal || "No goal description provided."}
                         </p>
 
-                        {totalHabits > 0 ? (
+                        {visionRoadmap ? (
                           <div className="pt-2">
                             <div className="flex justify-between items-end mb-1">
                               <span className="text-xs font-medium text-muted-foreground">
-                                Today&apos;s Bridge
+                                Overall Progress
                               </span>
                               <span className="text-xs font-bold text-primary">
                                 {Math.round(progress)}%
@@ -493,13 +499,13 @@ export default function DashboardPage() {
                             </div>
                             <BridgeVisualizer
                               progress={progress}
-                              totalPlanks={Math.min(totalHabits, 10)}
+                              totalPlanks={Math.min(totalTasks, 15)}
                               className="h-10"
                             />
                           </div>
                         ) : (
                           <div className="pt-2 text-xs text-muted-foreground italic text-center">
-                            No habits set for today yet.
+                            No roadmap generated yet.
                           </div>
                         )}
                       </CardContent>
@@ -632,3 +638,5 @@ function calculateOverallProgress(roadmap: Roadmap): number {
   const completedItems = allItems.filter((item) => item.completed).length;
   return (completedItems / allItems.length) * 100;
 }
+
+    
