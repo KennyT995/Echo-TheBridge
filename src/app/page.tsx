@@ -14,25 +14,25 @@ export const metadata: Metadata = {
 const featureData = [
   {
     icon: Target,
-    title: "Define Your Vision",
+    title: "Clarify Your North Star",
     description:
-      "Articulate your most ambitious goals. Our AI helps you clarify your destination, from 2 to 10 years out.",
+      "Pinpoint your ultimate goal. Our AI asks the right questions to help you define a clear, compelling vision for your future.",
     image: placeholderData.features[0].image,
     hint: placeholderData.features[0].hint,
   },
   {
     icon: Rocket,
-    title: "Generate Your Roadmap",
+    title: "Architect Your Inevitable Path",
     description:
-      "Watch as our AI instantly builds your strategic roadmap. It reverse-engineers your goal into daily habits, weekly tactics, and yearly milestones.",
+      "Get your personalized action plan. The AI reverse-engineers your vision into concrete yearly milestones, monthly sprints, weekly tactics, and daily habits.",
     image: placeholderData.features[1].image,
     hint: placeholderData.features[1].hint,
   },
   {
     icon: BrainCircuit,
-    title: "Stay on Track with AI Coach",
+    title: "Execute with an AI Co-pilot",
     description:
-      "Your AI partner is always on hand. Get strategic briefings, celebrate wins, and find solutions to obstacles on your path to success.",
+      "Stay aligned and motivated. Your AI coach provides strategic insights, celebrates your progress, and helps you navigate any obstacle along the way.",
     image: placeholderData.features[2].image,
     hint: placeholderData.features[2].hint,
   },
@@ -84,7 +84,7 @@ export default function HomePage() {
                 How It Works
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                A simple, powerful process to turn your aspirations into
+                A simple, powerful three-step process to turn your aspirations into
                 achievements.
               </p>
             </div>
