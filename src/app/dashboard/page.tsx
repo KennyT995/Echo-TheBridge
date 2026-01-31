@@ -82,7 +82,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 function usePrevious<T>(value: T) {
-  const ref = useRef<T>();
+  const ref = useRef<T | undefined>(undefined);
   useEffect(() => {
     ref.current = value;
   });
