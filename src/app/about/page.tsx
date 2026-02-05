@@ -1,4 +1,12 @@
 import type { Metadata } from "next";
+import NextImage from "next/image";
+import placeholderData from "@/app/lib/placeholder-images.json";
+
+interface TeamMember {
+  name: string;
+  role: string;
+  img: string;
+}
 
 export const metadata: Metadata = {
   title: "About Us | Echo: The Bridge",
@@ -32,6 +40,38 @@ export default function AboutPage() {
           with a plan can change your life.
         </p>
       </div>
+
+      <div className="mt-24">
+        <h2 className="font-headline text-3xl font-bold mb-12 text-center">
+          The Architects Behind the Bridge
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {(placeholderData.about.members as TeamMember[]).map((member) => (
+            <div
+              key={member.name}
+              className="group relative overflow-hidden rounded-3xl bg-secondary/20 border border-border/50 p-6 transition-all duration-500 hover:-translate-y-2 hover:bg-secondary/30"
+            >
+              <div className="relative aspect-square mb-6 overflow-hidden rounded-2xl border border-border/50">
+                <NextImage
+                  src={member.img}
+                  alt={member.name}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+              </div>
+              <h3 className="text-xl font-bold mb-1">{member.name}</h3>
+              <p className="text-primary font-medium text-sm mb-4">
+                {member.role}
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Expert in their field, dedicated to building the future of
+                personal productivity and AI coaching.
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
+

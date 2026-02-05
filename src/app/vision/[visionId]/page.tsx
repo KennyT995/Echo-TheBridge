@@ -26,7 +26,6 @@ import {
   Vision,
   Roadmap,
   UserData,
-  PlanTier,
   RoadmapSectionKey,
   VisionFormValues,
 } from "@/lib/types";
@@ -68,6 +67,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePlan } from "@/hooks/use-plan";
+import { BridgeVisualizer } from "@/features/roadmaps/components/bridge-visualizer";
+import { calculateOverallProgress } from "@/lib/utils";
 
 export default function VisionDetailPage() {
   const { visionId } = useParams();
@@ -220,12 +221,12 @@ export default function VisionDetailPage() {
       sectionToRegenerate && sectionToRegenerate !== "all"
         ? [sectionToRegenerate]
         : [
-            "visionTimeline",
-            "yearlyMilestones",
-            "monthlySprints",
-            "weeklyTactics",
-            "dailyHabits",
-          ];
+          "visionTimeline",
+          "yearlyMilestones",
+          "monthlySprints",
+          "weeklyTactics",
+          "dailyHabits",
+        ];
 
     // Archive completed tasks from the sections we are about to overwrite
     sectionsToProcess.forEach((section) => {
@@ -451,6 +452,19 @@ export default function VisionDetailPage() {
           <p className="text-lg text-muted-foreground max-w-3xl mb-6">
             {vision.goal}
           </p>
+
+          <div className="bg-muted/30 p-6 rounded-xl border border-border/50 max-w-2xl">
+            <div className="flex justify-between items-end mb-2">
+              <span className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Overall Progress</span>
+              <span className="text-2xl font-bold text-primary">
+                {Math.round(calculateOverallProgress(roadmap))}%
+              </span>
+            </div>
+            <BridgeVisualizer
+              progress={calculateOverallProgress(roadmap)}
+              className="h-20"
+            />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -570,59 +584,59 @@ export default function VisionDetailPage() {
           <div className="py-4 space-y-4 max-h-[70vh] overflow-y-auto">
             {(sectionToRegenerate === "all" ||
               sectionToRegenerate === "visionTimeline") && (
-              <div className="space-y-2">
-                <Label>Timeline Focus</Label>
-                <Textarea
-                  placeholder="e.g., Establish the foundation, then scale."
-                  value={timelineFocus}
-                  onChange={(e) => setTimelineFocus(e.target.value)}
-                />
-              </div>
-            )}
+                <div className="space-y-2">
+                  <Label>Timeline Focus</Label>
+                  <Textarea
+                    placeholder="e.g., Establish the foundation, then scale."
+                    value={timelineFocus}
+                    onChange={(e) => setTimelineFocus(e.target.value)}
+                  />
+                </div>
+              )}
             {(sectionToRegenerate === "all" ||
               sectionToRegenerate === "yearlyMilestones") && (
-              <div className="space-y-2">
-                <Label>Yearly Focus</Label>
-                <Textarea
-                  placeholder="e.g., Secure major funding round."
-                  value={yearlyFocus}
-                  onChange={(e) => setYearlyFocus(e.target.value)}
-                />
-              </div>
-            )}
+                <div className="space-y-2">
+                  <Label>Yearly Focus</Label>
+                  <Textarea
+                    placeholder="e.g., Secure major funding round."
+                    value={yearlyFocus}
+                    onChange={(e) => setYearlyFocus(e.target.value)}
+                  />
+                </div>
+              )}
             {(sectionToRegenerate === "all" ||
               sectionToRegenerate === "monthlySprints") && (
-              <div className="space-y-2">
-                <Label>Monthly Focus</Label>
-                <Textarea
-                  placeholder="e.g., Onboard first 100 paying customers."
-                  value={monthlyFocus}
-                  onChange={(e) => setMonthlyFocus(e.target.value)}
-                />
-              </div>
-            )}
+                <div className="space-y-2">
+                  <Label>Monthly Focus</Label>
+                  <Textarea
+                    placeholder="e.g., Onboard first 100 paying customers."
+                    value={monthlyFocus}
+                    onChange={(e) => setMonthlyFocus(e.target.value)}
+                  />
+                </div>
+              )}
             {(sectionToRegenerate === "all" ||
               sectionToRegenerate === "weeklyTactics") && (
-              <div className="space-y-2">
-                <Label>Weekly Focus</Label>
-                <Textarea
-                  placeholder="e.g., Ship two new feature updates."
-                  value={weeklyFocus}
-                  onChange={(e) => setWeeklyFocus(e.target.value)}
-                />
-              </div>
-            )}
+                <div className="space-y-2">
+                  <Label>Weekly Focus</Label>
+                  <Textarea
+                    placeholder="e.g., Ship two new feature updates."
+                    value={weeklyFocus}
+                    onChange={(e) => setWeeklyFocus(e.target.value)}
+                  />
+                </div>
+              )}
             {(sectionToRegenerate === "all" ||
               sectionToRegenerate === "dailyHabits") && (
-              <div className="space-y-2">
-                <Label>Daily Focus</Label>
-                <Textarea
-                  placeholder="e.g., Stick to a consistent morning routine."
-                  value={dailyFocus}
-                  onChange={(e) => setDailyFocus(e.target.value)}
-                />
-              </div>
-            )}
+                <div className="space-y-2">
+                  <Label>Daily Focus</Label>
+                  <Textarea
+                    placeholder="e.g., Stick to a consistent morning routine."
+                    value={dailyFocus}
+                    onChange={(e) => setDailyFocus(e.target.value)}
+                  />
+                </div>
+              )}
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setRefocusModalOpen(false)}>
@@ -640,6 +654,7 @@ export default function VisionDetailPage() {
 
       {proposedRoadmap && (
         <RoadmapSelectionDialog
+          key={proposedRoadmap.id}
           isOpen={!!proposedRoadmap}
           onOpenChange={(open) => !open && setProposedRoadmap(null)}
           proposedRoadmap={proposedRoadmap}

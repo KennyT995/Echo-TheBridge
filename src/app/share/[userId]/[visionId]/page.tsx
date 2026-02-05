@@ -17,10 +17,14 @@ import {
   GanttChartSquare,
   Rocket,
   ShieldAlert,
+  CircleDot,
+  Flag,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { BridgeVisualizer } from "@/features/roadmaps/components/bridge-visualizer";
+import { calculateOverallProgress, cn } from "@/lib/utils";
 
 // Since this is a public page, we can't use our standard hooks.
 // We initialize a temporary client-side Firebase instance.
@@ -71,7 +75,7 @@ export default function SharePage() {
           e instanceof Error ? e.message : "An unknown error occurred";
         setError(
           errorMessage ||
-            "Failed to fetch vision data. The link may be incorrect or the vision may no longer be public.",
+          "Failed to fetch vision data. The link may be incorrect or the vision may no longer be public.",
         );
       } finally {
         setIsLoading(false);
@@ -102,43 +106,81 @@ export default function SharePage() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           ) : vision ? (
-            <>
-              <CardDescription className="text-xl font-semibold">
-                {vision.title}
-              </CardDescription>
-              <p className="text-muted-foreground max-w-prose mx-auto">
-                {vision.goal}
-              </p>
-              {roadmap && roadmap.yearlyMilestones.length > 0 && (
-                <div className="pt-4 text-left">
-                  <h3 className="font-bold text-xl mb-4 flex items-center justify-center gap-2">
-                    <GanttChartSquare /> Yearly Milestones
-                  </h3>
-                  <ul className="space-y-3">
-                    {roadmap.yearlyMilestones.map((item, index) => (
-                      <li
-                        key={index}
-                        className="flex items-start gap-3 bg-muted/20 p-3 rounded-lg"
-                      >
-                        <CheckCircle2
-                          className={`h-5 w-5 mt-1 flex-shrink-0 ${item.completed ? "text-green-500" : "text-muted-foreground/50"}`}
-                        />
-                        <span
-                          className={`${item.completed ? "line-through text-muted-foreground" : ""}`}
-                        >
-                          {item.text}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+            <div className="space-y-8">
+              <div className="space-y-2">
+                <CardDescription className="text-2xl font-bold text-primary">
+                  {vision.title}
+                </CardDescription>
+                <p className="text-muted-foreground max-w-prose mx-auto italic">
+                  &quot;{vision.goal}&quot;
+                </p>
+              </div>
+
+              {roadmap && (
+                <div className="space-y-6">
+                  <div className="bg-muted/30 p-6 rounded-xl border border-border/50">
+                    <div className="flex justify-between items-end mb-2">
+                      <span className="text-sm font-medium text-muted-foreground">Building the Bridge</span>
+                      <span className="text-lg font-bold text-primary">
+                        {Math.round(calculateOverallProgress(roadmap))}%
+                      </span>
+                    </div>
+                    <BridgeVisualizer
+                      progress={calculateOverallProgress(roadmap)}
+                      className="h-16"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                    {/* Yearly Milestones */}
+                    {roadmap.yearlyMilestones.length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="font-bold flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                          <GanttChartSquare className="h-4 w-4" /> Yearly Focus
+                        </h4>
+                        <ul className="space-y-2">
+                          {roadmap.yearlyMilestones.slice(0, 3).map((item, idx) => (
+                            <li key={idx} className="text-sm flex gap-2">
+                              <CheckCircle2 className={cn("h-4 w-4 shrink-0 mt-0.5", item.completed ? "text-green-500" : "text-muted-foreground/30")} />
+                              <span className={item.completed ? "line-through text-muted-foreground" : ""}>{item.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {/* Vision Timeline */}
+                    {roadmap.visionTimeline && roadmap.visionTimeline.length > 0 && (
+                      <div className="space-y-3">
+                        <h4 className="font-bold flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                          <Flag className="h-4 w-4" /> The Long Game
+                        </h4>
+                        <ul className="space-y-2">
+                          {roadmap.visionTimeline.slice(0, 3).map((item, idx) => (
+                            <li key={idx} className="text-sm flex gap-2">
+                              <CircleDot className={cn("h-4 w-4 shrink-0 mt-0.5", item.completed ? "text-emerald-500" : "text-muted-foreground/30")} />
+                              <span className={item.completed ? "line-through text-muted-foreground" : ""}>{item.text}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-indigo-50 dark:bg-indigo-950/20 p-4 rounded-lg text-sm text-indigo-700 dark:text-indigo-300">
+                    <p>This is a live roadmap generated by Echo&apos;s AI. The user is currently executing these steps to manifest their vision.</p>
+                  </div>
                 </div>
               )}
-            </>
+            </div>
           ) : null}
-          <div className="pt-6">
-            <Button asChild>
-              <Link href="/">Create Your Own Vision with Echo: The Bridge</Link>
+          <div className="pt-8 flex flex-col items-center gap-4">
+            <Button asChild size="lg" className="bg-indigo-600 hover:bg-indigo-700">
+              <Link href="/">Architect Your Own Future</Link>
             </Button>
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
+              Powered by Echo: The Bridge
+            </p>
           </div>
         </CardContent>
       </Card>

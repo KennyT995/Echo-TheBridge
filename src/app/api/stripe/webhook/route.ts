@@ -28,14 +28,23 @@ export async function POST(request: Request) {
   }
 
   const session = event.data.object as Stripe.Checkout.Session;
-  const userId = session?.metadata?.firebaseUID;
   const subscription = event.data.object as Stripe.Subscription;
+
+  // Try to get userId from metadata (session or subscription)
+  let userId = session?.metadata?.firebaseUID || subscription?.metadata?.firebaseUID;
+
+  // If no UID in metadata, try to get it from customer metadata
+  if (!userId && (session.customer || subscription.customer)) {
+    const customerId = (session.customer || subscription.customer) as string;
+    const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
+    userId = customer?.metadata?.firebaseUID;
+  }
 
   if (!userId) {
     console.warn(
-      `No firebaseUID found in webhook metadata for event: ${event.id}`,
+      `No firebaseUID found for event: ${event.id} (type: ${event.type})`,
     );
-    return new NextResponse("Webhook error: Missing firebaseUID in metadata.", {
+    return new NextResponse("Webhook error: Missing firebaseUID.", {
       status: 400,
     });
   }

@@ -67,6 +67,11 @@ export async function POST(request: Request) {
       ],
       success_url: `${appUrl}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/plans`,
+      subscription_data: {
+        metadata: {
+          firebaseUID: userId,
+        },
+      },
       metadata: {
         firebaseUID: userId,
       },

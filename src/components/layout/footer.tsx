@@ -5,8 +5,15 @@ import { Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { footerContent } from "@/lib/navigation";
+import { useEffect, useState } from "react";
 
 export default function Footer() {
+  const [year, setYear] = useState<number | string>(2024);
+
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+
   return (
     <footer className="bg-secondary/30 border-t border-border/50 pt-16 pb-8">
       <div className="container mx-auto px-4">
@@ -79,7 +86,7 @@ export default function Footer() {
             </p>
             <div className="flex gap-2">
               <Input placeholder="Enter your email" className="bg-background" />
-              <Button size="icon" variant="ghost" aria-label="Social link">
+              <Button size="icon" variant="ghost" className="hover:text-primary transition-all hover:scale-110" aria-label="Subscribe to newsletter">
                 <Rocket className="h-4 w-4" suppressHydrationWarning />
                 <span className="sr-only">Subscribe</span>
               </Button>
@@ -89,8 +96,7 @@ export default function Footer() {
 
         <div className="border-t border-border/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>
-            &copy; {new Date().getFullYear()} Echo: The Bridge. All rights
-            reserved.
+            &copy; {year} Echo: The Bridge. All rights reserved.
           </p>
           <div className="flex gap-6">
             <Link

@@ -16,8 +16,8 @@ import {
 import { UserNav } from "./user-nav";
 import AppSidebar from "./app-sidebar";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
-
 import { mainNavLinks } from "@/lib/navigation";
+import { ModeToggle } from "./mode-toggle";
 
 export default function HeaderClient() {
   const { user, isUserLoading } = useUser();
@@ -26,6 +26,7 @@ export default function HeaderClient() {
   const authSection = (
     <div className="hidden md:flex items-center gap-2">
       <InstallPrompt />
+      <ModeToggle />
       {isUserLoading ? (
         <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
       ) : user ? (
@@ -69,59 +70,62 @@ export default function HeaderClient() {
 
         <div className="flex flex-1 items-center justify-end gap-2 md:gap-4">
           {authSection}
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                aria-label="Open menu"
-              >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] p-0">
-              <SheetHeader className="p-4 border-b">
-                <SheetTitle>Menu</SheetTitle>
-                <SheetDescription className="sr-only">
-                  Navigation menu for accessing pages and user account.
-                </SheetDescription>
-              </SheetHeader>
-              {user ? (
-                <AppSidebar onLinkClick={() => setOpen(false)} />
-              ) : (
-                <div className="flex flex-col h-full">
-                  <nav className="flex flex-col gap-2 p-4">
-                    {mainNavLinks.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
-                  </nav>
-                  <div className="mt-auto p-4 border-t">
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        asChild
-                        variant="outline"
-                        className="w-full justify-start"
-                      >
-                        <Link href="/login">Login</Link>
-                      </Button>
-                      <Button asChild className="w-full justify-start">
-                        <Link href="/login">Sign Up</Link>
-                      </Button>
+          <div className="md:hidden flex items-center gap-2">
+            <ModeToggle />
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden"
+                  aria-label="Open menu"
+                >
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle Menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] p-0">
+                <SheetHeader className="p-4 border-b">
+                  <SheetTitle>Menu</SheetTitle>
+                  <SheetDescription className="sr-only">
+                    Navigation menu for accessing pages and user account.
+                  </SheetDescription>
+                </SheetHeader>
+                {user ? (
+                  <AppSidebar onLinkClick={() => setOpen(false)} />
+                ) : (
+                  <div className="flex flex-col h-full">
+                    <nav className="flex flex-col gap-2 p-4">
+                      {mainNavLinks.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setOpen(false)}
+                          className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md hover:bg-muted"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </nav>
+                    <div className="mt-auto p-4 border-t">
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          asChild
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
+                          <Link href="/login">Login</Link>
+                        </Button>
+                        <Button asChild className="w-full justify-start">
+                          <Link href="/login">Sign Up</Link>
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </SheetContent>
-          </Sheet>
+                )}
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </header>

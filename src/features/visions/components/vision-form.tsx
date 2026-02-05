@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { generateRoadmap, getVisionIdeas, analyzeVision } from "@/app/actions";
+import { generateRoadmap, analyzeVision } from "@/app/actions";
 import {
   VisionFormSchema,
   type VisionFormValues,
@@ -29,94 +29,16 @@ import {
   type VisionCategory,
 } from "@/lib/types";
 import { VisionConfirmationDialog } from "./vision-confirmation-dialog";
+import { VisionInspiration } from "./vision-inspiration";
 
 import { useToast } from "@/hooks/use-toast";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface VisionFormProps {
   onVisionCreated: (visionId: string) => void;
 }
 
-function VisionInspiration({
-  onSelectIdea,
-}: {
-  onSelectIdea: (idea: string) => void;
-}) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [keywords, setKeywords] = useState("");
-  const [ideas, setIdeas] = useState<string[]>([]);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleGenerateIdeas = async () => {
-    setIsLoading(true);
-    setError(null);
-    setIdeas([]);
-    const result = await getVisionIdeas(keywords);
-    if (result.error) {
-      setError(result.error);
-    } else if (result.ideas) {
-      setIdeas(result.ideas);
-    }
-    setIsLoading(false);
-  };
-
-  return (
-    <Card className="bg-muted/30 border-dashed border-primary/50">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Sparkles className="text-primary h-5 w-5" />
-          Need Inspiration?
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label className="text-sm font-medium">Enter some keywords</Label>
-          <div className="flex gap-2">
-            <Input
-              placeholder="e.g., technology, education, community"
-              value={keywords}
-              onChange={(e) => setKeywords(e.target.value)}
-              disabled={isLoading}
-            />
-            <Button
-              onClick={handleGenerateIdeas}
-              disabled={isLoading || !keywords}
-              type="button"
-            >
-              {isLoading ? <Loader2 className="animate-spin" /> : "Inspire Me"}
-            </Button>
-          </div>
-        </div>
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        {ideas.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-medium">Here are a few ideas:</h4>
-            <ul className="space-y-2">
-              {ideas.map((idea, index) => (
-                <li key={index}>
-                  <Button
-                    variant="link"
-                    className="p-0 h-auto text-left whitespace-normal"
-                    onClick={() => onSelectIdea(idea)}
-                    type="button"
-                  >
-                    {idea}
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
 
 interface VisionAnalysis {
   isMultiVision: boolean;
@@ -232,7 +154,7 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
       return;
     }
 
-    setAnalysis(analysisResult as unknown as VisionAnalysis);
+    setAnalysis(analysisResult as VisionAnalysis);
     if (analysisResult.isMultiVision) {
       setIsLoading(false);
       setIsConfirmOpen(true);

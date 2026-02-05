@@ -89,10 +89,21 @@ export default {
             height: "0",
           },
         },
+        "subtle-zoom": {
+          "0%": { transform: "scale(1)" },
+          "100%": { transform: "scale(1.1)" },
+        },
+        "loading-bar": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(300%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "subtle-zoom": "subtle-zoom 20s infinite alternate linear",
+        "bounce-slow": "bounce 3s infinite",
+        "loading-bar": "loading-bar 1.5s infinite ease-in-out",
       },
     },
   },

@@ -280,33 +280,46 @@ export function DailyBriefing({
                   className="flex items-center justify-between group bg-background/50 p-2 rounded border border-transparent hover:border-red-200 dark:hover:border-red-900/50 transition-colors"
                 >
                   <div className="flex items-center gap-2">
-                    <button
+                    <div
+                      role="checkbox"
+                      aria-checked={goal.completed}
+                      tabIndex={0}
                       onClick={() => toggleAntiGoal(goal.id, goal.completed)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          toggleAntiGoal(goal.id, goal.completed);
+                        }
+                      }}
                       className={cn(
-                        "w-5 h-5 rounded flex items-center justify-center transition-colors border",
+                        "w-5 h-5 rounded flex items-center justify-center transition-colors border cursor-pointer",
                         goal.completed
                           ? "bg-red-100 border-red-200 text-red-600 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400"
                           : "border-muted-foreground/30 hover:border-red-400",
                       )}
+                      aria-label={`Mark "${goal.text}" as ${goal.completed ? "incomplete" : "complete"
+                        }`}
                     >
                       {goal.completed && <Check className="w-3 h-3" />}
-                    </button>
+                    </div>
                     <span
                       className={cn(
                         "text-sm transition-all",
                         goal.completed &&
-                          "text-muted-foreground line-through decoration-red-300 dark:decoration-red-800",
+                        "text-muted-foreground line-through decoration-red-300 dark:decoration-red-800",
                       )}
                     >
                       {goal.text}
                     </span>
                   </div>
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => deleteAntiGoal(goal.id)}
-                    className="text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-6 w-6 text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label={`Delete "${goal.text}"`}
                   >
                     <X className="w-3 h-3" />
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>

@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Send, Sparkles, User, Loader2, X } from "lucide-react";
 import { getFutureSelfChat } from "@/app/actions";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/firebase";
 import Link from "next/link";
 
 interface Message {
@@ -36,6 +37,7 @@ export function FutureSelfChat({
   className,
   aiFeaturesEnabled,
 }: FutureSelfChatProps) {
+  const { user } = useUser();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -169,9 +171,13 @@ export function FutureSelfChat({
                     <Avatar className="h-8 w-8 shrink-0">
                       {m.role === "user" ? (
                         <>
-                          <AvatarImage src="" />
+                          <AvatarImage src={user?.photoURL || ""} />
                           <AvatarFallback>
-                            <User className="w-4 h-4" />
+                            {user?.displayName ? (
+                              user.displayName.charAt(0)
+                            ) : (
+                              <User className="w-4 h-4" />
+                            )}
                           </AvatarFallback>
                         </>
                       ) : (
@@ -182,7 +188,7 @@ export function FutureSelfChat({
                     </Avatar>
                     <div
                       className={cn(
-                        "rounded-lg p-3 text-sm max-w-[80%]",
+                        "rounded-lg p-3 text-sm max-w-[80%] whitespace-pre-wrap",
                         m.role === "user"
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted text-foreground",

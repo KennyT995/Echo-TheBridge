@@ -3,7 +3,6 @@
 import {
   setDoc,
   addDoc,
-  updateDoc,
   deleteDoc,
   CollectionReference,
   DocumentReference,
@@ -62,7 +61,7 @@ export function addDocumentNonBlocking(
  */
 export function updateDocumentNonBlocking(
   docRef: DocumentReference,
-  data: Record<string, any>,
+  data: Record<string, unknown>,
 ) {
   // Use set with merge to be consistent with other updates and security rules.
   setDoc(docRef, data, { merge: true }).catch(() => {

@@ -19,3 +19,21 @@ export function toJsDate(date: unknown): Date | null {
   if (typeof date === "string") return new Date(date);
   return null;
 }
+
+// Helper types needed if not importing Roadmap (but wait, Roadmap is in types)
+// Better to import Roadmap type or use any if we want to avoid circular dep, but utils usually shouldn't depend on features types.
+// However, shared types are in "@/lib/types", so it's fine.
+import { Roadmap } from "@/lib/types";
+
+export function calculateOverallProgress(roadmap: Roadmap): number {
+  const allItems = [
+    ...(roadmap.visionTimeline || []),
+    ...(roadmap.dailyHabits || []),
+    ...(roadmap.weeklyTactics || []),
+    ...(roadmap.monthlySprints || []),
+    ...(roadmap.yearlyMilestones || []),
+  ];
+  if (allItems.length === 0) return 0;
+  const completedItems = allItems.filter((item) => item.completed).length;
+  return (completedItems / allItems.length) * 100;
+}

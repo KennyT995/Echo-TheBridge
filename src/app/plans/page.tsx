@@ -233,19 +233,22 @@ export default function PlansPage() {
 
   return (
     <>
-      <main className="container mx-auto px-4 py-12 md:py-20">
-        <div className="mx-auto max-w-4xl text-center">
-          <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl md:text-6xl">
-            Choose Your Plan
+      <main className="container mx-auto px-4 py-12 md:py-24 relative overflow-hidden">
+        {/* Background Decorations */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-[2/1] bg-primary/5 blur-[120px] rounded-full -z-10 animate-pulse" />
+
+        <div className="mx-auto max-w-4xl text-center mb-16">
+          <h1 className="font-headline text-5xl md:text-7xl font-bold tracking-tight text-primary leading-tight">
+            Choose Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500">Trajectory</span>
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground md:text-xl">
-            Select the plan that best fits your journey.
+          <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Whether you&apos;re just starting your journey or ready to architect your legacy, we have a plan built for your ambition.
           </p>
         </div>
 
         {currentPlan && currentPlan.price > 0 && (
-          <div className="mt-8 text-center">
-            <Button onClick={handleManageBilling} disabled={isProcessing}>
+          <div className="mb-12 text-center">
+            <Button onClick={handleManageBilling} variant="outline" size="lg" disabled={isProcessing} className="rounded-full px-8">
               {isProcessing ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -256,40 +259,53 @@ export default function PlansPage() {
           </div>
         )}
 
-        <div className="mx-auto mt-8 grid max-w-5xl grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 md:grid-cols-3">
           {displayedPlans.map((plan) => (
             <Card
               key={plan.id}
               className={cn(
-                "flex flex-col border-border/50",
-                userData?.planTierId === plan.id &&
-                  "border-primary ring-2 ring-primary",
+                "flex flex-col relative transition-all duration-500 hover:-translate-y-2 border-border/50 bg-secondary/10 backdrop-blur-sm overflow-hidden",
+                userData?.planTierId === plan.id && "border-primary ring-2 ring-primary/50 shadow-2xl shadow-primary/10",
+                plan.id === "pathfinder" && "md:scale-105 z-10 border-primary/50 bg-secondary/20"
               )}
             >
-              <CardHeader>
-                <CardTitle>{plan.name}</CardTitle>
-                <CardDescription>
-                  <span className="text-3xl font-bold">${plan.price}</span>
-                  {plan.price > 0 && (
-                    <span className="text-sm text-muted-foreground">
-                      /month
-                    </span>
-                  )}
+              {plan.id === "pathfinder" && (
+                <div className="absolute top-0 right-0">
+                  <div className="bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-bl-xl shadow-lg">
+                    Most Popular
+                  </div>
+                </div>
+              )}
+
+              <CardHeader className="pb-8">
+                <CardTitle className="text-2xl font-bold font-headline">{plan.name}</CardTitle>
+                <CardDescription className="pt-4">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-foreground font-headline">${plan.price}</span>
+                    {plan.price > 0 && (
+                      <span className="text-base text-muted-foreground font-medium">/month</span>
+                    )}
+                  </div>
                 </CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow">
+              <CardContent className="flex-grow pb-8">
                 <ul className="space-y-4">
                   {plan.features?.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <Check className="h-5 w-5 text-primary" />
-                      <span>{feature}</span>
+                    <li key={index} className="flex items-start gap-3">
+                      <div className="mt-1 bg-primary/10 rounded-full p-0.5">
+                        <Check className="h-4 w-4 text-primary" />
+                      </div>
+                      <span className="text-sm font-medium leading-tight">{feature}</span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="pt-0">
                 <Button
-                  className="w-full"
+                  className={cn(
+                    "w-full h-12 rounded-xl font-bold text-base transition-all",
+                    plan.id === "pathfinder" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" : "bg-secondary hover:bg-secondary/80"
+                  )}
                   onClick={() => handleSelectPlan(plan)}
                   disabled={
                     isProcessing ||
@@ -298,10 +314,10 @@ export default function PlansPage() {
                       plan.id !== "trailblazer")
                   }
                 >
-                  {isProcessing && <Loader2 className="mr-2 animate-spin" />}
+                  {isProcessing && <Loader2 className="mr-2 animate-spin h-4 w-4" />}
                   {user && userData?.planTierId === plan.id
                     ? "Current Plan"
-                    : "Select Plan"}
+                    : plan.price === 0 ? "Get Started" : "Upgrade Now"}
                 </Button>
               </CardFooter>
             </Card>

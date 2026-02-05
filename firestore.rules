@@ -131,7 +131,7 @@ service cloud.firestore {
 
       // Visions Subcollection
       match /visions/{visionId} {
-        allow get: if isOwner(userId) || (get(/databases/$(database)/documents/users/$(userId)/visions/$(visionId)).data.isPublic == true);
+        allow get: if isOwner(userId) || (resource.data.isPublic == true);
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && incomingVisionDataIsValid(userId, visionId);
         allow update: if isOwner(userId) && request.resource.data.id == resource.data.id && request.resource.data.userId == resource.data.userId;
@@ -141,7 +141,7 @@ service cloud.firestore {
 
       // Roadmaps Subcollection
       match /roadmaps/{roadmapId} {
-        allow get: if isOwner(userId) || (get(/databases/$(database)/documents/users/$(userId)/visions/$(roadmapId)).data.isPublic == true);
+        allow get: if isOwner(userId) || (resource.data.isPublic == true);
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && incomingRoadmapDataIsValid(userId, roadmapId);
         allow update: if isOwner(userId) && request.resource.data.id == resource.data.id && request.resource.data.userId == resource.data.userId && request.resource.data.visionId == resource.data.visionId;

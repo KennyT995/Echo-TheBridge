@@ -129,17 +129,24 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background p-4">
+    <main className="flex min-h-screen items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Decorations */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-[1/1] bg-primary/5 blur-[120px] rounded-full -z-10 animate-pulse" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-500/5 blur-[100px] rounded-full -z-10" />
+
       <Card
         className={cn(
-          "w-full max-w-sm transition-opacity",
-          isUserLoading && "opacity-50",
+          "w-full max-w-md transition-all duration-500 border-border/50 shadow-2xl shadow-primary/5",
+          isUserLoading && "opacity-50"
         )}
       >
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Welcome</CardTitle>
-          <CardDescription>
-            Enter your details to create an account or log in.
+        <CardHeader className="text-center space-y-1 pb-8">
+          <div className="mx-auto w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-4">
+            <Loader2 className={cn("h-6 w-6 text-primary", !isSubmitting && "animate-pulse")} />
+          </div>
+          <CardTitle className="text-3xl font-headline font-bold tracking-tight">Welcome to Echo</CardTitle>
+          <CardDescription className="text-base text-muted-foreground">
+            Bridge the gap between vision and reality.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -188,7 +195,7 @@ export default function LoginPage() {
                   className="w-full"
                 >
                   {(isSubmitting && activeAction === "signup") ||
-                  isUserLoading ? (
+                    isUserLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : null}
                   Create Account
@@ -211,7 +218,7 @@ export default function LoginPage() {
                   className="w-full"
                 >
                   {(isSubmitting && activeAction === "login") ||
-                  isUserLoading ? (
+                    isUserLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : null}
                   Login

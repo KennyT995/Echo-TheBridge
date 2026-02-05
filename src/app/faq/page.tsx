@@ -42,15 +42,19 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <main className="flex-1 py-12 md:py-20">
+    <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
+      {/* Background Decorations */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full -z-10" />
+
+      <main className="flex-1 py-12 md:py-24">
         <div className="container mx-auto px-4 max-w-3xl">
-          <div className="text-center mb-12">
-            <h1 className="font-headline text-4xl font-bold tracking-tighter mb-4">
-              Frequently Asked Questions
+          <div className="text-center mb-16">
+            <h1 className="font-headline text-5xl md:text-6xl font-bold tracking-tight mb-6">
+              Common <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500">Inquiries</span>
             </h1>
-            <p className="text-xl text-muted-foreground">
-              Everything you need to know about Echo: The Bridge.
+            <p className="text-xl text-muted-foreground leading-relaxed">
+              Everything you need to know about navigating the bridge from vision to reality.
             </p>
           </div>
 

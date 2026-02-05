@@ -1,8 +1,8 @@
 export const firebaseConfig = {
-  projectId: "studio-4769439297-fbd83",
-  appId: "1:527333325823:web:b892a689b9e702a31645ca",
-  apiKey: "AIzaSyDdiNmwNFcxf9py-0xXg8CiJf5P6CsleNM",
-  authDomain: "studio-4769439297-fbd83.firebaseapp.com",
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
   measurementId: "",
-  messagingSenderId: "527333325823",
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 };

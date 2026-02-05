@@ -19,7 +19,31 @@ import {
   analyzeVisionIntent,
   type AnalyzeVisionIntentOutput,
 } from "@/ai/flows/analyze-vision-intent";
+import {
+  generateDailyBriefing,
+  GenerateDailyBriefingInput,
+  GenerateDailyBriefingOutput,
+} from "@/ai/flows/generate-daily-briefing";
+import {
+  generateFutureSelfChat,
+  GenerateFutureSelfChatInput,
+  GenerateFutureSelfChatOutput,
+} from "@/ai/flows/generate-future-self-chat";
+import {
+  analyzeDecisionAlignment,
+  AnalyzeDecisionAlignmentInput,
+  AnalyzeDecisionAlignmentOutput,
+} from "@/ai/flows/analyze-decision-alignment";
+import {
+  generateFutureLetter,
+  GenerateFutureLetterInput,
+  GenerateFutureLetterOutput,
+} from "@/ai/flows/generate-future-letter";
+import { firestore } from "@/firebase/admin";
 
+/**
+ * Validates the vision intent using AI.
+ */
 export async function analyzeVision(
   goal: string,
 ): Promise<AnalyzeVisionIntentOutput | { error: string }> {
@@ -27,11 +51,14 @@ export async function analyzeVision(
     const result = await analyzeVisionIntent({ goal });
     return result;
   } catch (error) {
-    console.error("Vision analysis failed:", error);
+    console.error("[actions] Vision analysis failed:", error);
     return { error: "Failed to analyze vision intent." };
   }
 }
 
+/**
+ * Generates a comprehensive roadmap based on a vision.
+ */
 export async function generateRoadmap(
   values: VisionFormValues & Partial<GenerateRoadmapFromVisionInput>,
 ): Promise<{
@@ -71,7 +98,7 @@ export async function generateRoadmap(
     });
     return { roadmap, correctedGoal };
   } catch (error: unknown) {
-    console.error("Error in generateRoadmap:", error);
+    console.error("[actions] Error in generateRoadmap:", error);
     let errorMessage = "";
     if (error instanceof Error) {
       errorMessage = error.message;
@@ -95,6 +122,9 @@ export async function generateRoadmap(
   }
 }
 
+/**
+ * Gets a strategic reflection on user input relative to their vision.
+ */
 export async function getReflection(
   userInput: string,
   vision: string,
@@ -104,7 +134,7 @@ export async function getReflection(
       await analyzeAndReflectOnUserInput({ userInput, vision });
     return { strategicBriefing: result.strategicBriefing };
   } catch (error) {
-    console.error("Reflection generation failed:", error);
+    console.error("[actions] Reflection generation failed:", error);
     return {
       error:
         "An unexpected error occurred while generating your reflection. Please try again.",
@@ -112,6 +142,9 @@ export async function getReflection(
   }
 }
 
+/**
+ * Generates vision ideas based on keywords.
+ */
 export async function getVisionIdeas(
   keywords: string,
 ): Promise<{ ideas?: string[]; error?: string }> {
@@ -124,7 +157,7 @@ export async function getVisionIdeas(
     });
     return { ideas: result.ideas };
   } catch (error) {
-    console.error("Vision idea generation failed:", error);
+    console.error("[actions] Vision idea generation failed:", error);
     return {
       error:
         "An unexpected error occurred while generating ideas. Please try again.",
@@ -132,8 +165,9 @@ export async function getVisionIdeas(
   }
 }
 
-import { firestore } from "@/firebase/admin";
-
+/**
+ * Deletes a vision and its associated roadmap.
+ */
 export async function deleteVision(
   visionId: string,
   userId: string,
@@ -143,9 +177,6 @@ export async function deleteVision(
   }
 
   try {
-    // Note: In a real production app, verify the session cookie or ID token here to ensure
-    // the request comes from 'userId'.
-
     // Check if vision belongs to user
     const visionRef = firestore
       .collection("users")
@@ -158,36 +189,25 @@ export async function deleteVision(
       return { success: false, error: "Vision not found" };
     }
 
-    // Recursively delete vision (includes roadmaps if nested, but roadmaps are usually sibling or root collections
-    // In this app: Roadmaps are in users/{userId}/roadmaps/{visionId} usually, OR linked.
-    // Based on DashboardPage: collection(firestore, 'users', user.uid, 'roadmaps')
-    // So we need to delete the Roadmap document too.
-
     const roadmapRef = firestore
       .collection("users")
       .doc(userId)
       .collection("roadmaps")
       .doc(visionId);
 
-    // Use bulkWriter for recursive delete if subcollections exist, but simpler delete is fine for single docs
-    // But Vision might have subcollections? Assuming no subcollections for Vision doc itself based on 'VisionForm'.
-
     await visionRef.delete();
     await roadmapRef.delete();
 
     return { success: true };
   } catch (error) {
-    console.error("Delete vision failed:", error);
+    console.error("[actions] Delete vision failed:", error);
     return { success: false, error: "Failed to delete vision" };
   }
 }
 
-import {
-  generateDailyBriefing,
-  GenerateDailyBriefingInput,
-  GenerateDailyBriefingOutput,
-} from "@/ai/flows/generate-daily-briefing";
-
+/**
+ * Generates a daily briefing for the user.
+ */
 export async function getDailyBriefing(
   input: GenerateDailyBriefingInput,
 ): Promise<{ briefing?: GenerateDailyBriefingOutput; error?: string }> {
@@ -195,17 +215,14 @@ export async function getDailyBriefing(
     const briefing = await generateDailyBriefing(input);
     return { briefing };
   } catch (error) {
-    console.error("Daily briefing generation failed:", error);
+    console.error("[actions] Daily briefing generation failed:", error);
     return { error: "Failed to generate daily briefing." };
   }
 }
 
-import {
-  generateFutureSelfChat,
-  GenerateFutureSelfChatInput,
-  GenerateFutureSelfChatOutput,
-} from "@/ai/flows/generate-future-self-chat";
-
+/**
+ * Connects the user with their future self in a chat.
+ */
 export async function getFutureSelfChat(
   input: GenerateFutureSelfChatInput,
 ): Promise<{ response?: GenerateFutureSelfChatOutput; error?: string }> {
@@ -213,17 +230,14 @@ export async function getFutureSelfChat(
     const chatResponse = await generateFutureSelfChat(input);
     return { response: chatResponse };
   } catch (error) {
-    console.error("Future self chat failed:", error);
+    console.error("[actions] Future self chat failed:", error);
     return { error: "Failed to connect to your future self." };
   }
 }
 
-import {
-  analyzeDecisionAlignment,
-  AnalyzeDecisionAlignmentInput,
-  AnalyzeDecisionAlignmentOutput,
-} from "@/ai/flows/analyze-decision-alignment";
-
+/**
+ * Checks the alignment of a decision with the user's visions.
+ */
 export async function checkDecisionAlignment(
   input: AnalyzeDecisionAlignmentInput,
 ): Promise<{ result?: AnalyzeDecisionAlignmentOutput; error?: string }> {
@@ -231,17 +245,14 @@ export async function checkDecisionAlignment(
     const result = await analyzeDecisionAlignment(input);
     return { result };
   } catch (error) {
-    console.error("Decision alignment check failed:", error);
+    console.error("[actions] Decision alignment check failed:", error);
     return { error: "Failed to analyze decision alignment." };
   }
 }
 
-import {
-  generateFutureLetter,
-  GenerateFutureLetterInput,
-  GenerateFutureLetterOutput,
-} from "@/ai/flows/generate-future-letter";
-
+/**
+ * Generates a letter from the future.
+ */
 export async function checkFutureLetter(
   input: GenerateFutureLetterInput,
 ): Promise<{ result?: GenerateFutureLetterOutput; error?: string }> {
@@ -249,7 +260,7 @@ export async function checkFutureLetter(
     const result = await generateFutureLetter(input);
     return { result };
   } catch (error) {
-    console.error("Future letter generation failed:", error);
+    console.error("[actions] Future letter generation failed:", error);
     return { error: "Failed to receive letter from the future." };
   }
 }

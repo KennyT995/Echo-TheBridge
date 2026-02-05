@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -42,10 +42,7 @@ export function RoadmapSelectionDialog({
     {},
   );
 
-  useEffect(() => {
-    // When a new roadmap is proposed, reset any user selections.
-    setUserOverrides({});
-  }, [proposedRoadmap]);
+
 
   const toggleSelection = (key: string, index: number) => {
     const id = `${key}-${index}`;
@@ -151,11 +148,10 @@ export function RoadmapSelectionDialog({
                             />
                             <label
                               htmlFor={id}
-                              className={`text-sm cursor-pointer leading-tight ${
-                                selected
-                                  ? "text-foreground"
-                                  : "text-muted-foreground line-through opacity-70"
-                              }`}
+                              className={`text-sm cursor-pointer leading-tight ${selected
+                                ? "text-foreground"
+                                : "text-muted-foreground line-through opacity-70"
+                                }`}
                             >
                               {item.text}
                             </label>
@@ -181,4 +177,3 @@ export function RoadmapSelectionDialog({
   );
 }
 
-    

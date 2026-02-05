@@ -7,11 +7,15 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <main className="flex-1 py-12 md:py-20">
+    <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
+      {/* Background Decorations */}
+      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full -z-10" />
+
+      <main className="flex-1 py-12 md:py-24">
         <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="font-headline text-3xl md:text-4xl font-bold tracking-tighter mb-8">
-            Terms of Service
+          <h1 className="font-headline text-4xl md:text-5xl font-bold tracking-tight mb-8">
+            Terms of <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500">Service</span>
           </h1>
           <div className="prose prose-invert max-w-none text-muted-foreground">
             <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">

@@ -8,7 +8,11 @@ interface StreakWidgetProps {
   className?: string;
 }
 
-export function StreakWidget({ currentStreak, className }: StreakWidgetProps) {
+export function StreakWidget({
+  currentStreak,
+  longestStreak,
+  className
+}: StreakWidgetProps) {
   return (
     <Card
       className={cn(
@@ -50,6 +54,17 @@ export function StreakWidget({ currentStreak, className }: StreakWidgetProps) {
                 ? "You're on fire! Keep it up."
                 : "Start your streak today!"}
             </p>
+          </div>
+          {/* Stats Section */}
+          <div className="border-t sm:border-t-0 sm:border-l border-border/50 p-6 flex flex-row sm:flex-col justify-center gap-8 sm:gap-4 bg-muted/20">
+            <div className="text-center sm:text-left">
+              <span className="text-sm text-muted-foreground block">Current</span>
+              <span className="text-xl font-bold">{currentStreak}</span>
+            </div>
+            <div className="text-center sm:text-left">
+              <span className="text-sm text-muted-foreground block">Longest</span>
+              <span className="text-xl font-bold">{longestStreak}</span>
+            </div>
           </div>
         </div>
       </CardContent>

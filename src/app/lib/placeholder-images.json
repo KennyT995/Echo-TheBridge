@@ -1,39 +1,39 @@
 {
   "hero": {
-    "imageUrl": "https://picsum.photos/seed/bridge-abstract/1920/1080",
-    "imageHint": "abstract bridge"
+    "imageUrl": "/images/hero.png",
+    "imageHint": "futuristic bridge transition"
   },
   "features": [
     {
-      "image": "https://picsum.photos/seed/vision-feature/800/600",
+      "image": "/images/feature-vision.png",
       "hint": "defining vision telescope"
     },
     {
-      "image": "https://picsum.photos/seed/roadmap-feature/800/600",
-      "hint": "strategic roadmap timeline"
+      "image": "/images/feature-roadmap.png",
+      "hint": "strategic roadmap blueprint"
     },
     {
-      "image": "https://picsum.photos/seed/coach-feature/800/600",
-      "hint": "ai coach robot"
+      "image": "/images/feature-coach.png",
+      "hint": "ai coach guidance"
     }
   ],
   "about": {
-    "team": "https://picsum.photos/seed/vision-team/800/600",
+    "team": "/images/feature-vision.png",
     "members": [
       {
         "name": "Alex Rivera",
         "role": "Founder & CEO",
-        "img": "https://picsum.photos/seed/alex/300/300"
+        "img": "/images/team/alex.png"
       },
       {
         "name": "Sarah Chen",
         "role": "Chief AI Architect",
-        "img": "https://picsum.photos/seed/sarah/300/300"
+        "img": "/images/team/sarah.png"
       },
       {
         "name": "Marcus Johnson",
         "role": "Head of Strategy",
-        "img": "https://picsum.photos/seed/marcus/300/300"
+        "img": "/images/team/marcus.png"
       }
     ]
   }
