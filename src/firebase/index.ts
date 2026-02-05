@@ -7,16 +7,34 @@ import { getFirestore } from "firebase/firestore";
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
+  if (!firebaseConfig.apiKey) {
+    const errorMsg = "Firebase API Key is missing. Check your .env.local file and restart the dev server. Values found: " + JSON.stringify({
+      hasProjectId: !!firebaseConfig.projectId,
+      hasAppId: !!firebaseConfig.appId,
+      hasApiKey: !!firebaseConfig.apiKey,
+    });
+    console.error(errorMsg);
+    // In dev, we might want to throw to catch it early
+    if (process.env.NODE_ENV !== "production") {
+      throw new Error(errorMsg);
+    }
+  }
+
   let firebaseApp: FirebaseApp;
 
   if (getApps().length === 0) {
     // When not in production, always use the explicit firebaseConfig.
     // In production, App Hosting provides the configuration automatically.
     if (process.env.NODE_ENV !== "production") {
+      console.log("Firebase: Initializing in development mode with config:", {
+        ...firebaseConfig,
+        apiKey: firebaseConfig.apiKey ? `PRESENT (length: ${firebaseConfig.apiKey.length})` : "MISSING",
+      });
       firebaseApp = initializeApp(firebaseConfig);
     } else {
       try {
         // In production, try auto-initialization first.
+        console.log("Firebase: Initializing in production mode (auto-init)");
         firebaseApp = initializeApp();
       } catch (e) {
         console.warn(

@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Zap, ArrowRight, PlusCircle } from "lucide-react";
+import { Compass, Sparkles, ArrowRight, PlusCircle } from "lucide-react";
 
 interface EmptyVisionsStateProps {
     isLoading: boolean;
@@ -16,16 +16,24 @@ export function EmptyVisionsState({
     onNavigateToPlans,
 }: EmptyVisionsStateProps) {
     return (
-        <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-muted rounded-xl bg-muted/10">
-            <div className="bg-background p-4 rounded-full shadow-sm mb-4">
-                <Zap className="h-10 w-10 text-primary" />
+        <div className="flex flex-col items-center justify-center py-24 border border-dashed border-border/60 rounded-2xl bg-muted/5 relative overflow-hidden">
+            {/* Background pattern */}
+            <div className="absolute inset-0 opacity-[0.03] scale-150 -rotate-12 pointer-events-none">
+                <Compass className="w-full h-full" />
             </div>
-            <h3 className="text-xl font-bold tracking-tight mb-2">
-                No Visions Found
+
+            <div className="relative mb-6">
+                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-150 animate-pulse" />
+                <div className="bg-background p-5 rounded-2xl shadow-xl border border-border/50 relative">
+                    <Sparkles className="h-8 w-8 text-primary" />
+                </div>
+            </div>
+
+            <h3 className="text-2xl font-bold tracking-tight mb-2 font-headline">
+                Architect Your Future
             </h3>
-            <p className="text-muted-foreground text-center max-w-sm mb-6">
-                You haven&apos;t created any visions yet. Define your future to get a
-                personalized roadmap and AI coaching.
+            <p className="text-muted-foreground text-center max-w-sm mb-8 leading-relaxed">
+                You haven&apos;t defined any visions yet. Create your first strategic trajectory to bridge the gap between where you are and where you want to be.
             </p>
             <Button
                 size="lg"
@@ -33,9 +41,9 @@ export function EmptyVisionsState({
                     isLimitReached ? onNavigateToPlans() : onOpenCreateVision()
                 }
                 disabled={isLoading}
-                className="font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow"
+                className="font-bold rounded-xl h-12 px-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:scale-105 active:scale-95"
             >
-                {isLimitReached ? "Upgrade to Create More" : "Create Your First Vision"}
+                {isLimitReached ? "Upgrade to Create More" : "Launch Your First Vision"}
                 {isLimitReached ? (
                     <ArrowRight className="ml-2 h-4 w-4" />
                 ) : (

@@ -26,6 +26,16 @@ interface DailyBriefingProps {
   recentReflection?: string;
 }
 
+const FALLBACK_QUOTES = [
+  "The secret of your future is hidden in your daily routine.",
+  "Your direction is more important than your speed.",
+  "The bridge between dreams and reality is discipline.",
+  "Big things often have small beginnings.",
+  "Focus on the step in front of you, not the whole staircase.",
+  "Action is the foundational key to all success.",
+  "The future is created by what you do today, not tomorrow.",
+];
+
 export function DailyBriefing({
   userName,
   roadmaps,
@@ -40,6 +50,18 @@ export function DailyBriefing({
   );
   const [loading, setLoading] = useState(false);
   const { setFocus } = useFocus();
+
+  // Random fallback quote
+  const fallbackQuote = useMemo(() => {
+    const dayOfYear = Math.floor(
+      (new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) /
+      1000 /
+      60 /
+      60 /
+      24,
+    );
+    return FALLBACK_QUOTES[dayOfYear % FALLBACK_QUOTES.length];
+  }, []);
 
   // Anti-Goals State
   const [antiGoals, setAntiGoals] = useState<AntiGoal[]>([]);
@@ -61,7 +83,6 @@ export function DailyBriefing({
   const dateKey = today.toISOString().split("T")[0];
   const greeting = getGreeting(today.getHours());
 
-  // Fetch Daily Briefing Logic
   // Fetch Daily Briefing Logic
   useEffect(() => {
     const fetchBriefing = async () => {
@@ -92,16 +113,6 @@ export function DailyBriefing({
 
     fetchBriefing();
   }, [activeVisionTitle, userName, todaysHabits, recentReflection]);
-
-  // ... (anti goals logic skipped in replace, assume context matches)
-
-  // We only touched the first useEffect block.
-  // Wait, replace_file_content needs strict range.
-  // I can't skip content.
-  // I'll target the useEffect specifically.
-
-  // And the quote at 191.
-  // I'll use multi_replace.
 
   // Fetch Anti-Goals Logic
   useEffect(() => {
@@ -163,27 +174,32 @@ export function DailyBriefing({
   return (
     <Card
       className={cn(
-        "bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/20 dark:to-blue-950/20 border-indigo-100 dark:border-indigo-900/50",
+        "bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/20 dark:to-blue-950/20 border-indigo-100 dark:border-indigo-900/50 relative overflow-hidden",
         className,
       )}
     >
+      {/* Visual Glare */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[80px] rounded-full -z-10" />
+
       <CardHeader className="pb-2">
-        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-1">
-          <Sun className="w-5 h-5" />
-          <span className="text-sm font-semibold uppercase tracking-wider">
+        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-2">
+          <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-md">
+            <Sun className="w-4 h-4" />
+          </div>
+          <span className="text-xs font-bold uppercase tracking-[0.2em]">
             Morning Briefing
           </span>
         </div>
-        <CardTitle className="text-2xl sm:text-3xl">
+        <CardTitle className="text-3xl sm:text-4xl font-headline font-bold">
           {greeting}, {userName?.split(" ")[0] || "Visionary"}.
         </CardTitle>
-        <div className="text-base text-muted-foreground mt-2">
+        <div className="text-lg text-muted-foreground mt-3 max-w-2xl leading-relaxed">
           {loading ? (
-            <Skeleton className="h-4 w-64" />
+            <Skeleton className="h-6 w-3/4" />
           ) : briefing ? (
-            <span className="italic">&quot;{briefing.quote}&quot;</span>
+            <span className="italic text-foreground/80">&quot;{briefing.quote}&quot;</span>
           ) : (
-            "The secret of your future is hidden in your daily routine."
+            <span className="italic text-foreground/70">&quot;{fallbackQuote}&quot;</span>
           )}
         </div>
       </CardHeader>

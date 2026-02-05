@@ -50,26 +50,46 @@ const roadmapSections = [
     title: "Vision Timeline",
     key: "visionTimeline",
     icon: Flag,
+    color: "bg-indigo-500",
+    lightColor: "bg-indigo-50/50 dark:bg-indigo-950/20",
+    borderColor: "border-indigo-100 dark:border-indigo-900/30",
+    textColor: "text-indigo-600 dark:text-indigo-400",
   },
   {
     title: "Yearly Milestones",
     key: "yearlyMilestones",
     icon: GanttChartSquare,
+    color: "bg-blue-500",
+    lightColor: "bg-blue-50/50 dark:bg-blue-950/20",
+    borderColor: "border-blue-100 dark:border-blue-900/30",
+    textColor: "text-blue-600 dark:text-blue-400",
   },
   {
     title: "Monthly Sprints",
     key: "monthlySprints",
     icon: CalendarDays,
+    color: "bg-emerald-500",
+    lightColor: "bg-emerald-50/50 dark:bg-emerald-950/20",
+    borderColor: "border-emerald-100 dark:border-emerald-900/30",
+    textColor: "text-emerald-600 dark:text-emerald-400",
   },
   {
     title: "Weekly Tactics",
     key: "weeklyTactics",
     icon: CircleDot,
+    color: "bg-amber-500",
+    lightColor: "bg-amber-50/50 dark:bg-amber-950/20",
+    borderColor: "border-amber-100 dark:border-amber-900/30",
+    textColor: "text-amber-600 dark:text-amber-400",
   },
   {
     title: "Daily Habits",
     key: "dailyHabits",
     icon: CheckCircle2,
+    color: "bg-orange-500",
+    lightColor: "bg-orange-50/50 dark:bg-orange-950/20",
+    borderColor: "border-orange-100 dark:border-orange-900/30",
+    textColor: "text-orange-600 dark:text-orange-400",
   },
 ] as const;
 
@@ -292,63 +312,77 @@ export function RoadmapDisplay({
               <AccordionItem
                 key={section.key}
                 value={section.key}
-                className="border border-border/60 rounded-xl overflow-hidden"
+                className={cn(
+                  "border rounded-2xl overflow-hidden mb-4 transition-all duration-300",
+                  section.borderColor,
+                  "bg-card/50 backdrop-blur-sm"
+                )}
               >
                 <div className="flex flex-col">
-                  <div className="px-4 py-3 flex items-center justify-between w-full hover:bg-muted/30 transition-colors">
-                    <AccordionTrigger className="p-0 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline [&>svg]:hidden flex-1 py-0 justify-start">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-primary/10 rounded-lg">
-                          <section.icon className="h-5 w-5 text-primary" />
+                  <div className={cn("px-5 py-4 flex items-center justify-between w-full hover:bg-muted/10 transition-colors", section.lightColor)}>
+                    <AccordionTrigger className="p-0 text-lg font-bold hover:no-underline [&>svg]:hidden flex-1 py-0 justify-start">
+                      <div className="flex items-center gap-4">
+                        <div className={cn("p-2.5 rounded-xl shadow-sm border", section.lightColor, section.borderColor)}>
+                          <section.icon className={cn("h-5 w-5", section.textColor)} />
                         </div>
-                        <span>{section.title}</span>
+                        <span className={cn("font-headline tracking-tight", section.textColor)}>{section.title}</span>
                       </div>
                     </AccordionTrigger>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          {!readOnly && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={cn(
-                                "h-8 w-8 shrink-0 ml-2 transition-all",
-                                shouldTellUserToRegenerate(section.key, items)
-                                  .should
-                                  ? "text-amber-500 hover:text-amber-600 hover:bg-amber-100 animate-pulse"
-                                  : "text-muted-foreground hover:text-primary",
-                              )}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onRegenerateSection(section.key);
-                              }}
-                            >
-                              <RefreshCw className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </TooltipTrigger>
-                        {shouldTellUserToRegenerate(section.key, items)
-                          .should && (
-                          <TooltipContent>
-                            <p>
-                              {
-                                shouldTellUserToRegenerate(section.key, items)
-                                  .reason
-                              }{" "}
-                              - Click to regenerate
-                            </p>
-                          </TooltipContent>
-                        )}
-                      </Tooltip>
-                    </TooltipProvider>
+                    <div className="flex items-center gap-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            {!readOnly && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={cn(
+                                  "h-9 w-9 shrink-0 rounded-full transition-all",
+                                  shouldTellUserToRegenerate(section.key, items)
+                                    .should
+                                    ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 animate-pulse"
+                                    : "text-muted-foreground hover:bg-muted"
+                                )}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onRegenerateSection(section.key);
+                                }}
+                              >
+                                <RefreshCw className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </TooltipTrigger>
+                          {shouldTellUserToRegenerate(section.key, items)
+                            .should && (
+                              <TooltipContent>
+                                <p>
+                                  {
+                                    shouldTellUserToRegenerate(section.key, items)
+                                      .reason
+                                  }{" "}
+                                  - Click to regenerate
+                                </p>
+                              </TooltipContent>
+                            )}
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
                   </div>
-                  <div className="px-4 pb-4">
-                    <div className="flex justify-between items-center mb-1.5">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        {Math.round(progress)}% Complete
+                  <div className="px-5 pb-5 pt-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                        Structural Integrity
+                      </span>
+                      <span className={cn("text-xs font-bold", section.textColor)}>
+                        {Math.round(progress)}%
                       </span>
                     </div>
-                    <Progress value={progress} className="h-2 w-full" />
+                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={cn("h-full transition-all duration-1000 ease-out", section.color)}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -400,7 +434,7 @@ export function RoadmapDisplay({
                                   className={cn(
                                     "text-sm sm:text-base text-foreground/90 cursor-pointer flex-1 leading-relaxed min-w-0 break-words",
                                     item.completed &&
-                                      "line-through text-muted-foreground opacity-70",
+                                    "line-through text-muted-foreground opacity-70",
                                     readOnly && "cursor-default",
                                   )}
                                 >
@@ -495,14 +529,14 @@ export function RoadmapDisplay({
                         <span className="text-xs text-muted-foreground">
                           {item.completedAt
                             ? (item.completedAt instanceof Date
-                                ? item.completedAt
-                                : (item.completedAt as Timestamp).toDate
-                                  ? (item.completedAt as Timestamp).toDate()
-                                  : new Date(
-                                      (item.completedAt as { seconds: number })
-                                        .seconds * 1000,
-                                    )
-                              ).toLocaleDateString()
+                              ? item.completedAt
+                              : (item.completedAt as Timestamp).toDate
+                                ? (item.completedAt as Timestamp).toDate()
+                                : new Date(
+                                  (item.completedAt as { seconds: number })
+                                    .seconds * 1000,
+                                )
+                            ).toLocaleDateString()
                             : "Archived"}
                         </span>
                       </li>
