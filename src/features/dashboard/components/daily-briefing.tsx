@@ -11,6 +11,8 @@ import { GenerateDailyBriefingOutput } from "@/ai/flows/generate-daily-briefing"
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser, useFirestore, setDocumentNonBlocking } from "@/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
+import { FirestorePaths } from "@/lib/firestore-paths";
+import { logger } from "@/lib/logger";
 
 interface AntiGoal {
   id: string;
@@ -118,7 +120,7 @@ export function DailyBriefing({
   useEffect(() => {
     if (!user || !firestore) return;
 
-    const docRef = doc(firestore, "users", user.uid, "daily_plans", dateKey);
+    const docRef = doc(firestore, FirestorePaths.dailyPlan(user.uid, dateKey));
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
@@ -141,7 +143,7 @@ export function DailyBriefing({
     };
 
     const updatedList = [...antiGoals, newItem];
-    const docRef = doc(firestore, "users", user.uid, "daily_plans", dateKey);
+    const docRef = doc(firestore, FirestorePaths.dailyPlan(user.uid, dateKey));
 
     setDocumentNonBlocking(docRef, { antiGoals: updatedList }, { merge: true });
     setNewAntiGoal("");
@@ -154,14 +156,14 @@ export function DailyBriefing({
       item.id === id ? { ...item, completed: !currentStatus } : item,
     );
 
-    const docRef = doc(firestore, "users", user.uid, "daily_plans", dateKey);
+    const docRef = doc(firestore, FirestorePaths.dailyPlan(user.uid, dateKey));
     setDocumentNonBlocking(docRef, { antiGoals: updatedList }, { merge: true });
   };
 
   const deleteAntiGoal = (id: string) => {
     if (!user || !firestore) return;
     const updatedList = antiGoals.filter((item) => item.id !== id);
-    const docRef = doc(firestore, "users", user.uid, "daily_plans", dateKey);
+    const docRef = doc(firestore, FirestorePaths.dailyPlan(user.uid, dateKey));
     setDocumentNonBlocking(docRef, { antiGoals: updatedList }, { merge: true });
   };
 
@@ -174,32 +176,34 @@ export function DailyBriefing({
   return (
     <Card
       className={cn(
-        "bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-950/20 dark:to-blue-950/20 border-indigo-100 dark:border-indigo-900/50 relative overflow-hidden",
+        "bg-gradient-to-br from-background via-indigo-950/5 to-blue-950/10 border-white/5 glass-card relative overflow-hidden animate-reveal",
         className,
       )}
     >
       {/* Visual Glare */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[80px] rounded-full -z-10" />
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/5 blur-[120px] rounded-full -z-10" />
 
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 mb-2">
-          <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/50 rounded-md">
-            <Sun className="w-4 h-4" />
+      <CardHeader className="pb-4 relative z-10">
+        <div className="flex items-center gap-3 text-primary mb-4">
+          <div className="p-2 bg-primary/10 rounded-2xl border border-primary/20 animate-float">
+            <Sun className="w-5 h-5" />
           </div>
-          <span className="text-xs font-bold uppercase tracking-[0.2em]">
+          <span className="text-[11px] font-bold uppercase tracking-[0.4em]">
             Morning Briefing
           </span>
         </div>
-        <CardTitle className="text-3xl sm:text-4xl font-headline font-bold">
-          {greeting}, {userName?.split(" ")[0] || "Visionary"}.
+        <CardTitle className="text-4xl sm:text-6xl font-headline font-bold tracking-tighter leading-none">
+          {greeting}, <br className="sm:hidden" />
+          <span className="text-gradient">{userName?.split(" ")[0] || "Visionary"}</span>.
         </CardTitle>
-        <div className="text-lg text-muted-foreground mt-3 max-w-2xl leading-relaxed">
+        <div className="text-xl md:text-2xl text-muted-foreground/80 mt-6 max-w-2xl leading-relaxed font-light">
           {loading ? (
-            <Skeleton className="h-6 w-3/4" />
+            <Skeleton className="h-8 w-3/4 bg-white/5" />
           ) : briefing ? (
-            <span className="italic text-foreground/80">&quot;{briefing.quote}&quot;</span>
+            <span className="italic block">&quot;{briefing.quote}&quot;</span>
           ) : (
-            <span className="italic text-foreground/70">&quot;{fallbackQuote}&quot;</span>
+            <span className="italic block">&quot;{fallbackQuote}&quot;</span>
           )}
         </div>
       </CardHeader>
@@ -207,25 +211,25 @@ export function DailyBriefing({
         <div className="mt-4 space-y-4">
           {/* AI Insight Section */}
           {(briefing || loading) && (
-            <div className="p-4 bg-background/60 backdrop-blur-md rounded-lg border border-border/50 shadow-sm">
+            <div className="p-6 bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 shadow-xl group/insight">
               {loading ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-1/3" />
-                  <Skeleton className="h-4 w-full" />
+                <div className="space-y-4">
+                  <Skeleton className="h-4 w-1/4 bg-white/5" />
+                  <Skeleton className="h-4 w-full bg-white/5" />
                 </div>
               ) : (
                 briefing && (
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 text-xs font-bold px-2 py-0.5 rounded uppercase">
-                        Focus
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-lg uppercase tracking-widest border border-primary/20">
+                        Strategic Focus
                       </span>
-                      <span className="font-semibold text-foreground">
+                      <span className="font-bold text-lg tracking-tight">
                         {briefing.focusConfig.focus}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {briefing.focusConfig.motivation}
+                    <p className="text-base text-muted-foreground/80 leading-relaxed font-light italic">
+                      &quot;{briefing.focusConfig.motivation}&quot;
                     </p>
                   </div>
                 )
@@ -234,33 +238,33 @@ export function DailyBriefing({
           )}
 
           {/* Habits Status */}
-          <div className="flex items-center justify-between p-4 bg-background/40 rounded-lg border border-border/30">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-full text-indigo-600 dark:text-indigo-400">
-                <Coffee className="w-5 h-5" />
+          <div className="flex flex-col md:flex-row md:items-center justify-between p-6 bg-primary/5 rounded-2xl border border-primary/10 group/habits transition-all hover:bg-primary/10">
+            <div className="flex items-center gap-4 mb-4 md:mb-0">
+              <div className="p-3 bg-primary/20 rounded-2xl text-primary border border-primary/20 animate-float">
+                <Coffee className="w-6 h-6" />
               </div>
               <div>
-                <p className="font-medium">Today&apos;s Bridge</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="font-bold text-lg tracking-tight">Today&apos;s Trajectory</p>
+                <p className="text-sm text-muted-foreground/60 font-medium">
                   {pendingCount > 0
-                    ? `You have ${pendingCount} habits pending today.`
-                    : "You're all caught up for today!"}
+                    ? `${pendingCount} critical anchors remaining.`
+                    : "Optimal alignment achieved for today."}
                 </p>
               </div>
             </div>
             {pendingCount > 0 && (
-              <div className="hidden sm:block">
-                <ul className="space-y-2 mt-2">
-                  {todaysHabits.slice(0, 3).map((habit: string, i: number) => (
+              <div className="w-full md:w-auto">
+                <ul className="flex flex-wrap gap-2">
+                  {todaysHabits.slice(0, 2).map((habit: string, i: number) => (
                     <li
                       key={i}
-                      className="flex items-center justify-between text-sm bg-background/50 p-2 rounded border border-indigo-100/50 dark:border-indigo-900/30"
+                      className="flex items-center gap-3 text-xs bg-background/40 backdrop-blur-md px-3 py-2 rounded-xl border border-white/5 hover:border-primary/40 transition-all cursor-default group/habit"
                     >
-                      <span className="truncate max-w-[200px]">{habit}</span>
+                      <span className="truncate max-w-[120px] font-medium">{habit}</span>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 text-indigo-400 hover:text-indigo-600 hover:bg-indigo-50"
+                        className="h-7 w-7 rounded-lg text-primary/40 hover:text-primary hover:bg-primary/10 transition-colors"
                         title="Set as Focus Anchor"
                         onClick={() =>
                           setFocus(habit, activeVisionTitle || "Daily Habit")
@@ -270,32 +274,32 @@ export function DailyBriefing({
                       </Button>
                     </li>
                   ))}
+                  {pendingCount > 2 && (
+                    <li className="flex items-center px-3 py-2 bg-white/5 rounded-xl border border-white/5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
+                      +{pendingCount - 2} More
+                    </li>
+                  )}
                 </ul>
-                {pendingCount > 3 && (
-                  <p className="text-xs text-muted-foreground mt-2 text-center">
-                    + {pendingCount - 3} more
-                  </p>
-                )}
               </div>
             )}
           </div>
 
           {/* Anti-Goals Section */}
-          <div className="p-4 bg-red-50/50 dark:bg-red-950/10 rounded-lg border border-red-100 dark:border-red-900/30">
-            <div className="flex items-center gap-2 mb-3 text-red-700 dark:text-red-400">
-              <Shield className="w-4 h-4" />
-              <h3 className="font-semibold text-sm uppercase tracking-wide">
-                Anti-Goals (Not-To-Do List)
+          <div className="p-6 bg-destructive/5 rounded-2xl border border-destructive/10 group/antigoals transition-all hover:bg-destructive/10">
+            <div className="flex items-center gap-3 mb-4 text-destructive">
+              <Shield className="w-5 h-5 animate-pulse" />
+              <h3 className="font-bold text-sm uppercase tracking-[0.2em]">
+                Defensive Moat (Anti-Goals)
               </h3>
             </div>
 
-            <div className="space-y-2 mb-3">
+            <div className="space-y-2 mb-6">
               {antiGoals.map((goal) => (
                 <div
                   key={goal.id}
-                  className="flex items-center justify-between group bg-background/50 p-2 rounded border border-transparent hover:border-red-200 dark:hover:border-red-900/50 transition-colors"
+                  className="flex items-center justify-between group/item bg-background/20 backdrop-blur-md p-3 rounded-xl border border-white/5 hover:border-destructive/30 transition-all"
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     <div
                       role="checkbox"
                       aria-checked={goal.completed}
@@ -307,21 +311,21 @@ export function DailyBriefing({
                         }
                       }}
                       className={cn(
-                        "w-5 h-5 rounded flex items-center justify-center transition-colors border cursor-pointer",
+                        "w-6 h-6 rounded-lg flex items-center justify-center transition-all border-2",
                         goal.completed
-                          ? "bg-red-100 border-red-200 text-red-600 dark:bg-red-900/30 dark:border-red-800 dark:text-red-400"
-                          : "border-muted-foreground/30 hover:border-red-400",
+                          ? "bg-destructive border-destructive text-white scale-90"
+                          : "border-white/10 hover:border-destructive/50 bg-white/5",
                       )}
                       aria-label={`Mark "${goal.text}" as ${goal.completed ? "incomplete" : "complete"
                         }`}
                     >
-                      {goal.completed && <Check className="w-3 h-3" />}
+                      {goal.completed && <Check className="w-4 h-4" />}
                     </div>
                     <span
                       className={cn(
-                        "text-sm transition-all",
+                        "text-base transition-all font-light",
                         goal.completed &&
-                        "text-muted-foreground line-through decoration-red-300 dark:decoration-red-800",
+                        "text-muted-foreground/40 line-through decoration-destructive/50",
                       )}
                     >
                       {goal.text}
@@ -331,34 +335,34 @@ export function DailyBriefing({
                     variant="ghost"
                     size="icon"
                     onClick={() => deleteAntiGoal(goal.id)}
-                    className="h-6 w-6 text-muted-foreground hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="h-8 w-8 rounded-lg text-muted-foreground/20 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover/item:opacity-100 transition-all"
                     aria-label={`Delete "${goal.text}"`}
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-4 h-4" />
                   </Button>
                 </div>
               ))}
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Input
-                placeholder="I will avoid..."
+                placeholder="Declare what you must avoid..."
                 value={newAntiGoal}
                 onChange={(e) => setNewAntiGoal(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="h-8 text-sm bg-background/80 border-red-200/50 focus-visible:ring-red-500/20 placeholder:text-red-300 dark:placeholder:text-red-800/50"
+                className="h-12 text-base rounded-xl bg-background/40 border-white/5 focus-visible:ring-destructive/30 placeholder:text-muted-foreground/30 font-light italic"
               />
               <Button
-                size="sm"
-                variant="outline"
+                size="icon"
                 onClick={handleAddAntiGoal}
                 disabled={!newAntiGoal.trim()}
-                className="h-8 border-red-200/50 hover:bg-red-50 text-red-700 hover:text-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
+                className="h-12 w-12 rounded-xl bg-destructive text-white hover:bg-destructive/90 transition-all shadow-xl shadow-destructive/20 active:scale-90"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-6 h-6" />
               </Button>
             </div>
           </div>
+
         </div>
       </CardContent>
     </Card>

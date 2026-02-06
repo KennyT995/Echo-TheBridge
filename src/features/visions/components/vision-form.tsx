@@ -33,6 +33,8 @@ import { VisionInspiration } from "./vision-inspiration";
 
 import { useToast } from "@/hooks/use-toast";
 import { setDocumentNonBlocking } from "@/firebase/non-blocking-updates";
+import { FirestorePaths } from "@/lib/firestore-paths";
+import { logger } from "@/lib/logger";
 
 interface VisionFormProps {
   onVisionCreated: (visionId: string) => void;
@@ -115,10 +117,10 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
       userId: user.uid,
     };
 
-    const visionRef = doc(firestore, "users", user.uid, "visions", visionId);
+    const visionRef = doc(firestore, FirestorePaths.vision(user.uid, visionId));
     setDocumentNonBlocking(visionRef, visionData, {});
 
-    const roadmapRef = doc(firestore, "users", user.uid, "roadmaps", visionId);
+    const roadmapRef = doc(firestore, FirestorePaths.roadmap(user.uid, visionId));
     setDocumentNonBlocking(roadmapRef, roadmapData, {});
 
     toast({
@@ -145,7 +147,7 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
 
     if ("error" in analysisResult) {
       // Fallback to normal flow if analysis fails
-      console.error(analysisResult.error);
+      logger.error("[VisionForm] Vision analysis failed:", analysisResult.error);
       const vid = await createVision(values);
       if (vid) {
         onVisionCreated(vid);
@@ -229,20 +231,22 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12 animate-reveal">
       <VisionInspiration onSelectIdea={(idea) => form.setValue("goal", idea)} />
+
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 p-1">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-lg">Vision Title</FormLabel>
+                <FormItem className="space-y-3">
+                  <FormLabel className="text-xl font-bold tracking-tight">Vision Title</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="e.g., Launch a successful SaaS product"
+                      placeholder="e.g., Executive Physical Transformation"
+                      className="h-14 rounded-2xl glass border-white/10 text-lg px-6 focus-visible:ring-primary/40 bg-white/5"
                       {...field}
                     />
                   </FormControl>
@@ -254,7 +258,8 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
               control={form.control}
               name="category"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="space-y-3">
+                  <FormLabel className="text-xl font-bold tracking-tight">Strategy Domain</FormLabel>
                   <RadioGroup
                     onValueChange={(val) => {
                       if (val === "auto") {
@@ -275,12 +280,13 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
                       />
                       <Label
                         htmlFor="auto-pick"
-                        className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer text-center h-full transition-all"
+                        className="flex flex-col items-center justify-center rounded-2xl border-2 border-white/5 bg-white/5 p-6 hover:bg-white/10 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 [&:has([data-state=checked])]:border-primary cursor-pointer text-center h-full transition-all group"
                       >
-                        <span className="font-bold text-lg flex items-center gap-2">
-                          <Sparkles className="w-4 h-4 text-primary" />
-                          Let AI Decide based on my goal
+                        <span className="font-bold text-xl flex items-center gap-3 group-hover:scale-105 transition-transform">
+                          <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+                          Calibrate Automatically
                         </span>
+                        <span className="text-[10px] text-muted-foreground/60 uppercase tracking-widest mt-2 font-bold">Recommended for complex ambitions</span>
                       </Label>
                     </div>
 
@@ -293,23 +299,9 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
                         />
                         <Label
                           htmlFor={category}
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer text-center h-full transition-all"
+                          className="flex flex-col items-center justify-center rounded-2xl border-2 border-white/5 bg-white/5 p-4 hover:bg-white/10 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 [&:has([data-state=checked])]:border-primary cursor-pointer text-center h-full transition-all"
                         >
-                          <span className="font-semibold">{category}</span>
-                          <span className="text-xs text-muted-foreground mt-1">
-                            {category === "Career" &&
-                              "Professional growth & success"}
-                            {category === "Health" &&
-                              "Physical & mental well-being"}
-                            {category === "Financial" &&
-                              "Wealth, savings & stability"}
-                            {category === "Personal Growth" &&
-                              "Skills, hobbies & self"}
-                            {category === "Relationships" &&
-                              "Family, friends & connections"}
-                            {category === "Legacy" &&
-                              "Impact, contribution & memory"}
-                          </span>
+                          <span className="font-bold text-base tracking-tight">{category}</span>
                         </Label>
                       </div>
                     ))}
@@ -324,13 +316,13 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
             control={form.control}
             name="goal"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-lg">Your Goal</FormLabel>
+              <FormItem className="space-y-3">
+                <FormLabel className="text-xl font-bold tracking-tight">The Vision Statement</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Describe your vision in detail. What do you want to achieve? When do you want to achieve it by? (e.g., 'in 3 months', 'by next summer'). The more specific you are about the 'what' and 'when', the better the AI roadmap will be."
-                    rows={15}
-                    className="h-[400px] resize-none bg-background text-foreground text-base"
+                    placeholder="Articulate your vision with absolute clarity. Describe the 'What', 'How', and most importantly, the 'When'. (e.g., 'By Q4, I will have scaled my practice to 20 active clients while maintaining a 4-day work week')."
+                    rows={12}
+                    className="min-h-[300px] rounded-3xl glass border-white/10 text-xl px-8 py-6 focus-visible:ring-primary/40 bg-white/5 font-light leading-relaxed placeholder:text-muted-foreground/30"
                     {...field}
                   />
                 </FormControl>
@@ -338,19 +330,20 @@ export function VisionForm({ onVisionCreated }: VisionFormProps) {
               </FormItem>
             )}
           />
-          <div className="flex justify-center pt-4">
+
+          <div className="flex justify-center pt-10">
             <Button
               type="submit"
               size="lg"
               disabled={isLoading}
-              className="font-bold"
+              className="h-20 px-12 rounded-[2rem] font-black text-2xl uppercase tracking-tighter bg-primary text-primary-foreground shadow-[0_0_40px_rgba(var(--primary),0.3)] hover:shadow-[0_0_60px_rgba(var(--primary),0.5)] hover:scale-105 transition-all duration-500 animate-reveal"
             >
               {isLoading ? (
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <Loader2 className="mr-4 h-8 w-8 animate-spin" />
               ) : (
-                <Zap className="mr-2 h-5 w-5" />
+                <Zap className="mr-4 h-8 w-8 fill-current" />
               )}
-              {isLoading ? "Architecting Your Future..." : "Generate & Save"}
+              {isLoading ? "Architecting..." : "Launch Trajectory"}
             </Button>
           </div>
         </form>

@@ -33,17 +33,19 @@ export const generateDailyBriefing = ai.defineFlow(
       input;
 
     const prompt = `
-      You are an elite life coach for ${userName || "a visionary"}.
+      You are the Echo AI Architect, an elite strategic advisor for ${userName || "a visionary strategist"}.
       
-      Context:
-      - Their main vision is: "${activeVisionTitle || "To build a better future"}".
-      - Today's habits: ${todaysHabits?.join(", ") || "General improvements"}.
-      - Their last reflection: "${recentReflection || "No recent reflection"}".
+      Structural Context:
+      - Primary Strategic Vision: "${activeVisionTitle || "Undefined Ambition"}".
+      - Operational Habits: ${todaysHabits?.join(", ") || "Foundational maintenance"}.
+      - Recent Neural Reflection: "${recentReflection || "No recent reflection data available"}".
 
-      Generate a "Morning Briefing" JSON with:
-      1. A short, punchy, inspirational quote (can be famous or original) relevant to their context.
-      2. A specific "Focus" for the day (3-5 words).
-      3. A short "Motivation" (1-2 sentences) connecting their habits to their vision, referencing their reflection if relevant.
+      Objective: Synthesize a high-fidelity "Morning Briefing" that calibrates the user's focus for maximum trajectory alignment.
+
+      Output Requirements (JSON):
+      1. "quote": A singular, high-impact cognitive anchor. It should be punchy, profound, and relevant to their specific vision and recent reflection.
+      2. "focus": A "Strategic Focus" for the immediate 24-hour cycle (3-5 words, active and commanding).
+      3. "motivation": A sophisticated 1-2 sentence calibration. Connect their base operational habits to the high-level vision, framing today's actions as essential components of their bridge to the future. Use architectural metaphors if appropriate.
     `;
 
     const response = await ai.generate({

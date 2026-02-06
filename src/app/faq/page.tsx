@@ -4,6 +4,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -42,34 +44,58 @@ const faqs = [
 
 export default function FAQPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-[#050505] relative overflow-hidden">
       {/* Background Decorations */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full -z-10" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-accent/5 blur-[120px] rounded-full -z-10" />
 
-      <main className="flex-1 py-12 md:py-24">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <div className="text-center mb-16">
-            <h1 className="font-headline text-5xl md:text-6xl font-bold tracking-tight mb-6">
-              Common <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500">Inquiries</span>
+      <main className="flex-1 py-12 md:py-24 relative z-10">
+        <div className="container mx-auto px-6 max-w-4xl">
+          <div className="text-center mb-24 animate-reveal">
+            <div className="flex items-center justify-center gap-3 text-primary mb-6">
+              <div className="h-px w-12 bg-primary/20" />
+              <span className="text-[11px] font-black uppercase tracking-[0.4em]">Knowledge Repository</span>
+              <div className="h-px w-12 bg-primary/20" />
+            </div>
+            <h1 className="font-headline text-6xl md:text-8xl font-black tracking-tighter text-white leading-none mb-8">
+              System <span className="text-gradient">Intelligence</span>
             </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              Everything you need to know about navigating the bridge from vision to reality.
+            <p className="text-xl text-muted-foreground/60 leading-relaxed font-light max-w-2xl mx-auto">
+              Decrypting the mechanics of the bridge. Everything you need to know about the matrix of manifestation.
             </p>
           </div>
 
-          <Accordion type="single" collapsible className="w-full">
-            {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left text-lg font-medium">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+          <div className="space-y-6 animate-reveal delay-200">
+            <Accordion type="single" collapsible className="w-full space-y-4">
+              {faqs.map((faq, index) => (
+                <AccordionItem
+                  key={index}
+                  value={`item-${index}`}
+                  className="border-none rounded-[2rem] glass-card px-8 overflow-hidden transition-all duration-500 hover:border-white/10"
+                >
+                  <AccordionTrigger className="py-8 text-left text-xl font-bold tracking-tight hover:no-underline hover:text-primary transition-colors data-[state=open]:text-primary group">
+                    <div className="flex items-center gap-6">
+                      <span className="text-sm font-black text-muted-foreground/20 group-data-[state=open]:text-primary/40">{(index + 1).toString().padStart(2, '0')}</span>
+                      {faq.question}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-8 pl-12 text-lg text-muted-foreground/60 font-light leading-relaxed border-t border-white/5 pt-6 italic">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+
+          <div className="mt-24 p-12 rounded-[3rem] glass-card border-primary/10 text-center space-y-8 animate-reveal delay-500">
+            <h3 className="text-3xl font-black font-headline tracking-tighter">Beyond the Archive?</h3>
+            <p className="text-muted-foreground/60 max-w-lg mx-auto font-light">
+              If your inquiry resides outside these parameters, initiate a direct link with our support architects.
+            </p>
+            <Button asChild className="h-14 px-10 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest hover:scale-105 transition-all">
+              <Link href="/contact">Establish Link</Link>
+            </Button>
+          </div>
         </div>
       </main>
     </div>

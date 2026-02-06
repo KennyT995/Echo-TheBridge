@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { z } from "zod";
 
 import {
@@ -78,23 +78,39 @@ export function EditVisionDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Vision Details</DialogTitle>
-          <DialogDescription>
-            Update the title and category of your vision.
+      <DialogContent className="max-w-3xl glass-card border-white/5 p-0 overflow-hidden shadow-2xl">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[80px] rounded-full -z-10" />
+
+        <DialogHeader className="p-8 pb-6 border-b border-white/5 bg-white/5 backdrop-blur-xl">
+          <div className="flex items-center gap-3 text-primary mb-2">
+            <div className="p-2 bg-primary/10 rounded-xl border border-primary/20">
+              <Pencil className="w-5 h-5" />
+            </div>
+            <span className="text-[11px] font-bold uppercase tracking-[0.4em]">
+              Strategic Modification
+            </span>
+          </div>
+          <DialogTitle className="text-4xl font-headline font-bold tracking-tighter">
+            Recalibrate <span className="text-gradient">Vision</span>
+          </DialogTitle>
+          <DialogDescription className="text-lg text-muted-foreground/60 font-light mt-2">
+            Adjust the core parameters of your strategic roadmap.
           </DialogDescription>
         </DialogHeader>
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="p-8 space-y-8">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Vision Title</FormLabel>
+                <FormItem className="space-y-4">
+                  <FormLabel className="text-xl font-bold tracking-tight">Vision Title</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input
+                      {...field}
+                      className="h-14 rounded-2xl glass border-white/10 text-xl px-6 focus-visible:ring-primary/40 bg-white/5 font-light"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -104,8 +120,8 @@ export function EditVisionDialog({
               control={form.control}
               name="category"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
+                <FormItem className="space-y-4">
+                  <FormLabel className="text-xl font-bold tracking-tight">Sector Allocation</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -121,10 +137,10 @@ export function EditVisionDialog({
                           />
                           <Label
                             htmlFor={`edit-${category}`}
-                            className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer text-center h-full transition-all"
+                            className="flex flex-col items-start justify-center rounded-2xl border border-white/5 p-6 hover:bg-white/5 peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer h-full transition-all group"
                           >
-                            <span className="font-semibold">{category}</span>
-                            <span className="text-xs text-muted-foreground mt-1">
+                            <span className="font-bold text-lg group-hover:text-primary transition-colors">{category}</span>
+                            <span className="text-sm text-muted-foreground/60 mt-1 font-light">
                               {categoryDescriptions[category]}
                             </span>
                           </Label>
@@ -136,17 +152,22 @@ export function EditVisionDialog({
                 </FormItem>
               )}
             />
-            <DialogFooter>
+            <DialogFooter className="pt-4 border-t border-white/5 flex gap-4">
               <Button
                 type="button"
                 variant="ghost"
                 onClick={() => onOpenChange(false)}
+                className="h-12 px-6 rounded-xl text-muted-foreground hover:bg-white/5 transition-all"
               >
-                Cancel
+                Abort
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+              >
+                {isLoading && <Loader2 className="mr-3 h-5 w-5 animate-spin" />}
+                Commit Changes
               </Button>
             </DialogFooter>
           </form>
@@ -155,3 +176,4 @@ export function EditVisionDialog({
     </Dialog>
   );
 }
+

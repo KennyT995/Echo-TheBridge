@@ -40,6 +40,8 @@ import { calculateOverallProgress } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
+import { FirestorePaths } from "@/lib/firestore-paths";
+import { logger } from "@/lib/logger";
 
 // Feature Components
 import { StreakWidget } from "@/features/dashboard/components/streak-widget";
@@ -53,20 +55,13 @@ import { CrossingCelebration } from "@/features/roadmaps/components/crossing-cel
 import { WeeklyRetroDialog } from "@/features/journal/components/weekly-retro-dialog";
 import { usePlan } from "@/hooks/use-plan";
 
+import { usePrevious } from "@/hooks/use-previous";
+
 // Extracted Components
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { VisionsGrid } from "@/features/dashboard/components/visions-grid";
 import { EmptyVisionsState } from "@/features/dashboard/components/empty-visions-state";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
-function usePrevious<T>(value: T) {
-  const ref = useRef<T | undefined>(undefined);
-  useEffect(() => {
-    ref.current = value;
-  });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  return ref.current;
-}
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser();
@@ -144,7 +139,7 @@ export default function DashboardPage() {
         setFutureLetter(result);
       }
     } catch (e) {
-      console.error(e);
+      logger.error("[DashboardPage] Future letter generation failed:", e);
     } finally {
       setIsGeneratingLetter(false);
     }
@@ -153,18 +148,18 @@ export default function DashboardPage() {
   const visionsQuery = useMemoFirebase(() => {
     if (!user) return null;
     return query(
-      collection(firestore, "users", user.uid, "visions"),
+      collection(firestore, FirestorePaths.visions(user.uid)),
       orderBy("createdAt", "desc"),
     );
   }, [user, firestore]);
   const roadmapsQuery = useMemoFirebase(() => {
     if (!user) return null;
-    return collection(firestore, "users", user.uid, "roadmaps");
+    return collection(firestore, FirestorePaths.roadmaps(user.uid));
   }, [user, firestore]);
 
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
-    return doc(firestore, "users", user.uid);
+    return doc(firestore, FirestorePaths.user(user.uid));
   }, [user, firestore]);
 
   const { data: visions, isLoading: visionsLoading } =

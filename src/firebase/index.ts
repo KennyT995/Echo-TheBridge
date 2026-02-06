@@ -23,24 +23,12 @@ export function initializeFirebase() {
   let firebaseApp: FirebaseApp;
 
   if (getApps().length === 0) {
-    // When not in production, always use the explicit firebaseConfig.
-    // In production, App Hosting provides the configuration automatically.
     if (process.env.NODE_ENV !== "production") {
-      console.log("Firebase: Initializing in development mode with config:", {
-        ...firebaseConfig,
-        apiKey: firebaseConfig.apiKey ? `PRESENT (length: ${firebaseConfig.apiKey.length})` : "MISSING",
-      });
       firebaseApp = initializeApp(firebaseConfig);
     } else {
       try {
-        // In production, try auto-initialization first.
-        console.log("Firebase: Initializing in production mode (auto-init)");
         firebaseApp = initializeApp();
       } catch (e) {
-        console.warn(
-          "Automatic initialization failed. Falling back to firebase config object.",
-          e,
-        );
         // Fallback to explicit config if auto-init fails even in production.
         firebaseApp = initializeApp(firebaseConfig);
       }

@@ -41,6 +41,8 @@ import {
 } from "@/ai/flows/generate-future-letter";
 import { firestore } from "@/firebase/admin";
 
+import { logger } from "@/lib/logger";
+
 /**
  * Validates the vision intent using AI.
  */
@@ -51,7 +53,7 @@ export async function analyzeVision(
     const result = await analyzeVisionIntent({ goal });
     return result;
   } catch (error) {
-    console.error("[actions] Vision analysis failed:", error);
+    logger.error("[actions] Vision analysis failed:", error);
     return { error: "Failed to analyze vision intent." };
   }
 }
@@ -98,7 +100,7 @@ export async function generateRoadmap(
     });
     return { roadmap, correctedGoal };
   } catch (error: unknown) {
-    console.error("[actions] Error in generateRoadmap:", error);
+    logger.error("[actions] Error in generateRoadmap:", error);
     let errorMessage = "";
     if (error instanceof Error) {
       errorMessage = error.message;
@@ -134,7 +136,7 @@ export async function getReflection(
       await analyzeAndReflectOnUserInput({ userInput, vision });
     return { strategicBriefing: result.strategicBriefing };
   } catch (error) {
-    console.error("[actions] Reflection generation failed:", error);
+    logger.error("[actions] Reflection generation failed:", error);
     return {
       error:
         "An unexpected error occurred while generating your reflection. Please try again.",
@@ -157,7 +159,7 @@ export async function getVisionIdeas(
     });
     return { ideas: result.ideas };
   } catch (error) {
-    console.error("[actions] Vision idea generation failed:", error);
+    logger.error("[actions] Vision idea generation failed:", error);
     return {
       error:
         "An unexpected error occurred while generating ideas. Please try again.",
@@ -200,7 +202,7 @@ export async function deleteVision(
 
     return { success: true };
   } catch (error) {
-    console.error("[actions] Delete vision failed:", error);
+    logger.error("[actions] Delete vision failed:", error);
     return { success: false, error: "Failed to delete vision" };
   }
 }
@@ -215,7 +217,7 @@ export async function getDailyBriefing(
     const briefing = await generateDailyBriefing(input);
     return { briefing };
   } catch (error) {
-    console.error("[actions] Daily briefing generation failed:", error);
+    logger.error("[actions] Daily briefing generation failed:", error);
     return { error: "Failed to generate daily briefing." };
   }
 }
@@ -230,7 +232,7 @@ export async function getFutureSelfChat(
     const chatResponse = await generateFutureSelfChat(input);
     return { response: chatResponse };
   } catch (error) {
-    console.error("[actions] Future self chat failed:", error);
+    logger.error("[actions] Future self chat failed:", error);
     return { error: "Failed to connect to your future self." };
   }
 }
@@ -245,7 +247,7 @@ export async function checkDecisionAlignment(
     const result = await analyzeDecisionAlignment(input);
     return { result };
   } catch (error) {
-    console.error("[actions] Decision alignment check failed:", error);
+    logger.error("[actions] Decision alignment check failed:", error);
     return { error: "Failed to analyze decision alignment." };
   }
 }
@@ -260,7 +262,8 @@ export async function checkFutureLetter(
     const result = await generateFutureLetter(input);
     return { result };
   } catch (error) {
-    console.error("[actions] Future letter generation failed:", error);
+    logger.error("[actions] Future letter generation failed:", error);
     return { error: "Failed to receive letter from the future." };
   }
 }
+

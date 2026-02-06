@@ -45,10 +45,10 @@ const heroImage = {
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground selection:bg-primary/30">
+    <div className="flex flex-col min-h-screen bg-background text-foreground selection:bg-primary/30 overflow-x-hidden">
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative w-full min-h-[80vh] flex items-center justify-center overflow-hidden px-4 py-20">
+        <section className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden px-4 py-20">
           <div className="absolute inset-0 z-0 overflow-hidden">
             {heroImage && (
               <Image
@@ -57,36 +57,38 @@ export default function HomePage() {
                 fill
                 sizes="100vw"
                 priority
-                className="object-cover opacity-30 scale-105 animate-subtle-zoom"
+                className="object-cover opacity-20 scale-105 animate-subtle-zoom"
                 data-ai-hint={heroImage.imageHint}
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background via-background/40 to-background" />
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] animate-pulse" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-[128px] animate-pulse delay-1000" />
           </div>
 
-          <div className="relative z-10 max-w-5xl mx-auto text-center space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <div className="relative z-10 max-w-6xl mx-auto text-center space-y-10 animate-reveal">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-primary/20 text-primary text-sm font-semibold tracking-wide">
               <Sparkles className="w-4 h-4" />
-              <span>AI-Powered Personal Architecture</span>
+              <span className="uppercase">AI-Powered Personal Architecture</span>
             </div>
 
-            <h1 className="font-headline text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-primary leading-[1.1]">
-              Bridge Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500">Vision</span> to Reality
+            <h1 className="font-headline text-6xl md:text-8xl lg:text-9xl font-bold tracking-tighter leading-[0.9] lg:leading-[0.85]">
+              Bridge Your <span className="text-gradient">Vision</span> <br className="hidden md:block" /> to Reality
             </h1>
 
-            <p className="max-w-2xl mx-auto text-xl md:text-2xl text-muted-foreground leading-relaxed animate-in fade-in slide-in-from-bottom-6 duration-1000 delay-200">
-              Stop dreaming, start doing. Echo: The Bridge translates your
+            <p className="max-w-2xl mx-auto text-xl md:text-2xl text-muted-foreground/80 leading-relaxed font-light">
+              Stop dreaming, start doing. <span className="text-foreground font-medium italic">Echo: The Bridge</span> translates your
               long-term goals into a dynamic, AI-powered action plan.
             </p>
 
-            <div className="flex flex-col sm:flex-row justify-center gap-4 pt-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-300">
-              <Button asChild size="lg" className="h-14 px-8 text-lg font-bold rounded-full group">
+            <div className="flex flex-col sm:flex-row justify-center gap-6 pt-10">
+              <Button asChild size="lg" className="h-16 px-10 text-xl font-bold rounded-full group shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all duration-300">
                 <Link href="/login">
                   Get Started for Free
-                  <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="ml-2 w-6 h-6 transition-transform group-hover:translate-x-2" />
                 </Link>
               </Button>
-              <Button asChild variant="outline" size="lg" className="h-14 px-8 text-lg font-bold rounded-full border-2">
+              <Button asChild variant="outline" size="lg" className="h-16 px-10 text-xl font-bold rounded-full border-2 glass hover:bg-white/5 transition-all duration-300">
                 <Link href="#features">Learn How It Works</Link>
               </Button>
             </div>
@@ -94,82 +96,85 @@ export default function HomePage() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-24 md:py-32 relative overflow-hidden">
-          <div className="container mx-auto px-4">
-            <div className="text-center max-w-3xl mx-auto mb-20">
-              <h2 className="font-headline text-4xl md:text-5xl font-bold text-primary mb-6">
-                How It Works
+        <section id="features" className="py-32 md:py-48 relative overflow-hidden">
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center max-w-3xl mx-auto mb-24 animate-reveal">
+              <h2 className="font-headline text-5xl md:text-6xl font-bold tracking-tight mb-8">
+                How It <span className="text-primary">Works</span>
               </h2>
-              <p className="text-xl text-muted-foreground">
+              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
                 A simple, powerful three-step process to turn your aspirations into
                 achievements.
               </p>
             </div>
 
-            <div className="grid gap-16 lg:grid-cols-3">
+            <div className="grid gap-12 lg:grid-cols-3">
               {featureData.map((feature, index) => (
                 <div
                   key={index}
-                  className="group relative flex flex-col items-center text-center p-8 rounded-3xl bg-secondary/20 border border-border/50 hover:bg-secondary/30 transition-all duration-500 hover:-translate-y-2"
+                  className="group relative flex flex-col items-center text-center p-10 rounded-[2.5rem] glass-card hover:bg-white/5 transition-all duration-500 hover:-translate-y-4"
                 >
-                  <div className="relative w-full aspect-video mb-8 rounded-2xl overflow-hidden shadow-xl border border-border/50">
+                  <div className="relative w-full aspect-[4/3] mb-10 rounded-3xl overflow-hidden shadow-2xl border border-white/10">
                     <Image
                       src={feature.image}
                       alt={feature.title}
                       fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="object-cover transition-transform duration-1000 group-hover:scale-110"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
-                      <feature.icon className="w-10 h-10 text-white" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8">
+                      <div className="bg-primary p-3 rounded-2xl shadow-lg animate-float">
+                        <feature.icon className="w-8 h-8 text-primary-foreground" />
+                      </div>
                     </div>
                   </div>
 
-                  <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                  <p className="text-lg text-muted-foreground leading-relaxed">
+                  <h3 className="text-3xl font-bold mb-6 tracking-tight group-hover:text-primary transition-colors">{feature.title}</h3>
+                  <p className="text-lg text-muted-foreground/90 leading-relaxed font-light">
                     {feature.description}
                   </p>
                 </div>
               ))}
             </div>
           </div>
+
+          <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[160px] -z-10" />
+          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[160px] -z-10" />
         </section>
 
         {/* Vision Quote Section */}
-        <section className="py-24 bg-primary text-primary-foreground text-center px-4">
-          <div className="max-w-4xl mx-auto space-y-6">
-            <blockquote className="text-3xl md:text-4xl font-headline font-bold italic leading-tight">
+        <section className="py-32 md:py-48 bg-primary relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] pointer-events-none" />
+          <div className="max-w-5xl mx-auto space-y-10 px-4 text-center relative z-10">
+            <blockquote className="text-4xl md:text-6xl lg:text-7xl font-headline font-bold italic leading-tight text-primary-foreground tracking-tighter animate-reveal">
               &quot;The secret of your future is hidden in your daily routine.&quot;
             </blockquote>
-            <cite className="text-xl opacity-80 not-italic">— Mike Murdock</cite>
+            <cite className="block text-2xl text-primary-foreground/70 not-italic font-medium uppercase tracking-[0.2em]">
+              — Mike Murdock
+            </cite>
           </div>
         </section>
 
         {/* Pricing CTA */}
-        <section className="py-24 md:py-32 relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl aspect-[2/1] bg-primary/5 blur-[120px] rounded-full -z-10" />
+        <section className="py-32 md:py-48 relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-6xl aspect-square bg-primary/5 blur-[160px] rounded-full -z-10 animate-pulse" />
           <div className="container mx-auto px-4 text-center">
-            <h2 className="font-headline text-4xl md:text-5xl font-bold mb-6">
-              Find the Perfect Plan
+            <h2 className="font-headline text-5xl md:text-7xl font-bold mb-10 tracking-tight">
+              Ready to Build Your <span className="text-gradient">Legacy</span>?
             </h2>
-            <p className="mt-4 max-w-xl mx-auto text-xl text-muted-foreground mb-12">
-              Whether you&apos;re just starting out or ready to build a lasting
-              legacy, we have a plan for you.
+            <p className="max-w-2xl mx-auto text-xl md:text-2xl text-muted-foreground mb-16 font-light">
+              Whether you&apos;re just starting out or ready to bridge the gap to greatness, we have the architecture you need.
             </p>
             <Button
               asChild
               size="lg"
-              className="h-16 px-12 text-xl font-bold rounded-full shadow-2xl shadow-primary/20"
+              className="h-20 px-16 text-2xl font-bold rounded-full shadow-2xl shadow-primary/30 hover:shadow-primary/50 transition-all duration-300 animate-float"
             >
               <Link href="/plans">View Plans & Pricing</Link>
             </Button>
           </div>
         </section>
       </main>
-
-      {/* Footer-like simple credits */}
-      <footer className="py-8 border-t border-border/50 text-center text-muted-foreground text-sm uppercase tracking-widest">
-        &copy; {new Date().getFullYear()} ECHO: THE BRIDGE. ALL RIGHTS RESERVED.
-      </footer>
     </div>
   );
 }
+

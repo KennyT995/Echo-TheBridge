@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://visionbridge.ai";
+  const baseUrl = "https://echo-the-bridge.com";
 
   return [
     {

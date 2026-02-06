@@ -21,74 +21,85 @@ export function VisionConfirmationDialog({
   if (!analysis) return null;
 
   return (
-    <div className="animate-in fade-in zoom-in-95 duration-200">
-      <div className="mb-6 text-center space-y-2">
-        <h3 className="text-xl font-bold">
-          I noticed multiple goals in your vision.
+    <div className="animate-reveal py-8">
+      <div className="mb-12 text-center space-y-4">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-2">
+          Intelligence Insight
+        </div>
+        <h3 className="text-4xl md:text-5xl font-bold font-headline tracking-tighter">
+          Multidimensional <span className="text-gradient">Goals</span> Detected
         </h3>
-        <p className="text-muted-foreground">{analysis.reasoning}</p>
+        <p className="text-xl text-muted-foreground/60 font-light max-w-2xl mx-auto leading-relaxed">
+          {analysis.reasoning}
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
         <Card
-          className="border-2 border-primary/20 hover:border-primary/50 transition-colors cursor-pointer group"
+          className="border-white/5 glass-card hover:border-primary/40 transition-all cursor-pointer group hover:-translate-y-2 duration-500 overflow-hidden relative"
           onClick={onConfirmSeparate}
         >
-          <CardContent className="pt-6 flex flex-col h-full">
-            <div className="mb-4 p-3 bg-primary/10 w-fit rounded-full group-hover:bg-primary/20 transition-colors">
-              <Split className="h-6 w-6 text-primary" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl rounded-full" />
+          <CardContent className="pt-10 p-8 flex flex-col h-full relative z-10">
+            <div className="mb-8 p-4 bg-primary/10 w-fit rounded-2xl border border-primary/20 group-hover:scale-110 transition-transform duration-500">
+              <Split className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="font-bold text-lg mb-2">Separate Roadmaps</h3>
-            <p className="text-sm text-muted-foreground mb-4 flex-grow">
-              Create distinct roadmaps for each goal to keep them focused.
+            <h3 className="font-bold text-2xl mb-3 font-headline">Parallel Trajectories</h3>
+            <p className="text-muted-foreground/60 mb-8 font-light leading-relaxed">
+              Decompose your vision into distinct, focused roadmaps for maximum clarity.
             </p>
-            <div className="space-y-2 mt-auto">
+            <div className="space-y-3 mt-auto">
               {analysis.proposedVisions.map((vision, idx) => (
                 <div
                   key={idx}
-                  className="bg-muted p-2 rounded text-sm font-medium"
+                  className="bg-white/5 p-4 rounded-xl text-sm font-medium border border-white/5 group-hover:border-primary/20 transition-colors"
                 >
                   {vision.title}
                 </div>
               ))}
             </div>
             <Button
-              className="w-full mt-4"
-              variant="outline"
+              className="w-full h-14 mt-8 rounded-xl font-bold text-lg"
+              variant="default"
               disabled={isCreating}
             >
-              Separate Them
+              Initialize Separate Flows
             </Button>
           </CardContent>
         </Card>
 
         <Card
-          className="border-2 border-primary/20 hover:border-primary/50 transition-colors cursor-pointer group"
+          className="border-white/5 glass-card hover:border-accent/40 transition-all cursor-pointer group hover:-translate-y-2 duration-500 overflow-hidden relative"
           onClick={onConfirmUnified}
         >
-          <CardContent className="pt-6 flex flex-col h-full">
-            <div className="mb-4 p-3 bg-primary/10 w-fit rounded-full group-hover:bg-primary/20 transition-colors">
-              <GitMerge className="h-6 w-6 text-primary" />
+          <div className="absolute bottom-0 right-0 w-32 h-32 bg-accent/5 blur-3xl rounded-full" />
+          <CardContent className="pt-10 p-8 flex flex-col h-full relative z-10">
+            <div className="mb-8 p-4 bg-accent/10 w-fit rounded-2xl border border-accent/20 group-hover:scale-110 transition-transform duration-500">
+              <GitMerge className="h-8 w-8 text-accent" />
             </div>
-            <h3 className="font-bold text-lg mb-2">Unified Roadmap</h3>
-            <p className="text-sm text-muted-foreground mb-4 flex-grow">
-              Keep everything in one single roadmap.
+            <h3 className="font-bold text-2xl mb-3 font-headline">Unified Masterplan</h3>
+            <p className="text-muted-foreground/60 mb-8 font-light leading-relaxed">
+              Maintain singular focus and consolidate all elements into one integrated strategy.
             </p>
-            <div className="bg-muted p-2 rounded text-sm font-medium mt-auto">
+            <div className="bg-white/5 p-4 rounded-xl text-sm font-medium border border-white/5 group-hover:border-accent/20 transition-colors mt-auto">
               {analysis.unifiedVision.title}
             </div>
-            <Button className="w-full mt-4" disabled={isCreating}>
-              Keep Together
+            <Button
+              className="w-full h-14 mt-8 rounded-xl font-bold text-lg bg-accent text-accent-foreground hover:bg-accent/90"
+              disabled={isCreating}
+            >
+              Sync as One Vision
             </Button>
           </CardContent>
         </Card>
       </div>
 
-      <div className="flex justify-center mt-6">
-        <Button variant="ghost" onClick={onCancel} disabled={isCreating}>
-          Cancel
+      <div className="flex justify-center mt-12">
+        <Button variant="ghost" onClick={onCancel} disabled={isCreating} className="h-12 px-8 text-muted-foreground/40 hover:text-foreground">
+          Recalibrate Vision
         </Button>
       </div>
     </div>
   );
 }
+

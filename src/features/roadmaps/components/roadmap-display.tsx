@@ -295,12 +295,12 @@ export function RoadmapDisplay({
   };
 
   return (
-    <Card className="w-full shadow-sm">
-      <CardContent className="p-4 sm:p-6">
+    <Card className="w-full glass-card border-white/5 shadow-2xl overflow-hidden">
+      <CardContent className="p-0">
         <Accordion
           type="multiple"
           defaultValue={["dailyHabits"]}
-          className="w-full space-y-6"
+          className="w-full divide-y divide-white/5"
         >
           {roadmapSections.map((section) => {
             const items = roadmap[section.key];
@@ -312,23 +312,43 @@ export function RoadmapDisplay({
               <AccordionItem
                 key={section.key}
                 value={section.key}
-                className={cn(
-                  "border rounded-2xl overflow-hidden mb-4 transition-all duration-300",
-                  section.borderColor,
-                  "bg-card/50 backdrop-blur-sm"
-                )}
+                className="border-none"
               >
-                <div className="flex flex-col">
-                  <div className={cn("px-5 py-4 flex items-center justify-between w-full hover:bg-muted/10 transition-colors", section.lightColor)}>
+                <div className="flex flex-col group">
+                  <div className={cn("px-8 py-6 flex items-center justify-between w-full transition-all duration-500", section.lightColor)}>
                     <AccordionTrigger className="p-0 text-lg font-bold hover:no-underline [&>svg]:hidden flex-1 py-0 justify-start">
-                      <div className="flex items-center gap-4">
-                        <div className={cn("p-2.5 rounded-xl shadow-sm border", section.lightColor, section.borderColor)}>
-                          <section.icon className={cn("h-5 w-5", section.textColor)} />
+                      <div className="flex items-center gap-6">
+                        <div className={cn(
+                          "p-3 rounded-2xl shadow-xl transition-all duration-500 group-hover:scale-110 group-hover:rotate-3",
+                          section.color,
+                          "text-white border border-white/20"
+                        )}>
+                          <section.icon className="h-6 w-6" />
                         </div>
-                        <span className={cn("font-headline tracking-tight", section.textColor)}>{section.title}</span>
+                        <div className="text-left">
+                          <span className={cn("text-2xl font-headline font-black tracking-tighter block", section.textColor)}>
+                            {section.title}
+                          </span>
+                          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 leading-none">
+                            Sector Calibration // {items.length} Units
+                          </span>
+                        </div>
                       </div>
                     </AccordionTrigger>
-                    <div className="flex items-center gap-2">
+
+                    <div className="flex items-center gap-6">
+                      <div className="hidden sm:flex flex-col items-end gap-1">
+                        <span className={cn("text-xs font-black uppercase tracking-widest", section.textColor)}>
+                          {Math.round(progress)}% Complete
+                        </span>
+                        <div className="h-1.5 w-32 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                          <div
+                            className={cn("h-full transition-all duration-1000 ease-out", section.color)}
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -337,58 +357,37 @@ export function RoadmapDisplay({
                                 variant="ghost"
                                 size="icon"
                                 className={cn(
-                                  "h-9 w-9 shrink-0 rounded-full transition-all",
-                                  shouldTellUserToRegenerate(section.key, items)
-                                    .should
-                                    ? "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 animate-pulse"
-                                    : "text-muted-foreground hover:bg-muted"
+                                  "h-12 w-12 shrink-0 rounded-2xl transition-all border border-transparent",
+                                  shouldTellUserToRegenerate(section.key, items).should
+                                    ? "bg-amber-500/10 text-amber-500 border-amber-500/20 animate-pulse"
+                                    : "text-muted-foreground/40 hover:bg-white/5 hover:text-white"
                                 )}
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   onRegenerateSection(section.key);
                                 }}
                               >
-                                <RefreshCw className="h-4 w-4" />
+                                <RefreshCw className="h-5 w-5" />
                               </Button>
                             )}
                           </TooltipTrigger>
-                          {shouldTellUserToRegenerate(section.key, items)
-                            .should && (
-                              <TooltipContent>
-                                <p>
-                                  {
-                                    shouldTellUserToRegenerate(section.key, items)
-                                      .reason
-                                  }{" "}
-                                  - Click to regenerate
-                                </p>
-                              </TooltipContent>
-                            )}
+                          {shouldTellUserToRegenerate(section.key, items).should && (
+                            <TooltipContent className="bg-amber-500 text-white font-bold border-none rounded-xl p-4 shadow-2xl">
+                              <p className="text-sm">
+                                {shouldTellUserToRegenerate(section.key, items).reason}
+                              </p>
+                              <p className="text-[10px] uppercase tracking-widest opacity-80 mt-1">Click to Resynthesize</p>
+                            </TooltipContent>
+                          )}
                         </Tooltip>
                       </TooltipProvider>
                     </div>
                   </div>
-                  <div className="px-5 pb-5 pt-2">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-                        Structural Integrity
-                      </span>
-                      <span className={cn("text-xs font-bold", section.textColor)}>
-                        {Math.round(progress)}%
-                      </span>
-                    </div>
-                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={cn("h-full transition-all duration-1000 ease-out", section.color)}
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                  </div>
                 </div>
 
-                <AccordionContent className="p-0">
-                  <ScrollArea className="max-h-[400px]">
-                    <ul className="divide-y divide-border/50">
+                <AccordionContent className="p-0 border-t border-white/5 bg-black/20">
+                  <ScrollArea className="max-h-[600px]">
+                    <ul className="divide-y divide-white/5">
                       {items.map((item: RoadmapItem, index: number) => {
                         const isEditing =
                           editing?.section === section.key &&
@@ -397,21 +396,30 @@ export function RoadmapDisplay({
                         return (
                           <li
                             key={index}
-                            className="group flex items-start gap-3 p-4 hover:bg-muted/20 transition-colors"
+                            className={cn(
+                              "group flex items-center gap-6 p-6 transition-all duration-300",
+                              item.completed ? "bg-white/[0.02]" : "hover:bg-white/[0.05]"
+                            )}
                           >
-                            <Checkbox
-                              id={`check-${uniqueId}`}
-                              checked={item.completed}
-                              onCheckedChange={(checked) =>
-                                handleCheckChange(
-                                  section.key,
-                                  index,
-                                  !!checked,
-                                )
-                              }
-                              disabled={readOnly}
-                              className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
-                            />
+                            <div className="relative">
+                              <Checkbox
+                                id={`check-${uniqueId}`}
+                                checked={item.completed}
+                                onCheckedChange={(checked) =>
+                                  handleCheckChange(
+                                    section.key,
+                                    index,
+                                    !!checked,
+                                  )
+                                }
+                                disabled={readOnly}
+                                className="h-7 w-7 rounded-lg border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all duration-300"
+                              />
+                              {item.completed && (
+                                <div className="absolute inset-0 bg-primary/20 blur-lg -z-10 animate-fade-in" />
+                              )}
+                            </div>
+
                             <div className="flex-1 min-w-0">
                               {isEditing ? (
                                 <Input
@@ -426,15 +434,14 @@ export function RoadmapDisplay({
                                   onBlur={handleSaveEdit}
                                   onKeyDown={handleInputKeyDown}
                                   autoFocus
-                                  className="text-base h-8"
+                                  className="text-xl h-12 bg-white/5 border-primary/40 rounded-xl px-4 font-light"
                                 />
                               ) : (
                                 <label
                                   htmlFor={`check-${uniqueId}`}
                                   className={cn(
-                                    "text-sm sm:text-base text-foreground/90 cursor-pointer flex-1 leading-relaxed min-w-0 break-words",
-                                    item.completed &&
-                                    "line-through text-muted-foreground opacity-70",
+                                    "text-lg sm:text-xl text-white/80 cursor-pointer flex-1 leading-relaxed min-w-0 break-words font-light transition-all duration-300",
+                                    item.completed && "line-through text-muted-foreground/40 opacity-50",
                                     readOnly && "cursor-default",
                                   )}
                                 >
@@ -444,21 +451,21 @@ export function RoadmapDisplay({
                             </div>
 
                             {!item.completed && !isEditing && !readOnly && (
-                              <div className="flex gap-1 ml-auto opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                              <div className="flex gap-2 ml-auto opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                                  className="h-10 w-10 rounded-xl hover:bg-destructive/10 hover:text-destructive border border-transparent hover:border-destructive/20"
                                   onClick={() =>
                                     handleDelete(section.key, index)
                                   }
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Trash2 className="h-5 w-5" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8"
+                                  className="h-10 w-10 rounded-xl hover:bg-primary/10 hover:text-primary border border-transparent hover:border-primary/20"
                                   onClick={() =>
                                     setEditing({
                                       section: section.key,
@@ -467,7 +474,7 @@ export function RoadmapDisplay({
                                     })
                                   }
                                 >
-                                  <Pencil className="h-4 w-4" />
+                                  <Pencil className="h-5 w-5" />
                                 </Button>
                               </div>
                             )}
@@ -477,15 +484,14 @@ export function RoadmapDisplay({
                     </ul>
                   </ScrollArea>
                   {!readOnly && (
-                    <div className="p-2 border-t border-border/50">
+                    <div className="p-4 bg-white/[0.02]">
                       <Button
                         variant="ghost"
-                        size="sm"
-                        className="w-full justify-start text-muted-foreground hover:text-primary gap-2"
+                        className="w-full h-14 justify-center text-muted-foreground/40 hover:text-primary gap-3 rounded-2xl border border-dashed border-white/5 hover:border-primary/20 hover:bg-primary/5 transition-all text-lg font-light"
                         onClick={() => handleAdd(section.key)}
                       >
-                        <Plus className="h-4 w-4" />
-                        Add Item
+                        <Plus className="h-6 w-6" />
+                        Deploy New Objective
                       </Button>
                     </div>
                   )}
@@ -497,36 +503,38 @@ export function RoadmapDisplay({
           {roadmap.history && roadmap.history.length > 0 && (
             <AccordionItem
               value="history"
-              className="border border-border/60 rounded-xl overflow-hidden"
+              className="border-none"
             >
-              <AccordionTrigger className="px-4 py-3 text-lg font-medium text-primary/90 hover:text-primary hover:no-underline hover:bg-muted/30 transition-colors [&>svg]:hidden">
+              <AccordionTrigger className="px-8 py-6 text-2xl font-headline font-black tracking-tighter text-muted-foreground/60 hover:text-primary hover:no-underline transition-all [&>svg]:hidden">
                 <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
-                      <History className="h-5 w-5 text-primary" />
+                  <div className="flex items-center gap-6">
+                    <div className="p-3 bg-white/5 rounded-2xl border border-white/10 group-hover:scale-110 transition-transform">
+                      <History className="h-6 w-6 text-muted-foreground/40" />
                     </div>
-                    <span>Past Achievements</span>
+                    <div className="text-left">
+                      <span className="block">Past Achievements</span>
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/20 leading-none">
+                        Historical Records // {roadmap.history.length} Units
+                      </span>
+                    </div>
                   </div>
-                  <span className="text-sm text-muted-foreground mr-2">
-                    {roadmap.history.length} completed
-                  </span>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="p-0">
+              <AccordionContent className="p-0 border-t border-white/5 bg-black/40">
                 <ScrollArea className="max-h-[400px]">
-                  <ul className="divide-y divide-border/50">
+                  <ul className="divide-y divide-white/5">
                     {roadmap.history.map((item, index) => (
                       <li
                         key={index}
-                        className="flex items-center gap-3 p-4 hover:bg-muted/20 transition-colors"
+                        className="flex items-center gap-6 p-6 hover:bg-white/[0.02] transition-colors"
                       >
-                        <CheckCircle2 className="h-5 w-5 text-muted-foreground opacity-50 flex-shrink-0" />
+                        <CheckCircle2 className="h-6 w-6 text-muted-foreground/20 flex-shrink-0" />
                         <div className="flex-1">
-                          <span className="text-sm sm:text-base text-muted-foreground line-through opacity-70">
+                          <span className="text-lg text-muted-foreground/40 line-through font-light">
                             {item.text}
                           </span>
                         </div>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/20">
                           {item.completedAt
                             ? (item.completedAt instanceof Date
                               ? item.completedAt

@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Moon, Sparkles } from "lucide-react";
 import { useUser, useFirestore } from "@/firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { FirestorePaths } from "@/lib/firestore-paths";
+import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
 
 interface JournalDialogProps {
@@ -32,7 +34,7 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
 
     setIsSubmitting(true);
     try {
-      await addDoc(collection(firestore, "users", user.uid, "daily_logs"), {
+      await addDoc(collection(firestore, FirestorePaths.dailyLogs(user.uid)), {
         content: entry,
         createdAt: serverTimestamp(),
         type: "evening_reflection",
@@ -46,7 +48,7 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
       setEntry("");
       onOpenChange(false);
     } catch (error) {
-      console.error("Error saving journal:", error);
+      logger.error("[JournalDialog] Failed to save reflection:", error);
       toast({
         title: "Error",
         description: "Failed to save your reflection. Please try again.",
@@ -59,54 +61,62 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-2 text-indigo-500 mb-2">
-            <Moon className="w-5 h-5" />
-            <span className="text-sm font-medium uppercase tracking-wider">
+      <DialogContent className="sm:max-w-xl glass-card border-white/5 p-0 overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[80px] rounded-full -z-10" />
+
+        <DialogHeader className="p-8 pb-0">
+          <div className="flex items-center gap-3 text-indigo-400 mb-4 animate-float">
+            <div className="p-2 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
+              <Moon className="w-5 h-5" />
+            </div>
+            <span className="text-[11px] font-bold uppercase tracking-[0.4em]">
               Evening Reflection
             </span>
           </div>
-          <DialogTitle>Close out your day</DialogTitle>
-          <DialogDescription>
-            Take a moment to reflect. What went well? What did you learn?
+          <DialogTitle className="text-4xl font-headline font-bold tracking-tighter">
+            Close the <span className="text-gradient">Circle</span>
+          </DialogTitle>
+          <DialogDescription className="text-lg text-muted-foreground/60 font-light mt-2">
+            Decompress. What insights did today reveal to you?
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="journal-entry">Your Thoughts</Label>
+        <div className="p-8 space-y-6">
+          <div className="space-y-3">
+            <Label htmlFor="journal-entry" className="text-sm font-bold uppercase tracking-widest text-muted-foreground/60">Your Thoughts</Label>
             <Textarea
               id="journal-entry"
-              placeholder="Today was..."
-              className="min-h-[150px] resize-none focus-visible:ring-indigo-500"
+              placeholder="The most significant moment today was..."
+              className="min-h-[250px] rounded-2xl glass border-white/10 text-lg px-6 py-4 focus-visible:ring-indigo-500/40 bg-white/5 resize-none leading-relaxed"
               value={entry}
               onChange={(e) => setEntry(e.target.value)}
             />
           </div>
 
-          <div className="bg-muted/50 p-3 rounded-md text-xs text-muted-foreground flex gap-2">
-            <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-yellow-500" />
-            <p>
-              Your AI Coach will analyze this reflection to provide better
-              guidance in tomorrow&apos;s morning briefing.
+          <div className="bg-indigo-500/5 backdrop-blur-xl p-4 rounded-2xl border border-indigo-500/10 text-xs text-indigo-300 flex gap-3">
+            <Sparkles className="w-5 h-5 shrink-0 text-indigo-400 animate-pulse" />
+            <p className="leading-relaxed">
+              Your AI Architect will synthesize this reflection to recalibrate your
+              calibration of tomorrow&apos;s strategic objectives.
             </p>
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="p-8 pt-0 gap-3">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() => onOpenChange(false)}
             disabled={isSubmitting}
+            className="h-12 px-6 rounded-xl hover:bg-white/5 text-muted-foreground"
           >
-            Cancel
+            Defer Reflection
           </Button>
           <Button
             onClick={handleSubmit}
             disabled={!entry.trim() || isSubmitting}
+            className="h-12 px-8 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold transition-all shadow-xl shadow-indigo-600/20 active:scale-95"
           >
-            {isSubmitting ? "Saving..." : "Save Reflection"}
+            {isSubmitting ? "Synchronizing..." : "Seal the Day"}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -14,6 +14,9 @@ import {
   Copy,
   RefreshCw,
   Pencil,
+  GanttChartSquare,
+  Sparkles,
+  Flag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -69,6 +72,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePlan } from "@/hooks/use-plan";
 import { BridgeVisualizer } from "@/features/roadmaps/components/bridge-visualizer";
 import { calculateOverallProgress } from "@/lib/utils";
+import { FirestorePaths } from "@/lib/firestore-paths";
+import { logger } from "@/lib/logger";
 
 export default function VisionDetailPage() {
   const { visionId } = useParams();
@@ -106,17 +111,17 @@ export default function VisionDetailPage() {
   // Memoize Firestore references
   const visionRef = useMemoFirebase(() => {
     if (!user || !visionId) return null;
-    return doc(firestore, "users", user.uid, "visions", visionId as string);
+    return doc(firestore, FirestorePaths.vision(user.uid, visionId as string));
   }, [user, visionId, firestore]);
 
   const roadmapRef = useMemoFirebase(() => {
     if (!user || !visionId) return null;
-    return doc(firestore, "users", user.uid, "roadmaps", visionId as string);
+    return doc(firestore, FirestorePaths.roadmap(user.uid, visionId as string));
   }, [user, visionId, firestore]);
 
   const userRef = useMemoFirebase(() => {
     if (!user) return null;
-    return doc(firestore, "users", user.uid);
+    return doc(firestore, FirestorePaths.user(user.uid));
   }, [user, firestore]);
 
   const { data: vision, isLoading: isVisionLoading } =
@@ -352,68 +357,89 @@ export default function VisionDetailPage() {
   }
 
   return (
-    <>
-      <main className="container mx-auto px-4 py-8 md:py-12">
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
-            <div>
-              <h1 className="font-headline text-4xl font-bold tracking-tighter text-primary sm:text-5xl">
+    <div className="min-h-screen bg-[#050505] relative overflow-hidden">
+      {/* Background Ambience */}
+      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-indigo-500/5 blur-[120px] rounded-full -z-10" />
+
+      <main className="container mx-auto px-6 py-12 relative z-10">
+        {/* Header Section */}
+        <div className="mb-16 animate-reveal">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
+            <div className="space-y-6 max-w-4xl">
+              <div className="flex items-center gap-3">
+                <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.3em]">
+                  {vision.category || "General Strategy"}
+                </Badge>
+                <div className="h-px w-12 bg-white/10" />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/40">
+                  Sector-01 // Strategic Asset
+                </span>
+              </div>
+              <h1 className="font-headline text-6xl md:text-8xl font-black tracking-tighter text-white leading-[0.85]">
                 {vision.title}
               </h1>
-              <Badge variant="secondary" className="mt-2">
-                {vision.category}
-              </Badge>
+              <p className="text-2xl md:text-3xl text-muted-foreground/60 font-light italic leading-relaxed max-w-3xl border-l-2 border-primary/20 pl-8 py-2">
+                &quot;{vision.goal}&quot;
+              </p>
             </div>
-            <div className="flex flex-wrap gap-2 flex-shrink-0">
+
+            <div className="flex flex-wrap gap-3 flex-shrink-0">
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => setIsEditDialogOpen(true)}
+                className="h-14 px-8 rounded-2xl border border-white/5 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all text-lg font-bold"
               >
-                <Pencil className="mr-2 h-4 w-4" /> Edit
+                <Pencil className="mr-3 h-5 w-5" /> Edit
               </Button>
               <Button
-                variant="outline"
+                variant="ghost"
                 disabled={isRegenerating}
                 onClick={() => {
                   setSectionToRegenerate("all");
                   setRefocusModalOpen(true);
                 }}
+                className="h-14 px-8 rounded-2xl border border-white/5 bg-white/5 backdrop-blur-md hover:bg-white/10 transition-all text-lg font-bold"
               >
                 {isRegenerating ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-3 h-5 w-5 animate-spin" />
                 ) : (
-                  <RefreshCw className="mr-2 h-4 w-4" />
+                  <RefreshCw className="mr-3 h-5 w-5" />
                 )}
-                Regenerate
+                Resynthesize
               </Button>
-              <Button variant="outline" onClick={() => setShareModalOpen(true)}>
-                <Share2 className="mr-2 h-4 w-4" /> Share
+              <Button
+                variant="ghost"
+                onClick={() => setShareModalOpen(true)}
+                className="h-14 px-8 rounded-2xl border border-primary/20 bg-primary/5 backdrop-blur-md hover:bg-primary/10 text-primary transition-all text-lg font-bold"
+              >
+                <Share2 className="mr-3 h-5 w-5" /> Share
               </Button>
+
               <AlertDialog onOpenChange={() => setDeleteConfirmationInput("")}>
                 <AlertDialogTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    className="h-14 w-14 rounded-2xl border border-destructive/10 bg-destructive/5 text-destructive hover:bg-destructive/20 transition-all"
                   >
-                    <Trash2 className="h-5 w-5" />
+                    <Trash2 className="h-6 w-6" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="glass-card border-white/5 bg-black/90 backdrop-blur-2xl">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Are you absolutely sure?
+                    <AlertDialogTitle className="text-3xl font-headline font-bold tracking-tighter">
+                      Terminate <span className="text-destructive">Vision</span>?
                     </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will permanently delete your vision and its entire
-                      roadmap. This action cannot be undone.
+                    <AlertDialogDescription className="text-lg font-light text-muted-foreground/60">
+                      This will permanently purge the vision data and its entire manifestation trajectory. This action is irreversible.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
 
-                  <div className="py-2 space-y-4">
-                    <Label htmlFor="delete-confirm">
-                      To confirm, type:{" "}
-                      <span className="font-mono text-primary/90">
+                  <div className="py-6 space-y-4">
+                    <Label htmlFor="delete-confirm" className="text-sm font-bold uppercase tracking-widest text-muted-foreground/40">
+                      Security Verification // Type:
+                      <span className="text-white block mt-2 text-xl font-mono normal-case tracking-normal">
                         &quot;{deleteConfirmationPhrase}&quot;
                       </span>
                     </Label>
@@ -423,25 +449,25 @@ export default function VisionDetailPage() {
                       onChange={(e) =>
                         setDeleteConfirmationInput(e.target.value)
                       }
-                      placeholder={deleteConfirmationPhrase}
-                      className="border-destructive/50 focus:ring-destructive/50"
+                      placeholder="Enter verification phrase..."
+                      className="h-14 rounded-2xl bg-white/5 border-destructive/20 text-xl px-6 focus-visible:ring-destructive/40"
                     />
                   </div>
 
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogFooter className="gap-4">
+                    <AlertDialogCancel className="h-12 px-6 rounded-xl border-white/10 bg-white/5 text-muted-foreground">Abort</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDelete}
                       disabled={
                         deleteConfirmationInput !== deleteConfirmationPhrase ||
                         isDeleting
                       }
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      className="h-12 px-8 rounded-xl bg-destructive text-white font-bold hover:bg-destructive/90 transition-all"
                     >
                       {isDeleting && (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       )}
-                      {isDeleting ? "Deleting..." : "Delete Vision"}
+                      Confirm Deletion
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
@@ -449,88 +475,114 @@ export default function VisionDetailPage() {
             </div>
           </div>
 
-          <p className="text-lg text-muted-foreground max-w-3xl mb-6">
-            {vision.goal}
-          </p>
-
-          <div className="bg-muted/30 p-6 rounded-xl border border-border/50 max-w-2xl">
-            <div className="flex justify-between items-end mb-2">
-              <span className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Overall Progress</span>
-              <span className="text-2xl font-bold text-primary">
-                {Math.round(calculateOverallProgress(roadmap))}%
-              </span>
+          {/* Progress Overview */}
+          <div className="glass shadow-inner rounded-[2.5rem] p-10 md:p-14 border border-white/5 relative overflow-hidden group max-w-4xl">
+            <div className="absolute top-0 right-0 p-12 text-primary/5">
+              <GanttChartSquare className="w-48 h-48 rotate-12" />
             </div>
-            <BridgeVisualizer
-              progress={calculateOverallProgress(roadmap)}
-              className="h-20"
-            />
+
+            <div className="relative z-10">
+              <div className="flex justify-between items-end mb-8">
+                <div className="text-left space-y-2">
+                  <span className="text-xs font-black uppercase tracking-[0.4em] text-primary block">Structural Integrity Protocol</span>
+                  <h3 className="text-6xl md:text-8xl font-black font-headline tracking-tighter leading-none">
+                    {Math.round(calculateOverallProgress(roadmap))}<span className="text-primary text-4xl md:text-6xl">%</span>
+                  </h3>
+                </div>
+              </div>
+              <BridgeVisualizer
+                progress={calculateOverallProgress(roadmap)}
+                className="h-24"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
+          <div className="xl:col-span-2 space-y-12">
             <RoadmapDisplay
               roadmap={roadmap}
               roadmapRef={roadmapRef}
               onRegenerateSection={handleRegenerateSection}
             />
           </div>
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wand2 className="text-primary" />
-                  AI Coach
+
+          <div className="space-y-8">
+            <Card className="glass-card border-white/5 shadow-2xl overflow-hidden rounded-[2.5rem]">
+              <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+              <CardHeader className="p-10 pb-6">
+                <div className="flex items-center gap-4 text-primary mb-2">
+                  <div className="p-3 bg-primary/10 rounded-2xl border border-primary/20">
+                    <Wand2 className="h-6 w-6" />
+                  </div>
+                  <span className="text-xs font-black uppercase tracking-[0.4em]">Neural Coach</span>
+                </div>
+                <CardTitle className="text-4xl font-headline font-bold tracking-tighter">
+                  Strategic <span className="text-gradient">Calibration</span>
                 </CardTitle>
-                <CardDescription>
-                  Check in on your progress, share wins or problems, and get a
-                  strategic briefing.
+                <CardDescription className="text-lg text-muted-foreground/60 font-light pt-2 leading-relaxed">
+                  Synthesize your daily progress or obstacles into actionable neural feedback.
                   {!plan?.aiFeaturesEnabled && (
-                    <Badge variant="destructive" className="ml-2">
-                      Requires Pathfinder Plan or higher
+                    <Badge variant="destructive" className="mt-4 block w-fit">
+                      Requires Pathfinder Protocol
                     </Badge>
                   )}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <Textarea
-                    placeholder="What's on your mind? e.g., 'I completed the certification for my monthly sprint!' or 'I'm struggling to find time for my daily habits.'"
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    className="min-h-[120px]"
-                    disabled={!plan?.aiFeaturesEnabled}
-                  />
-                  <Button
-                    onClick={handleReflection}
-                    disabled={
-                      isReflecting || !userInput || !plan?.aiFeaturesEnabled
-                    }
-                    className="w-full"
-                  >
-                    {isReflecting ? (
-                      <>
-                        <Loader2 className="animate-spin mr-2" />
-                        Getting Reflection...
-                      </>
-                    ) : (
-                      <>
-                        <Wand2 className="mr-2" />
-                        Get Reflection
-                      </>
-                    )}
-                  </Button>
-                  {reflection && (
-                    <Alert className="mt-4">
-                      <AlertTitle>Strategic Briefing</AlertTitle>
-                      <AlertDescription className="whitespace-pre-wrap font-sans">
-                        {reflection}
-                      </AlertDescription>
-                    </Alert>
+
+              <CardContent className="p-10 pt-0 space-y-8">
+                <Textarea
+                  placeholder="Transmit your current state... e.g., 'Completed the certification phase ahead of schedule.'"
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  className="min-h-[200px] rounded-3xl glass border-white/10 text-xl px-8 py-6 focus-visible:ring-primary/40 bg-white/5 font-light leading-relaxed resize-none"
+                  disabled={!plan?.aiFeaturesEnabled}
+                />
+
+                <Button
+                  onClick={handleReflection}
+                  disabled={isReflecting || !userInput.trim() || !plan?.aiFeaturesEnabled}
+                  className="w-full h-16 rounded-2xl bg-white text-black hover:bg-white/90 font-black text-xl uppercase tracking-widest shadow-xl transition-all active:scale-95 group"
+                >
+                  {isReflecting ? (
+                    <>
+                      <Loader2 className="animate-spin h-6 w-6 mr-3" />
+                      Analyzing Transmsission...
+                    </>
+                  ) : (
+                    <>
+                      Execute Calibration <Sparkles className="ml-3 h-6 w-6 group-hover:scale-125 transition-transform" />
+                    </>
                   )}
-                </div>
+                </Button>
+
+                {reflection && (
+                  <div className="mt-8 animate-reveal">
+                    <div className="p-8 rounded-3xl bg-primary/5 border border-primary/20 space-y-4 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 p-4 text-primary/10">
+                        <Wand2 className="w-12 h-12" />
+                      </div>
+                      <h4 className="text-xs font-black uppercase tracking-widest text-primary">Strategic Response</h4>
+                      <p className="text-lg text-white/90 font-light leading-relaxed whitespace-pre-wrap">
+                        {reflection}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
+
+            {/* Legend/Info for Architecture */}
+            <div className="p-10 rounded-[2.5rem] bg-indigo-500/[0.03] border border-indigo-500/10 space-y-6">
+              <div className="flex items-center gap-3">
+                <Flag className="w-5 h-5 text-indigo-400 opacity-40" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400">Architecture Metadata</span>
+              </div>
+              <p className="text-sm text-muted-foreground/60 leading-relaxed font-light italic">
+                All objectives are synthesized via the Echo Generative Protocol. Your trajectory is currently active and monitoring for manifestation triggers.
+              </p>
+            </div>
           </div>
         </div>
       </main>
@@ -680,6 +732,6 @@ export default function VisionDetailPage() {
           aiFeaturesEnabled={plan?.aiFeaturesEnabled ?? false}
         />
       )}
-    </>
+    </div>
   );
 }

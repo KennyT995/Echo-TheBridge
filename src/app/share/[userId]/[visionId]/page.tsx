@@ -19,6 +19,7 @@ import {
   ShieldAlert,
   CircleDot,
   Flag,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -90,59 +91,98 @@ export default function SharePage() {
   }
 
   return (
-    <main className="min-h-screen bg-secondary/30 flex items-center justify-center p-4">
-      <Card className="w-full max-w-3xl">
-        <CardHeader className="text-center">
-          <Rocket className="mx-auto h-12 w-12 text-primary" />
-          <CardTitle className="text-3xl font-headline mt-4">
-            A Shared Vision
+    <main className="min-h-screen bg-[#050505] relative flex items-center justify-center p-4 overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full animate-float" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full animate-float" style={{ animationDelay: "-2s" }} />
+
+      <Card className="w-full max-w-4xl glass-card border-white/5 relative z-10 overflow-hidden shadow-2xl">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+
+        <CardHeader className="text-center pt-12 pb-8">
+          <div className="mx-auto w-20 h-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6 animate-reveal">
+            <Rocket className="h-10 w-10 text-primary animate-pulse" />
+          </div>
+          <CardTitle className="text-5xl md:text-6xl font-headline font-black tracking-tighter animate-reveal">
+            Echo <span className="text-gradient">Strategic Transmission</span>
           </CardTitle>
+          <p className="text-muted-foreground/40 font-bold uppercase tracking-[0.4em] mt-4 animate-reveal">
+            Sector-01 // Public Protocol
+          </p>
         </CardHeader>
-        <CardContent className="text-center space-y-6">
+
+        <CardContent className="text-center space-y-12 px-8 md:px-16 pb-16">
           {error ? (
-            <Alert variant="destructive">
-              <ShieldAlert className="h-4 w-4" />
-              <AlertTitle>Could Not Load Vision</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+            <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive-foreground rounded-2xl p-6">
+              <ShieldAlert className="h-6 w-6" />
+              <AlertTitle className="text-xl font-bold ml-2">Transmission Interrupted</AlertTitle>
+              <AlertDescription className="text-lg opacity-80 mt-2">{error}</AlertDescription>
             </Alert>
           ) : vision ? (
-            <div className="space-y-8">
-              <div className="space-y-2">
-                <CardDescription className="text-2xl font-bold text-primary">
+            <div className="space-y-12 animate-reveal">
+              <div className="space-y-4">
+                <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-widest text-primary">
+                  Primary Objective
+                </div>
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white leading-tight">
                   {vision.title}
-                </CardDescription>
-                <p className="text-muted-foreground max-w-prose mx-auto italic">
-                  &quot;{vision.goal}&quot;
-                </p>
+                </h2>
+                <div className="relative max-w-2xl mx-auto">
+                  <p className="text-xl md:text-2xl text-muted-foreground/60 font-light italic leading-relaxed">
+                    &quot;{vision.goal}&quot;
+                  </p>
+                </div>
               </div>
 
               {roadmap && (
-                <div className="space-y-6">
-                  <div className="bg-muted/30 p-6 rounded-xl border border-border/50">
-                    <div className="flex justify-between items-end mb-2">
-                      <span className="text-sm font-medium text-muted-foreground">Building the Bridge</span>
-                      <span className="text-lg font-bold text-primary">
-                        {Math.round(calculateOverallProgress(roadmap))}%
-                      </span>
+                <div className="space-y-12">
+                  <div className="glass shadow-inner rounded-[2rem] p-8 md:p-12 border border-white/5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-8 text-primary/10">
+                      <GanttChartSquare className="w-32 h-32 rotate-12" />
                     </div>
-                    <BridgeVisualizer
-                      progress={calculateOverallProgress(roadmap)}
-                      className="h-16"
-                    />
+
+                    <div className="relative z-10">
+                      <div className="flex justify-between items-end mb-6">
+                        <div className="text-left">
+                          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary block mb-2">Bridge Integrity</span>
+                          <h3 className="text-4xl font-black font-headline tracking-tighter">
+                            {Math.round(calculateOverallProgress(roadmap))}<span className="text-primary text-2xl">%</span>
+                          </h3>
+                        </div>
+                        <div className="text-right hidden md:block">
+                          <span className="text-xs font-bold text-muted-foreground/40 uppercase tracking-widest leading-none">Manifestation Progress</span>
+                        </div>
+                      </div>
+                      <BridgeVisualizer
+                        progress={calculateOverallProgress(roadmap)}
+                        className="h-24"
+                      />
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
                     {/* Yearly Milestones */}
                     {roadmap.yearlyMilestones.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="font-bold flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-                          <GanttChartSquare className="h-4 w-4" /> Yearly Focus
-                        </h4>
-                        <ul className="space-y-2">
-                          {roadmap.yearlyMilestones.slice(0, 3).map((item, idx) => (
-                            <li key={idx} className="text-sm flex gap-2">
-                              <CheckCircle2 className={cn("h-4 w-4 shrink-0 mt-0.5", item.completed ? "text-green-500" : "text-muted-foreground/30")} />
-                              <span className={item.completed ? "line-through text-muted-foreground" : ""}>{item.text}</span>
+                      <div className="space-y-6 glass-card p-8 rounded-3xl border-white/5 hover:border-primary/20 transition-all group">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 group-hover:scale-110 transition-transform">
+                            <GanttChartSquare className="h-6 w-6 text-indigo-400" />
+                          </div>
+                          <h4 className="text-xl font-bold tracking-tight text-indigo-300">Yearly Milestones</h4>
+                        </div>
+                        <ul className="space-y-4">
+                          {roadmap.yearlyMilestones.slice(0, 4).map((item, idx) => (
+                            <li key={idx} className="flex gap-4 items-start group/item">
+                              <div className={cn(
+                                "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-all",
+                                item.completed ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-white/5 text-muted-foreground/20 border border-white/10"
+                              )}>
+                                <CheckCircle2 className="h-4 w-4" />
+                              </div>
+                              <span className={cn(
+                                "text-lg transition-all",
+                                item.completed ? "line-through text-muted-foreground/40" : "text-white/80 group-hover/item:text-white"
+                              )}>{item.text}</span>
                             </li>
                           ))}
                         </ul>
@@ -151,15 +191,26 @@ export default function SharePage() {
 
                     {/* Vision Timeline */}
                     {roadmap.visionTimeline && roadmap.visionTimeline.length > 0 && (
-                      <div className="space-y-3">
-                        <h4 className="font-bold flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                          <Flag className="h-4 w-4" /> The Long Game
-                        </h4>
-                        <ul className="space-y-2">
-                          {roadmap.visionTimeline.slice(0, 3).map((item, idx) => (
-                            <li key={idx} className="text-sm flex gap-2">
-                              <CircleDot className={cn("h-4 w-4 shrink-0 mt-0.5", item.completed ? "text-emerald-500" : "text-muted-foreground/30")} />
-                              <span className={item.completed ? "line-through text-muted-foreground" : ""}>{item.text}</span>
+                      <div className="space-y-6 glass-card p-8 rounded-3xl border-white/5 hover:border-emerald-500/20 transition-all group">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 group-hover:scale-110 transition-transform">
+                            <Flag className="h-6 w-6 text-emerald-400" />
+                          </div>
+                          <h4 className="text-xl font-bold tracking-tight text-emerald-300">Phase Objectives</h4>
+                        </div>
+                        <ul className="space-y-4">
+                          {roadmap.visionTimeline.slice(0, 4).map((item, idx) => (
+                            <li key={idx} className="flex gap-4 items-start group/item">
+                              <div className={cn(
+                                "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 transition-all",
+                                item.completed ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : "bg-white/5 text-muted-foreground/20 border border-white/10"
+                              )}>
+                                <CircleDot className="h-4 w-4" />
+                              </div>
+                              <span className={cn(
+                                "text-lg transition-all",
+                                item.completed ? "line-through text-muted-foreground/40" : "text-white/80 group-hover/item:text-white"
+                              )}>{item.text}</span>
                             </li>
                           ))}
                         </ul>
@@ -167,19 +218,25 @@ export default function SharePage() {
                     )}
                   </div>
 
-                  <div className="bg-indigo-50 dark:bg-indigo-950/20 p-4 rounded-lg text-sm text-indigo-700 dark:text-indigo-300">
-                    <p>This is a live roadmap generated by Echo&apos;s AI. The user is currently executing these steps to manifest their vision.</p>
+                  <div className="bg-primary/5 p-6 rounded-2xl border border-primary/10 text-base text-primary/60 font-light flex items-center justify-center gap-4">
+                    <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+                    <p>Live AI manifestation cycle currently in execution via Echo Protocol.</p>
                   </div>
                 </div>
               )}
             </div>
           ) : null}
-          <div className="pt-8 flex flex-col items-center gap-4">
-            <Button asChild size="lg" className="bg-indigo-600 hover:bg-indigo-700">
-              <Link href="/">Architect Your Own Future</Link>
-            </Button>
-            <p className="text-xs text-muted-foreground font-medium uppercase tracking-widest">
-              Powered by Echo: The Bridge
+
+          <div className="pt-8 flex flex-col items-center gap-8 animate-reveal">
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+            <div className="text-center space-y-4">
+              <p className="text-muted-foreground/60 text-lg">Inspired by this vision?</p>
+              <Button asChild size="lg" className="h-16 px-12 rounded-2xl bg-white text-black hover:bg-white/90 font-black text-xl uppercase tracking-tighter shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:scale-105 transition-all">
+                <Link href="/">Architect Your Future</Link>
+              </Button>
+            </div>
+            <p className="text-[10px] text-muted-foreground/40 font-black uppercase tracking-[0.4em]">
+              Echo: The Bridge // Strategic Manifestation OS
             </p>
           </div>
         </CardContent>
@@ -187,3 +244,4 @@ export default function SharePage() {
     </main>
   );
 }
+

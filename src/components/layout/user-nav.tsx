@@ -32,58 +32,60 @@ export function UserNav() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" className="relative h-11 w-11 rounded-xl glass border-white/10 hover:bg-white/5 p-0 transition-all active:scale-95 group">
+          <Avatar className="h-9 w-9 border border-white/10 group-hover:border-primary/40 transition-colors">
             <AvatarImage
               src={user.photoURL || ""}
               alt={user.displayName || "User"}
             />
-            <AvatarFallback>
+            <AvatarFallback className="bg-primary/10 text-primary font-bold">
               {(user.displayName?.[0] || user.email?.[0] || "U").toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
+      <DropdownMenuContent className="w-64 glass-card border-white/10 p-2 rounded-2xl shadow-2xl" align="end" forceMount>
+        <DropdownMenuLabel className="p-4">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">
-              {user.displayName || user.email}
+            <p className="text-sm font-bold tracking-tight text-white leading-none">
+              {user.displayName || "Visionary"}
             </p>
-            <p className="text-xs leading-none text-muted-foreground">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground/40 font-black truncate">
               {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuGroup>
+        <DropdownMenuSeparator className="bg-white/5" />
+        <DropdownMenuGroup className="p-1">
           <DropdownMenuItem asChild>
-            <Link href="/dashboard" className="w-full cursor-pointer">
-              <LayoutDashboard className="mr-2 h-4 w-4" />
-              <span>Dashboard</span>
+            <Link href="/dashboard" className="flex items-center px-4 py-3 rounded-xl focus:bg-primary/10 transition-colors cursor-pointer group">
+              <LayoutDashboard className="mr-3 h-5 w-5 text-muted-foreground/60 group-hover:text-primary transition-colors" />
+              <span className="font-bold text-sm tracking-tight text-muted-foreground/80 group-hover:text-white transition-colors">Command Center</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/account" className="w-full cursor-pointer">
-              <User className="mr-2 h-4 w-4" />
-              <span>My Account</span>
+            <Link href="/account" className="flex items-center px-4 py-3 rounded-xl focus:bg-primary/10 transition-colors cursor-pointer group">
+              <User className="mr-3 h-5 w-5 text-muted-foreground/60 group-hover:text-primary transition-colors" />
+              <span className="font-bold text-sm tracking-tight text-muted-foreground/80 group-hover:text-white transition-colors">Identity Matrix</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/plans" className="w-full cursor-pointer">
-              <CreditCard className="mr-2 h-4 w-4" />
-              <span>Plans</span>
+            <Link href="/plans" className="flex items-center px-4 py-3 rounded-xl focus:bg-primary/10 transition-colors cursor-pointer group">
+              <CreditCard className="mr-3 h-5 w-5 text-muted-foreground/60 group-hover:text-primary transition-colors" />
+              <span className="font-bold text-sm tracking-tight text-muted-foreground/80 group-hover:text-white transition-colors">Sector Allocation</span>
             </Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={handleLogout}
-          className="text-red-600 focus:text-red-600 cursor-pointer"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
-        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-white/5" />
+        <div className="p-1">
+          <DropdownMenuItem
+            onClick={handleLogout}
+            className="flex items-center px-4 py-3 rounded-xl text-destructive focus:bg-destructive/10 focus:text-destructive transition-colors cursor-pointer group"
+          >
+            <LogOut className="mr-3 h-5 w-5 transition-transform group-hover:-translate-x-1" />
+            <span className="font-bold text-sm tracking-tight">Terminate Session</span>
+          </DropdownMenuItem>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );

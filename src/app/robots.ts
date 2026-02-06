@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/dashboard/", "/account/", "/api/"],
     },
-    sitemap: "https://visionbridge.ai/sitemap.xml",
+    sitemap: "https://echo-the-bridge.com/sitemap.xml",
   };
 }

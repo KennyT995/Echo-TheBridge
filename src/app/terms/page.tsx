@@ -7,83 +7,88 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-background relative overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-[#050505] relative overflow-hidden">
       {/* Background Decorations */}
-      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full -z-10" />
-      <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-indigo-500/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute top-0 right-0 w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full -z-10" />
+      <div className="absolute bottom-0 left-0 w-[50%] h-[50%] bg-accent/5 blur-[120px] rounded-full -z-10" />
 
-      <main className="flex-1 py-12 md:py-24">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="font-headline text-4xl md:text-5xl font-bold tracking-tight mb-8">
-            Terms of <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-indigo-500">Service</span>
+      <main className="flex-1 py-12 md:py-24 relative z-10">
+        <div className="container mx-auto px-6 max-w-5xl">
+          <div className="flex items-center gap-3 text-primary mb-6 animate-reveal">
+            <div className="h-px w-12 bg-primary/20" />
+            <span className="text-[11px] font-black uppercase tracking-[0.4em]">Usage Protocols</span>
+          </div>
+          <h1 className="font-headline text-6xl md:text-8xl font-black tracking-tighter text-white leading-none mb-12 animate-reveal">
+            Operating <span className="text-gradient">Agreement</span>
           </h1>
-          <div className="prose prose-invert max-w-none text-muted-foreground">
-            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">
-              1. Acceptance of Terms
-            </h2>
-            <p className="mb-4">
-              By accessing and using Echo: The Bridge, you accept and agree to
-              be bound by the terms and provision of this agreement. In
-              addition, when using this websites particular services, you shall
-              be subject to any posted guidelines or rules applicable to such
-              services.
-            </p>
 
-            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">
-              2. Description of Service
-            </h2>
-            <p className="mb-4">
-              Echo: The Bridge provides users with AI-generated strategic
-              roadmaps based on user input. You understand and agree that the
-              Service is provided &quot;AS-IS&quot; and that Echo: The Bridge
-              assumes no responsibility for the timeliness, deletion,
-              mis-delivery or failure to store any user communications or
-              personalization settings.
-            </p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 animate-reveal delay-200">
+            <div className="lg:col-span-1 space-y-8">
+              <div className="p-8 rounded-[2.5rem] glass-card border-white/5 bg-primary/5 space-y-4">
+                <p className="text-lg text-white font-bold tracking-tight leading-relaxed italic">
+                  &quot;Standardizing the relationship between identity and architecture.&quot;
+                </p>
+                <p className="text-muted-foreground/60 text-sm font-light leading-relaxed">
+                  To maintain system integrity, every access point must adhere to the established behavioral protocols.
+                </p>
+              </div>
 
-            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">
-              3. Registration
-            </h2>
-            <p className="mb-4">
-              You verify that any contact information you provide is true and
-              accurate. You agree to keep your password confidential and will be
-              responsible for all use of your account and password.
-            </p>
+              <div className="space-y-4 px-4">
+                <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Compliance Headers</h3>
+                <ul className="space-y-6">
+                  <li className="flex gap-4 items-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                    <p className="text-sm text-muted-foreground/80 font-light leading-relaxed">Neural accuracy: AI outputs are non-deterministic catalysts.</p>
+                  </li>
+                  <li className="flex gap-4 items-start">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                    <p className="text-sm text-muted-foreground/80 font-light leading-relaxed">Identity verification: Secure access via verified signatures only.</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
 
-            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">
-              4. AI Output Disclaimer
-            </h2>
-            <p className="mb-4">
-              The content generated by our AI is for informational and
-              educational purposes only. It does not constitute professional
-              advice (medical, legal, financial, etc.). You should not rely
-              solely on the generated roadmaps for critical life decisions
-              without using your own judgment and consulting appropriate
-              professionals.
-            </p>
+            <div className="lg:col-span-2 space-y-16">
+              <div className="prose prose-invert max-w-none prose-h2:font-headline prose-h2:text-3xl prose-h2:font-black prose-h2:tracking-tighter prose-h2:text-white prose-p:text-muted-foreground/60 prose-p:leading-relaxed prose-p:font-light prose-strong:text-white prose-strong:font-bold">
+                <section>
+                  <h2>1. Protocol Acceptance</h2>
+                  <p>
+                    By initializing access to Echo: The Bridge, you acknowledge and commit to these protocols. Failure to maintain alignment may result in session termination.
+                  </p>
+                </section>
 
-            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">
-              5. Intellectual Property
-            </h2>
-            <p className="mb-4">
-              You retain rights to the text descriptions you input. Echo: The
-              Bridge claims no ownership over your personal goals. However, the
-              underlying software, design, and AI workflows are the property of
-              Echo: The Bridge.
-            </p>
+                <section>
+                  <h2>2. Service Scope</h2>
+                  <p>
+                    Echo: The Bridge provides high-level strategic reverse-engineering services. You acknowledge that the service is provided in its current iterative state, and the architecture may evolve without prior transmission.
+                  </p>
+                </section>
 
-            <h2 className="text-2xl font-bold text-foreground mt-8 mb-4">
-              6. Termination
-            </h2>
-            <p className="mb-4">
-              We may terminate or suspend your account immediately, without
-              prior notice or liability, for any reason whatsoever, including
-              without limitation if you breach the Terms.
-            </p>
+                <section>
+                  <h2>3. AI Catalyst Disclaimer</h2>
+                  <p>
+                    The trajectories generated by our neural engines are informative catalysts. They do not constitute professional directive (financial, legal, or biological). The final executive decision remains with the Human Architect.
+                  </p>
+                </section>
 
-            <p className="mt-12 text-sm italic">
-              Last updated: January 14, 2026
-            </p>
+                <section>
+                  <h2>4. IP Synchronization</h2>
+                  <p>
+                    You retain absolute sovereignty over your vision content. Echo: The Bridge retains sovereignty over the underlying neural logic, design patterns, and platform architecture.
+                  </p>
+                </section>
+              </div>
+
+              <div className="pt-12 border-t border-white/5 flex items-center justify-between gap-8">
+                <p className="text-xs text-muted-foreground/20 font-light italic">
+                  Last recalibrated: February 05, 2026
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-primary/40">Protocol Check: Passed</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>

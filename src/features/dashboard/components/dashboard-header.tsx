@@ -36,72 +36,87 @@ export function DashboardHeader({
     onNavigateToPlans,
 }: DashboardHeaderProps) {
     return (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl">
-                    Dashboard
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 mb-12 animate-reveal">
+            <div className="space-y-2">
+                <h1 className="text-5xl md:text-6xl font-bold tracking-tighter font-headline">
+                    Architect&apos;s <span className="text-gradient">Dashboard</span>
                 </h1>
-                <p className="text-muted-foreground mt-1">
-                    An overview of your life&apos;s aspirations.
+                <p className="text-xl text-muted-foreground/60 font-light max-w-md">
+                    Synchronize your daily actions with your multi-year strategic objectives.
                 </p>
             </div>
-            <div className="flex gap-2 flex-wrap">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={onOpenFutureLetter}
-                    disabled={isLoading}
-                    className="text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50"
-                    aria-label="Open Future Letter"
-                >
-                    <Mail className="h-5 w-5" />
-                </Button>
-                <Button
-                    variant="ghost"
-                    onClick={onOpenJournal}
-                    disabled={isLoading}
-                >
-                    <BookOpen className="mr-2 h-4 w-4" /> Journal
-                </Button>
-                <Button
-                    variant="outline"
-                    onClick={onOpenDecision}
-                    disabled={isLoading}
-                    className="border-indigo-200 hover:bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/50"
-                >
-                    <Compass className="mr-2 h-4 w-4" /> Align
-                </Button>
-                {isSunday && (
+
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 p-1.5 rounded-2xl glass border-white/5 mr-2">
                     <Button
-                        variant="default"
-                        onClick={onOpenWeeklyRetro}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-500/20 animate-pulse"
+                        variant="ghost"
+                        size="icon"
+                        onClick={onOpenFutureLetter}
+                        disabled={isLoading}
+                        className="h-11 w-11 rounded-xl text-primary hover:bg-primary/10 transition-all hover:scale-110"
+                        aria-label="Open Future Letter"
                     >
-                        <CalendarDays className="mr-2 h-4 w-4" /> Weekly Review
+                        <Mail className="h-5 w-5" />
                     </Button>
-                )}
-                <Button
-                    variant="outline"
-                    onClick={onOpenNightlyReview}
-                    disabled={isLoading}
-                    className="border-indigo-200 hover:bg-indigo-50 text-indigo-700 dark:border-indigo-800 dark:text-indigo-400 dark:hover:bg-indigo-950/50"
-                >
-                    <Moon className="mr-2 h-4 w-4" /> End Day
-                </Button>
-                <Button
-                    onClick={() =>
-                        isLimitReached ? onNavigateToPlans() : onOpenCreateVision()
-                    }
-                    disabled={isLoading}
-                >
-                    {isLimitReached ? "Limit Reached" : "New Vision"}
-                    {isLimitReached ? (
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                    ) : (
-                        <PlusCircle className="ml-2 h-4 w-4" />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onOpenJournal}
+                        disabled={isLoading}
+                        className="h-11 w-11 rounded-xl text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all"
+                        aria-label="Open Journal"
+                    >
+                        <BookOpen className="h-5 w-5" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onOpenDecision}
+                        disabled={isLoading}
+                        className="h-11 w-11 rounded-xl text-accent hover:bg-accent/10 transition-all hover:scale-110"
+                        aria-label="Align Vision"
+                    >
+                        <Compass className="h-5 w-5" />
+                    </Button>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    {isSunday && (
+                        <Button
+                            variant="default"
+                            onClick={onOpenWeeklyRetro}
+                            className="h-12 px-6 rounded-2xl bg-primary text-primary-foreground font-bold shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:scale-105 transition-all animate-pulse"
+                        >
+                            <CalendarDays className="mr-2 h-5 w-5" /> Weekly Review
+                        </Button>
                     )}
-                </Button>
+
+                    <Button
+                        variant="outline"
+                        onClick={onOpenNightlyReview}
+                        disabled={isLoading}
+                        className="h-12 px-6 rounded-2xl glass border-white/10 font-bold hover:bg-white/5 transition-all"
+                    >
+                        <Moon className="mr-2 h-5 w-5" /> End Day
+                    </Button>
+
+                    <Button
+                        onClick={() =>
+                            isLimitReached ? onNavigateToPlans() : onOpenCreateVision()
+                        }
+                        disabled={isLoading}
+                        className="h-12 px-8 rounded-2xl font-black uppercase tracking-widest bg-foreground text-background hover:bg-foreground/90 hover:scale-105 active:scale-95 transition-all shadow-2xl"
+                    >
+                        {isLimitReached ? "Upgrade" : "Initialize"}
+                        {isLimitReached ? (
+                            <ArrowRight className="ml-2 h-5 w-5" />
+                        ) : (
+                            <PlusCircle className="ml-2 h-5 w-5" />
+                        )}
+                    </Button>
+                </div>
             </div>
         </div>
     );
 }
+

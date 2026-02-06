@@ -16,55 +16,56 @@ export function StreakWidget({
   return (
     <Card
       className={cn(
-        "overflow-hidden border-border/50 shadow-lg bg-card transition-all duration-500",
-        currentStreak > 0 && "ring-1 ring-orange-500/20 shadow-orange-500/5",
+        "overflow-hidden border-white/5 glass-card transition-all duration-700 hover:-translate-y-1 animate-reveal",
+        currentStreak > 0 && "ring-1 ring-orange-500/20 shadow-orange-500/10",
         className,
       )}
     >
-      <CardContent className="p-0">
-        <div className="flex flex-col sm:flex-row">
-          {/* Streak Section */}
-          <div className="flex-1 p-6 flex flex-col justify-center items-center sm:items-start relative overflow-hidden">
-            {currentStreak > 0 && (
-              <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 blur-[40px] rounded-full -z-10 animate-pulse" />
-            )}
+      <CardContent className="p-0 relative overflow-hidden">
+        {/* Glow effect */}
+        {currentStreak > 0 && (
+          <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 blur-[100px] rounded-full -z-10 animate-pulse" />
+        )}
 
-            <div className="flex items-center gap-4 mb-2">
+        <div className="flex flex-col sm:flex-row relative z-10">
+          {/* Streak Section */}
+          <div className="flex-1 p-8 flex flex-col justify-center items-center sm:items-start">
+            <div className="flex items-center gap-6 mb-2">
               <div
                 className={cn(
-                  "p-3 rounded-2xl transition-all duration-500",
+                  "p-4 rounded-3xl transition-all duration-700 transform",
                   currentStreak > 0
-                    ? "bg-orange-500 text-white shadow-lg shadow-orange-500/20 scale-110"
-                    : "bg-muted text-muted-foreground",
+                    ? "bg-gradient-to-br from-orange-400 to-red-600 text-white shadow-[0_0_30px_rgba(249,115,22,0.4)] scale-110 rotate-3"
+                    : "bg-white/5 text-muted-foreground border border-white/10",
                 )}
               >
                 <Flame
                   className={cn(
-                    "w-6 h-6",
-                    currentStreak > 0 ? "fill-white animate-bounce" : "fill-none",
+                    "w-8 h-8",
+                    currentStreak > 0 ? "fill-white animate-pulse" : "fill-none",
                   )}
                 />
               </div>
               <div className="flex flex-col">
-                <span className="text-4xl font-bold leading-none font-headline tracking-tighter">
+                <span className="text-5xl font-bold leading-none font-headline tracking-tighter text-gradient">
                   {currentStreak}
                 </span>
-                <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.2em] mt-1 pl-0.5">
-                  Day Trajectory
+                <span className="text-[11px] text-muted-foreground/60 font-bold uppercase tracking-[0.3em] mt-2 pl-1">
+                  Day Momentum
                 </span>
               </div>
             </div>
           </div>
 
           {/* Stats Section */}
-          <div className="border-t sm:border-t-0 sm:border-l border-border/50 p-6 flex flex-row sm:flex-col justify-center gap-12 sm:gap-6 bg-muted/5">
-            <div className="text-center sm:text-left">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">Current</span>
-              <span className="text-2xl font-bold font-headline">{currentStreak}</span>
+          <div className="border-t sm:border-t-0 sm:border-l border-white/5 p-8 flex flex-row sm:flex-col justify-center gap-16 sm:gap-8 bg-white/5 backdrop-blur-xl">
+            <div className="text-center sm:text-left group/stat">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 block mb-2 group-hover/stat:text-primary transition-colors">Current</span>
+              <span className="text-3xl font-bold font-headline transition-all group-hover/stat:scale-110 block origin-left">{currentStreak}</span>
             </div>
-            <div className="text-center sm:text-left">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">Longest</span>
-              <span className="text-2xl font-bold font-headline">{longestStreak}</span>
+            <div className="text-center sm:text-left group/stat">
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/40 block mb-2 group-hover/stat:text-accent transition-colors">Longest</span>
+              <span className="text-3xl font-bold font-headline transition-all group-hover/stat:scale-110 block origin-left">{longestStreak}</span>
             </div>
           </div>
         </div>
@@ -72,3 +73,4 @@ export function StreakWidget({
     </Card>
   );
 }
+
