@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import NextImage from "next/image";
 import { Rocket } from "lucide-react";
 import Link from "next/link";
-import placeholderData from "@/app/lib/placeholder-images.json";
+import placeholderData from "@/lib/placeholder-images.json";
 
 interface TeamMember {
   name: string;

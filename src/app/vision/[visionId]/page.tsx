@@ -21,7 +21,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { EditVisionDialog } from "@/features/visions/components/edit-vision-dialog";
-import { getReflection, generateRoadmap, deleteVision } from "@/app/actions";
+import { getReflection, generateRoadmap } from "@/app/actions";
+import { useDeleteVision } from "@/features/visions/hooks/use-delete-vision";
 import type { GenerateRoadmapFromVisionInput } from "@/ai/flows/generate-roadmap-from-vision";
 import { RoadmapSelectionDialog } from "@/features/roadmaps/components/roadmap-selection-dialog";
 import { RoadmapDisplay } from "@/features/roadmaps/components/roadmap-display";
@@ -40,7 +41,7 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -73,7 +74,7 @@ import { usePlan } from "@/hooks/use-plan";
 import { BridgeVisualizer } from "@/features/roadmaps/components/bridge-visualizer";
 import { calculateOverallProgress } from "@/lib/utils";
 import { FirestorePaths } from "@/lib/firestore-paths";
-import { logger } from "@/lib/logger";
+
 
 export default function VisionDetailPage() {
   const { visionId } = useParams();
@@ -94,7 +95,7 @@ export default function VisionDetailPage() {
       ? `${window.location.origin}/share/${user.uid}/${visionId}`
       : "";
   const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { deleteVision, isDeleting } = useDeleteVision();
   const deleteConfirmationPhrase = "I want to delete this vision";
 
   const [isRefocusModalOpen, setRefocusModalOpen] = useState(false);
@@ -280,9 +281,8 @@ export default function VisionDetailPage() {
 
   const handleDelete = async () => {
     if (!visionId || !user) return;
-    setIsDeleting(true);
 
-    const result = await deleteVision(visionId as string, user.uid);
+    const result = await deleteVision(user.uid, visionId as string);
 
     if (result.success) {
       toast({
@@ -296,7 +296,6 @@ export default function VisionDetailPage() {
         title: "Error",
         description: result.error || "Failed to delete vision.",
       });
-      setIsDeleting(false);
     }
   };
 

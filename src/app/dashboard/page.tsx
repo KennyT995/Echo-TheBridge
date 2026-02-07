@@ -9,10 +9,11 @@ import {
   useMemoFirebase,
 } from "@/firebase";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Loading from "../loading";
 
-import { deleteVision, checkFutureLetter } from "@/app/actions";
+import { checkFutureLetter } from "@/app/actions";
+import { useDeleteVision } from "@/features/visions/hooks/use-delete-vision";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -86,15 +87,14 @@ export default function DashboardPage() {
   const isSunday = today.getDay() === 0;
 
   const [visionToDelete, setVisionToDelete] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { deleteVision, isDeleting } = useDeleteVision();
   const [deleteConfirmationInput, setDeleteConfirmationInput] = useState("");
   const deleteConfirmationPhrase = "I want to delete this vision";
 
   const handleDeleteVision = async () => {
     if (!visionToDelete || !user) return;
-    setIsDeleting(true);
     try {
-      const result = await deleteVision(visionToDelete, user.uid);
+      const result = await deleteVision(user.uid, visionToDelete);
       if (result.success) {
         toast({
           title: "Vision Deleted",
@@ -112,7 +112,7 @@ export default function DashboardPage() {
         description: "An unexpected error occurred.",
       });
     } finally {
-      setIsDeleting(false);
+      // isDeleting is managed by the hook, but we need to reset local state
       setVisionToDelete(null);
       setDeleteConfirmationInput("");
     }

@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useUser, useFirestore, setDocumentNonBlocking } from "@/firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 import { FirestorePaths } from "@/lib/firestore-paths";
-import { logger } from "@/lib/logger";
+
 
 interface AntiGoal {
   id: string;

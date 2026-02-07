@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Rocket, Target, BrainCircuit, ArrowRight, Sparkles } from "lucide-react";
-import placeholderData from "@/app/lib/placeholder-images.json";
+import placeholderData from "@/lib/placeholder-images.json";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

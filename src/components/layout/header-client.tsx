@@ -23,22 +23,6 @@ export default function HeaderClient() {
   const { user, isUserLoading } = useUser();
   const [open, setOpen] = useState(false);
 
-  const authSection = (
-    <div className="hidden md:flex items-center gap-2">
-      <InstallPrompt />
-      <ModeToggle />
-      {isUserLoading ? (
-        <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
-      ) : user ? (
-        <UserNav />
-      ) : (
-        <Button asChild>
-          <Link href="/login">Login / Sign Up</Link>
-        </Button>
-      )}
-    </div>
-  );
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl supports-[backdrop-filter]:bg-[#050505]/40 transition-all duration-500">
       <div className="container mx-auto px-6 h-20 flex items-center justify-between">

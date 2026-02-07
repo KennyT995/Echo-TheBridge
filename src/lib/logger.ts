@@ -7,7 +7,7 @@ type LogLevel = "info" | "warn" | "error" | "debug";
 
 const isDev = process.env.NODE_ENV === "development";
 
-function log(level: LogLevel, message: string, ...args: any[]) {
+function log(level: LogLevel, message: string, ...args: unknown[]) {
     const timestamp = new Date().toISOString();
     const formattedMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
 
@@ -30,8 +30,8 @@ function log(level: LogLevel, message: string, ...args: any[]) {
 }
 
 export const logger = {
-    info: (message: string, ...args: any[]) => log("info", message, ...args),
-    warn: (message: string, ...args: any[]) => log("warn", message, ...args),
-    error: (message: string, ...args: any[]) => log("error", message, ...args),
-    debug: (message: string, ...args: any[]) => log("debug", message, ...args),
+    info: (message: string, ...args: unknown[]) => log("info", message, ...args),
+    warn: (message: string, ...args: unknown[]) => log("warn", message, ...args),
+    error: (message: string, ...args: unknown[]) => log("error", message, ...args),
+    debug: (message: string, ...args: unknown[]) => log("debug", message, ...args),
 };

@@ -28,7 +28,7 @@ export function initializeFirebase() {
     } else {
       try {
         firebaseApp = initializeApp();
-      } catch (e) {
+      } catch {
         // Fallback to explicit config if auto-init fails even in production.
         firebaseApp = initializeApp(firebaseConfig);
       }

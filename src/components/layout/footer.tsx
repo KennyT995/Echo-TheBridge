@@ -8,11 +8,7 @@ import { footerContent } from "@/lib/navigation";
 import { useEffect, useState } from "react";
 
 export default function Footer() {
-  const [year, setYear] = useState<number | string>(2024);
 
-  useEffect(() => {
-    setYear(new Date().getFullYear());
-  }, []);
 
   return (
     <footer className="relative bg-[#050505] pt-24 pb-12 overflow-hidden border-t border-white/5">
@@ -104,7 +100,7 @@ export default function Footer() {
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-8 py-8 border-t border-white/5">
           <p className="text-sm font-light text-muted-foreground/30">
-            &copy; {year} Echo: The Bridge. All systems operational. v2.0.4-beta
+            <span suppressHydrationWarning>&copy; {new Date().getFullYear()}</span> Echo: The Bridge. All systems operational. v2.0.4-beta
           </p>
           <div className="flex gap-8">
             <Link

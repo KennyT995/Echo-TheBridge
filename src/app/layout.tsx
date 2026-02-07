@@ -5,7 +5,7 @@ import { FirebaseClientProvider } from "@/firebase/client-provider";
 import { FocusAnchorProvider } from "@/features/focus/context/focus-context";
 import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
-import { inter, spaceGrotesk } from "@/app/lib/fonts";
+import { inter, spaceGrotesk } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme-provider";
 

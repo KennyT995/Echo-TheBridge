@@ -167,45 +167,7 @@ export async function getVisionIdeas(
   }
 }
 
-/**
- * Deletes a vision and its associated roadmap.
- */
-export async function deleteVision(
-  visionId: string,
-  userId: string,
-): Promise<{ success: boolean; error?: string }> {
-  if (!visionId || !userId) {
-    return { success: false, error: "Missing visionId or userId" };
-  }
 
-  try {
-    // Check if vision belongs to user
-    const visionRef = firestore
-      .collection("users")
-      .doc(userId)
-      .collection("visions")
-      .doc(visionId);
-    const visionSnap = await visionRef.get();
-
-    if (!visionSnap.exists) {
-      return { success: false, error: "Vision not found" };
-    }
-
-    const roadmapRef = firestore
-      .collection("users")
-      .doc(userId)
-      .collection("roadmaps")
-      .doc(visionId);
-
-    await visionRef.delete();
-    await roadmapRef.delete();
-
-    return { success: true };
-  } catch (error) {
-    logger.error("[actions] Delete vision failed:", error);
-    return { success: false, error: "Failed to delete vision" };
-  }
-}
 
 /**
  * Generates a daily briefing for the user.

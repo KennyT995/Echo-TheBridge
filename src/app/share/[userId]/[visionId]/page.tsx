@@ -8,7 +8,6 @@ import Loading from "@/app/loading";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";

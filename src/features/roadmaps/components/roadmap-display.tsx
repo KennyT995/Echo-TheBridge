@@ -22,7 +22,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { DocumentReference, Timestamp } from "firebase/firestore";
 import { updateDocumentNonBlocking } from "@/firebase/non-blocking-updates";
-import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import confetti from "canvas-confetti";
@@ -143,7 +142,7 @@ export function RoadmapDisplay({
     return (completedCount / items.length) * 100;
   };
 
-  // triggerCelebration MOVED OUTSIDE
+
 
   const shouldTellUserToRegenerate = (
     section: RoadmapSectionKey,
