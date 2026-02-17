@@ -13,6 +13,7 @@ export default {
       fontFamily: {
         body: ["var(--font-inter)", "sans-serif"],
         headline: ["var(--font-space-grotesk)", "sans-serif"],
+        geist: ["var(--font-geist)", "sans-serif"],
         code: ["monospace"],
       },
       colors: {

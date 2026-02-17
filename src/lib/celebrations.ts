@@ -134,7 +134,8 @@ const celebrationStrategies: Record<
       toast({
         title: "📅 WEEK COMPLETE",
         description: "7/7 Days. You crushed this week!",
-        className: "border-green-500 bg-green-50",
+        className:
+          "bg-green-500/10 border-green-500/20 text-green-500 backdrop-blur-md",
       });
     },
     // 2. "Weekend Warrior"
@@ -148,6 +149,7 @@ const celebrationStrategies: Record<
       toast({
         title: "🚀 Weekly Objectives Met",
         description: "Time to recharge for next week.",
+        className: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
       });
     },
   ],
@@ -163,7 +165,7 @@ const celebrationStrategies: Record<
       toast({
         title: "⬆️ LEVEL UP: Monthly Sprint Completed",
         description: "You've made significant progress on your vision.",
-        className: "bg-blue-50 border-blue-500",
+        className: "bg-blue-500/10 border-blue-500/20 text-blue-400 backdrop-blur-md",
       });
     },
     // 2. "Confetti Cannon"
@@ -185,6 +187,7 @@ const celebrationStrategies: Record<
       toast({
         title: "🏆 MONTHLY MASTERPIECE",
         description: "This month is one for the books.",
+        className: "bg-amber-500/10 border-amber-500/20 text-amber-400 backdrop-blur-md",
       });
     },
   ],
@@ -196,6 +199,7 @@ const celebrationStrategies: Record<
         title: "🎆 YEARLY MILESTONE ACHIEVED",
         description: "This is a major life moment. Take it in.",
         duration: 8000,
+        className: "bg-purple-500/10 border-purple-500/20 text-purple-400 backdrop-blur-md",
       });
     },
   ],
@@ -205,7 +209,7 @@ const celebrationStrategies: Record<
       toast({
         title: "🚩 MILESTONE REACHED",
         description: "You've conquered a major phase of your journey.",
-        className: "border-indigo-500 bg-indigo-50",
+        className: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400 backdrop-blur-md",
       });
     },
   ],
@@ -218,7 +222,7 @@ const celebrationStrategies: Record<
         description:
           "You have crossed the bridge. Welcome to your new reality.",
         duration: 10000,
-        className: "bg-yellow-50 border-yellow-500",
+        className: "bg-yellow-500/10 border-yellow-500/20 text-yellow-500 shadow-yellow-500/10 backdrop-blur-lg",
       });
     },
   ],

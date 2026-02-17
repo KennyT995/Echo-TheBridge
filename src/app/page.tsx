@@ -8,7 +8,17 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Echo: The Bridge - Turn Long-Term Vision into Daily Action",
   description:
-    "Stop dreaming, start doing. Echo: The Bridge translates your long-term goals into a dynamic, AI-powered action plan.",
+    "Stop dreaming, start doing. Echo: The Bridge translates your long-term goals into a dynamic, AI-powered action plan. Engineered for strategic trajectory alignment.",
+  openGraph: {
+    title: "Echo: The Bridge - Bridge Your Vision to Reality",
+    description: "AI-powered personal architecture to turn ambitious dreams into inevitable realities.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Echo: The Bridge - Bridge Your Vision to Reality",
+    description: "The secret of your future is hidden in your daily routine.",
+  },
 };
 
 const featureData = [

@@ -34,12 +34,15 @@ const prompt = ai.definePrompt({
   name: "correctGrammarAndSpellingPrompt",
   input: { schema: CorrectGrammarAndSpellingInputSchema },
   output: { schema: CorrectGrammarAndSpellingOutputSchema },
-  prompt: `You are an expert editor. Your sole task is to correct the grammar and spelling of the following text. Do not change the meaning or tone. Only fix objective errors.
+  prompt: `You are the Lead Linguistic Architect for Echo: The Bridge. Your mission is to calibrate and refine the user's transmission for maximal clarity and impact.
 
-Text to correct:
+Objective: Correct all grammatical entropy and spelling deviations in the provided text.
+Constraint: Maintain the original intent and psychological resonance. Do not alter the visionary tone.
+
+Transmission to process:
 "{{{text}}}"
 
-Return only the corrected text in the specified JSON format.`,
+Return ONLY the raw JSON matching the schema.`,
 });
 
 const correctGrammarAndSpellingFlow = ai.defineFlow(

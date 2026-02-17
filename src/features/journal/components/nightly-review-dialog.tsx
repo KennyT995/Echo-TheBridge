@@ -16,6 +16,7 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { FirestorePaths } from "@/lib/firestore-paths";
 import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
+import { useConfetti } from "@/hooks/use-confetti";
 
 interface NightlyReviewDialogProps {
   open: boolean;
@@ -37,6 +38,7 @@ export function NightlyReviewDialog({
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const { celebrate } = useConfetti();
   const [step, setStep] = useState<Step>("win");
   const [data, setData] = useState<ReviewData>({
     win: "",
@@ -77,6 +79,8 @@ export function NightlyReviewDialog({
         description: "Great work today. Rest well.",
       });
 
+      celebrate({ duration: 3000 });
+
       setData({ win: "", learning: "", gratitude: "" });
       setStep("win");
       onOpenChange(false);
@@ -110,7 +114,7 @@ export function NightlyReviewDialog({
             Close the <span className="text-gradient">Loop</span>
           </DialogTitle>
           <DialogDescription className="text-lg text-muted-foreground/60 font-light mt-2">
-            Step {currentStepIndex + 1} of {steps.length}: Finalizing today&apos;s trajectory.
+            Phase {currentStepIndex + 1} of {steps.length}: Finalizing today&apos;s trajectory.
           </DialogDescription>
         </DialogHeader>
 
@@ -223,7 +227,7 @@ export function NightlyReviewDialog({
               disabled={!data[step]}
               className="h-12 px-8 rounded-xl bg-foreground text-background font-bold hover:bg-foreground/90 transition-all"
             >
-              Continue <ChevronRight className="w-5 h-5 ml-3" />
+              Advance <ChevronRight className="w-5 h-5 ml-3" />
             </Button>
           )}
         </DialogFooter>

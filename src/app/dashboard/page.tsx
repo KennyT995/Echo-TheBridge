@@ -57,6 +57,7 @@ import { WeeklyRetroDialog } from "@/features/journal/components/weekly-retro-di
 import { usePlan } from "@/hooks/use-plan";
 
 import { usePrevious } from "@/hooks/use-previous";
+import { useConfetti } from "@/hooks/use-confetti";
 
 // Extracted Components
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
@@ -69,6 +70,7 @@ export default function DashboardPage() {
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
+  const { celebrate } = useConfetti();
   const [isCreateVisionOpen, setCreateVisionOpen] = useState(false);
   const [isJournalOpen, setJournalOpen] = useState(false);
   const [isNightlyReviewOpen, setNightlyReviewOpen] = useState(false);
@@ -231,11 +233,13 @@ export default function DashboardPage() {
         title: "Visions Created",
         description: "Your new visions have been added to your dashboard.",
       });
+      celebrate({ duration: 3000 });
     } else {
       toast({
         title: "Success!",
         description: "Your new vision and roadmap have been created.",
       });
+      celebrate({ duration: 3000 });
       router.push(`/vision/${visionId}`);
     }
   };

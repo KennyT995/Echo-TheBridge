@@ -1,6 +1,7 @@
 "use client";
 
 import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { logger } from "@/lib/logger";
 
 let stripePromise: Promise<Stripe | null>;
 
@@ -10,7 +11,7 @@ export const getStripe = (): Promise<Stripe | null> => {
     if (publicKey) {
       stripePromise = loadStripe(publicKey);
     } else {
-      console.warn(
+      logger.warn(
         "Stripe publishable key is not set. Stripe.js will not be loaded.",
       );
       return Promise.resolve(null);

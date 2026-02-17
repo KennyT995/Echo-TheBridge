@@ -39,8 +39,6 @@ import {
   GenerateFutureLetterInput,
   GenerateFutureLetterOutput,
 } from "@/ai/flows/generate-future-letter";
-import { firestore } from "@/firebase/admin";
-
 import { logger } from "@/lib/logger";
 
 /**
@@ -54,7 +52,7 @@ export async function analyzeVision(
     return result;
   } catch (error) {
     logger.error("[actions] Vision analysis failed:", error);
-    return { error: "Failed to analyze vision intent." };
+    return { error: "Transmission Interrupted: Unable to verify vision alignment." };
   }
 }
 
@@ -71,7 +69,7 @@ export async function generateRoadmap(
   const validatedFields = VisionFormSchema.safeParse(values);
   if (!validatedFields.success) {
     return {
-      error: "Invalid fields. Please ensure your goal is descriptive enough.",
+      error: "Protocol Error: Invalid fields. Please ensure your goal is descriptive enough.",
     };
   }
 
@@ -113,13 +111,13 @@ export async function generateRoadmap(
     ) {
       return {
         error:
-          "An unexpected error occurred while generating your roadmap with the AI. Please try again later.",
+          "Neural Sync Failure: An unexpected error occurred while generating your roadmap. Calibration required.",
       };
     }
     // Generic fallback error
     return {
       error:
-        "An unexpected error occurred while generating your roadmap. Please try again.",
+        "System Error: Roadmap architecture failed. Please try again.",
     };
   }
 }
@@ -139,7 +137,7 @@ export async function getReflection(
     logger.error("[actions] Reflection generation failed:", error);
     return {
       error:
-        "An unexpected error occurred while generating your reflection. Please try again.",
+        "Reflection Protocol failed. Unable to synthesize strategic briefing.",
     };
   }
 }
@@ -151,7 +149,7 @@ export async function getVisionIdeas(
   keywords: string,
 ): Promise<{ ideas?: string[]; error?: string }> {
   if (!keywords) {
-    return { error: "Please provide at least one keyword." };
+    return { error: "Input Error: Please provide at least one keyword." };
   }
   try {
     const result: GenerateVisionIdeasOutput = await generateVisionIdeas({
@@ -162,7 +160,7 @@ export async function getVisionIdeas(
     logger.error("[actions] Vision idea generation failed:", error);
     return {
       error:
-        "An unexpected error occurred while generating ideas. Please try again.",
+        "Ideation Module encountered an error. Please re-initialize.",
     };
   }
 }
@@ -180,7 +178,7 @@ export async function getDailyBriefing(
     return { briefing };
   } catch (error) {
     logger.error("[actions] Daily briefing generation failed:", error);
-    return { error: "Failed to generate daily briefing." };
+    return { error: "Briefing Signal Lost: Failed to generate daily briefing." };
   }
 }
 
@@ -195,7 +193,7 @@ export async function getFutureSelfChat(
     return { response: chatResponse };
   } catch (error) {
     logger.error("[actions] Future self chat failed:", error);
-    return { error: "Failed to connect to your future self." };
+    return { error: "Temporal Link Unstable: Failed to connect to Future Self." };
   }
 }
 
@@ -210,7 +208,7 @@ export async function checkDecisionAlignment(
     return { result };
   } catch (error) {
     logger.error("[actions] Decision alignment check failed:", error);
-    return { error: "Failed to analyze decision alignment." };
+    return { error: "Alignment Check Failed: Unable to analyze decision parameters." };
   }
 }
 
@@ -225,7 +223,7 @@ export async function checkFutureLetter(
     return { result };
   } catch (error) {
     logger.error("[actions] Future letter generation failed:", error);
-    return { error: "Failed to receive letter from the future." };
+    return { error: "Transmission Blocked: Failed to receive letter from the future." };
   }
 }
 

@@ -36,10 +36,10 @@ export type RoadmapHistoryItem = z.infer<typeof RoadmapHistoryItemSchema>;
 // Updated Roadmap schema
 export const RoadmapSchema = z.object({
   visionTimeline: z.array(RoadmapItemSchema).default([]),
-  yearlyMilestones: z.array(RoadmapItemSchema),
-  monthlySprints: z.array(RoadmapItemSchema),
-  weeklyTactics: z.array(RoadmapItemSchema),
-  dailyHabits: z.array(RoadmapItemSchema),
+  yearlyMilestones: z.array(RoadmapItemSchema).default([]),
+  monthlySprints: z.array(RoadmapItemSchema).default([]),
+  weeklyTactics: z.array(RoadmapItemSchema).default([]),
+  dailyHabits: z.array(RoadmapItemSchema).default([]),
   history: z.array(RoadmapHistoryItemSchema).optional().default([]),
 });
 export type Roadmap = z.infer<typeof RoadmapSchema> & {

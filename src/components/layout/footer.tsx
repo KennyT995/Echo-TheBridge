@@ -5,7 +5,6 @@ import { Rocket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { footerContent } from "@/lib/navigation";
-import { useEffect, useState } from "react";
 
 export default function Footer() {
 

@@ -8,6 +8,7 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
+import { logger } from "@/lib/logger";
 
 // This function is now internal to this module.
 const createUserProfile = async (userCredential: UserCredential) => {
@@ -20,7 +21,7 @@ const createUserProfile = async (userCredential: UserCredential) => {
   if (!user.displayName) {
     // We don't want to block on this, but we should handle errors.
     await updateProfile(user, { displayName }).catch((e) =>
-      console.warn("Failed to update auth profile display name", e),
+      logger.warn("Failed to update auth profile display name", e),
     );
   }
 
@@ -57,7 +58,7 @@ export async function signUpWithEmail(
     try {
       await userCredential.user.delete();
     } catch (deleteError) {
-      console.error("Failed to clean up orphaned auth user.", deleteError);
+      logger.error("Failed to clean up orphaned auth user.", deleteError);
       // Even if cleanup fails, we must inform the user that the process failed.
       throw new Error(
         "An unexpected error occurred during sign-up. Your account may be in an inconsistent state. Please contact support.",

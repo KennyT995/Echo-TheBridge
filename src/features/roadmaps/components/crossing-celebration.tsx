@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import confetti from "canvas-confetti";
+import { useConfetti } from "@/hooks/use-confetti";
 import {
   Dialog,
   DialogContent,
@@ -24,54 +24,18 @@ export function CrossingCelebration({
   roadmapTitle = "your roadmap",
   onClose,
 }: CrossingCelebrationProps) {
+  const { celebrate } = useConfetti();
   const [isOpen, setIsOpen] = useState(false);
   const [hasCelebrated, setHasCelebrated] = useState(false);
-
-  const triggerConfetti = () => {
-    const duration = 3 * 1000;
-    const animationEnd = Date.now() + duration;
-    const defaults = {
-      startVelocity: 30,
-      spread: 360,
-      ticks: 60,
-      zIndex: 9999,
-    };
-
-    const randomInRange = (min: number, max: number) => {
-      return Math.random() * (max - min) + min;
-    };
-
-    const interval: NodeJS.Timeout = setInterval(function () {
-      const timeLeft = animationEnd - Date.now();
-
-      if (timeLeft <= 0) {
-        return clearInterval(interval);
-      }
-
-      const particleCount = 50 * (timeLeft / duration);
-
-      // multiple origins to fill screen
-      confetti({
-        ...defaults,
-        particleCount,
-        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-      });
-      confetti({
-        ...defaults,
-        particleCount,
-        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-      });
-    }, 250);
-  };
 
   useEffect(() => {
     if (progress === 100 && !hasCelebrated) {
       // eslint-disable-next-line
       setIsOpen(true);
       setHasCelebrated(true);
-      triggerConfetti();
+      celebrate({ duration: 3000 });
     }
-  }, [progress, hasCelebrated]);
+  }, [progress, hasCelebrated, celebrate]);
 
   return (
     <Dialog

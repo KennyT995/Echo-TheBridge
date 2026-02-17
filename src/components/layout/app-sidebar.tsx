@@ -143,7 +143,7 @@ export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
                         >
                           <div className={cn(
                             "w-1.5 h-6 rounded-full transition-all",
-                            pathname === `/vision/${vision.id}` ? "bg-primary" : "bg-white/10 group-item-hover:bg-primary/40"
+                            pathname === `/vision/${vision.id}` ? "bg-primary" : "bg-white/10 group-hover/item:bg-primary/40"
                           )} />
                           <span className="truncate font-medium">{vision.title}</span>
                         </Link>

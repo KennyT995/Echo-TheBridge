@@ -42,17 +42,7 @@ const chartColors = [
   "hsl(180, 70%, 50%)",
 ];
 
-function calculateOverallProgress(roadmap: Roadmap): number {
-  const allItems: RoadmapItem[] = [
-    ...(roadmap.dailyHabits || []),
-    ...(roadmap.weeklyTactics || []),
-    ...(roadmap.monthlySprints || []),
-    ...(roadmap.yearlyMilestones || []),
-  ];
-  if (allItems.length === 0) return 0;
-  const completedItems = allItems.filter((item) => item.completed).length;
-  return (completedItems / allItems.length) * 100;
-}
+import { calculateOverallProgress } from "@/lib/utils";
 
 export function VisionCharts({ visions, roadmaps }: VisionChartsProps) {
   const categoryDistribution = useMemo(() => {

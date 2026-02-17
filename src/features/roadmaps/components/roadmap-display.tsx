@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/accordion";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Roadmap, RoadmapItem, RoadmapSectionKey } from "@/lib/types";
+import { toJsDate, cn } from "@/lib/utils";
 import {
   CheckCircle2,
   CircleDot,
@@ -17,17 +18,15 @@ import {
   Flag,
   Trash2,
   Plus,
+  History,
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
-import { DocumentReference, Timestamp } from "firebase/firestore";
+import { DocumentReference } from "firebase/firestore";
 import { updateDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import confetti from "canvas-confetti";
 import { triggerMilestoneCelebration } from "@/lib/celebrations";
 import { useToast } from "@/hooks/use-toast";
-import { History } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import {
@@ -92,33 +91,6 @@ const roadmapSections = [
   },
 ] as const;
 
-const triggerCelebration = (sectionKey: RoadmapSectionKey) => {
-  const baseLine = {
-    dailyHabits: { count: 30, spread: 40, scalar: 0.8 },
-    weeklyTactics: { count: 60, spread: 60, scalar: 1.0 },
-    monthlySprints: { count: 100, spread: 80, scalar: 1.2 },
-    yearlyMilestones: { count: 150, spread: 100, scalar: 1.4 },
-    visionTimeline: { count: 180, spread: 120, scalar: 1.5 },
-  }[sectionKey];
-
-  // Randomize the parameters slightly to feel organic
-  const randomSpread = baseLine.spread + (Math.random() * 20 - 10);
-  const randomCount = Math.floor(baseLine.count * (0.8 + Math.random() * 0.4)); // +/- 20%
-  const randomOriginX = 0.5 + (Math.random() * 0.2 - 0.1); // Center +/- 0.1
-
-  confetti({
-    particleCount: randomCount,
-    spread: randomSpread,
-    origin: { y: 0.6, x: randomOriginX },
-    scalar: baseLine.scalar,
-    disableForReducedMotion: true,
-    colors: ["#22c55e", "#ec4899", "#3b82f6", "#eab308"],
-    startVelocity: 30 + Math.random() * 20,
-    gravity: 0.8,
-    drift: Math.random() - 0.5,
-    ticks: 300,
-  });
-};
 
 export function RoadmapDisplay({
   roadmap,
@@ -220,7 +192,18 @@ export function RoadmapDisplay({
           if (isSectionComplete && !wasSectionComplete) {
             triggerMilestoneCelebration(section, toast);
           } else {
-            triggerCelebration(section);
+            // For regular tasks, we can use a simpler celebration or just the milestone one with less intensity?
+            // Actually, triggerMilestoneCelebration handles tiers.
+            // But we don't have a "single task" tier.
+            // Let's reuse the section tier but maybe relying on the random strategy is enough.
+            // Or we can just skip it for single tasks to avoid fatigue.
+            // The original code fired a small confetti burst for EVERY task completion.
+            // Let's respect that intent but use the library if possible, or keep a small local burst?
+            // To keep it clean, let's use the 'dailyHabits' tier for single tasks as a fallback,
+            // or just skip it.
+            // The original `triggerCelebration` was quite distinct.
+            // Let's map single task completion to a light celebration.
+            triggerMilestoneCelebration("dailyHabits", toast);
           }
         }
       }
@@ -534,17 +517,7 @@ export function RoadmapDisplay({
                           </span>
                         </div>
                         <span className="text-xs font-black uppercase tracking-widest text-muted-foreground/20">
-                          {item.completedAt
-                            ? (item.completedAt instanceof Date
-                              ? item.completedAt
-                              : (item.completedAt as Timestamp).toDate
-                                ? (item.completedAt as Timestamp).toDate()
-                                : new Date(
-                                  (item.completedAt as { seconds: number })
-                                    .seconds * 1000,
-                                )
-                            ).toLocaleDateString()
-                            : "Archived"}
+                          {toJsDate(item.completedAt)?.toLocaleDateString() || "Archived"}
                         </span>
                       </li>
                     ))}

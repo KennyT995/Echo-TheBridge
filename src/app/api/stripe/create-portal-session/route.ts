@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { headers } from "next/headers";
-import { admin } from "@/firebase/admin";
-import { getAuth } from "firebase-admin/auth";
+import { admin, auth } from "@/firebase/admin";
+import { logger } from "@/lib/logger";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -17,10 +17,10 @@ async function getUserIdFromRequest(): Promise<string | null> {
     const idToken = authHeader.split("Bearer ")[1];
     if (idToken) {
       try {
-        const decodedToken = await getAuth(admin.app()).verifyIdToken(idToken);
+        const decodedToken = await auth.verifyIdToken(idToken);
         return decodedToken.uid;
       } catch (error) {
-        console.error("Error verifying ID token:", error);
+        logger.error("Error verifying ID token:", error);
         return null;
       }
     }
@@ -64,7 +64,7 @@ export async function POST() {
       status: 200,
     });
   } catch (error: unknown) {
-    console.error("Stripe Portal Session Error:", error);
+    logger.error("Stripe Portal Session Error:", error);
     return new NextResponse(
       JSON.stringify({ error: { message: (error as Error).message } }),
       { status: 500 },

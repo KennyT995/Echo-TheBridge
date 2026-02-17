@@ -16,6 +16,7 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { FirestorePaths } from "@/lib/firestore-paths";
 import { logger } from "@/lib/logger";
 import { useToast } from "@/hooks/use-toast";
+import { useConfetti } from "@/hooks/use-confetti";
 
 interface JournalDialogProps {
   open: boolean;
@@ -26,6 +27,7 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const { celebrate } = useConfetti();
   const [entry, setEntry] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,6 +48,7 @@ export function JournalDialog({ open, onOpenChange }: JournalDialogProps) {
       });
 
       setEntry("");
+      celebrate({ duration: 3000 });
       onOpenChange(false);
     } catch (error) {
       logger.error("[JournalDialog] Failed to save reflection:", error);

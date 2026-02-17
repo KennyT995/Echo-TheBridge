@@ -23,6 +23,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useConfetti } from "@/hooks/use-confetti";
 
 interface WeeklyRetroDialogProps {
   open: boolean;
@@ -60,6 +61,7 @@ export function WeeklyRetroDialog({
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const { celebrate } = useConfetti();
 
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({
@@ -99,6 +101,8 @@ export function WeeklyRetroDialog({
         title: "Weekly Review Complete",
         description: "Your insights have been saved. Ready for a new week!",
       });
+
+      celebrate({ duration: 5000 });
 
       onOpenChange(false);
       // Reset after close
@@ -182,7 +186,7 @@ export function WeeklyRetroDialog({
             className="h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
           >
             {isSubmitting && <Loader2 className="w-5 h-5 mr-3 animate-spin" />}
-            {currentStep === steps.length - 1 ? "Complete Review" : "Next Objective"}
+            {currentStep === steps.length - 1 ? "Complete Review" : "Next Phase"}
             {!isSubmitting && currentStep !== steps.length - 1 && (
               <ArrowRight className="w-5 h-5 ml-3" />
             )}

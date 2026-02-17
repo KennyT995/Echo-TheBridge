@@ -21,6 +21,7 @@ import { useToast } from "@/hooks/use-toast";
 import { getStripe } from "@/lib/stripe";
 import type { PlanTier, UserData } from "@/lib/types";
 import { getErrorMessage } from "@/lib/error-utils";
+import { logger } from "@/lib/logger";
 
 const defaultPlans: PlanTier[] = [
   {
@@ -110,7 +111,7 @@ export default function PlansPage() {
             await seedDefaultPlans(firestore);
             // This might require a manual refresh or a state change to re-trigger useCollection
           } catch (e) {
-            console.error("Error seeding plans:", e);
+            logger.error("Error seeding plans:", e);
           }
         }
         setIsSeeding(false);
@@ -143,7 +144,7 @@ export default function PlansPage() {
         });
         router.push("/dashboard");
       } catch (error) {
-        console.error("Error updating to free plan: ", error);
+        logger.error("Error updating to free plan: ", error);
         toast({
           variant: "destructive",
           title: "System Error",
@@ -186,7 +187,7 @@ export default function PlansPage() {
         throw new Error("Stripe.js is not loaded.");
       }
     } catch (error: unknown) {
-      console.error("Error handling subscription:", error);
+      logger.error("Error handling subscription:", error);
       toast({
         title: "Synthesis Error",
         description: getErrorMessage(error),

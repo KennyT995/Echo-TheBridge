@@ -4,11 +4,11 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Minimize2, Crosshair } from "lucide-react";
+import { X, Minimize2, Crosshair, Target, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FocusAnchorProps {
-  activeTask?: string; // The current "next step" or focus
+  activeTask?: string;
   visionTitle?: string;
   onClose: () => void;
 }
@@ -35,16 +35,16 @@ export function FocusAnchor({
   return (
     <div
       className={cn(
-        "fixed z-50 transition-all duration-300 ease-in-out font-sans",
-        isMinimized ? "bottom-4 right-4" : "bottom-6 right-6",
+        "fixed z-40 transition-all duration-500 ease-in-out font-sans animate-in slide-in-from-right-10",
+        isMinimized ? "top-24 right-4" : "top-24 right-6",
       )}
     >
       <Card
         className={cn(
-          "shadow-2xl border-indigo-500/20 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60",
+          "shadow-[0_0_30px_rgba(0,0,0,0.3)] border-indigo-500/20 bg-[#050505]/80 backdrop-blur-xl supports-[backdrop-filter]:bg-[#050505]/60 transition-all duration-300",
           isMinimized
-            ? "w-12 h-12 rounded-full flex items-center justify-center p-0"
-            : "w-80 p-4",
+            ? "w-12 h-12 rounded-full flex items-center justify-center p-0 border-indigo-500/40"
+            : "w-80 p-0 overflow-hidden rounded-2xl border-indigo-500/30"
         )}
       >
         {isMinimized ? (
@@ -52,48 +52,57 @@ export function FocusAnchor({
             variant="ghost"
             size="icon"
             onClick={() => setIsMinimized(false)}
-            className="h-full w-full rounded-full bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500"
+            className="h-full w-full rounded-full hover:bg-indigo-500/20 text-indigo-400 p-0 relative group"
           >
-            <Crosshair className="h-6 w-6" />
+            <div className="absolute inset-0 rounded-full border border-indigo-500/30 animate-ping opacity-20" />
+            <Target className="h-5 w-5 group-hover:scale-110 transition-transform" />
           </Button>
         ) : (
-          <div className="space-y-3">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-2 text-xs font-medium text-indigo-500 uppercase tracking-widest">
-                <Crosshair className="w-3 h-3" />
-                <span>Current Anchor</span>
-              </div>
-              <div className="flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={() => setIsMinimized(true)}
-                >
-                  <Minimize2 className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 hover:text-destructive"
-                  onClick={onClose}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
+          <div className="relative">
+            {/* Header / Draggable Area */}
+            <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-gradient-x" />
 
-            <div>
-              <h4 className="font-bold text-lg leading-tight">{activeTask}</h4>
-              {visionTitle && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  for {visionTitle}
-                </p>
-              )}
-            </div>
+            <div className="p-4 space-y-3">
+              <div className="flex items-start justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-center w-5 h-5 rounded-md bg-indigo-500/10 border border-indigo-500/20">
+                    <Crosshair className="w-3 h-3 text-indigo-400 animate-spin-slow" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400">
+                    Active Directive
+                  </span>
+                </div>
+                <div className="flex gap-1 -mr-2 -mt-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-white"
+                    onClick={() => setIsMinimized(true)}
+                  >
+                    <Minimize2 className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-white hover:bg-destructive/20"
+                    onClick={onClose}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
 
-            <div className="h-1 w-full bg-indigo-100 dark:bg-indigo-900/30 rounded-full overflow-hidden">
-              <div className="h-full bg-indigo-500 w-1/3 animate-pulse"></div>
+              <div>
+                <h4 className="font-bold text-base text-white/90 leading-snug drop-shadow-sm">
+                  {activeTask}
+                </h4>
+                {visionTitle && (
+                  <div className="flex items-center gap-1.5 mt-2 text-[10px] text-muted-foreground/60 font-mono">
+                    <span className="w-1 h-1 rounded-full bg-indigo-500" />
+                    <span className="truncate max-w-[200px]">{visionTitle}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

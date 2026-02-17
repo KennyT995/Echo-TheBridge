@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { headers } from "next/headers";
 import { admin } from "@/firebase/admin";
+import { logger } from "@/lib/logger";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-06-20",
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (error: unknown) {
-    console.error(
+    logger.error(
       `Webhook signature verification failed: ${(error as Error).message}`,
     );
     return new NextResponse(`Webhook Error: ${(error as Error).message}`, {
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
   }
 
   if (!userId) {
-    console.warn(
+    logger.warn(
       `No firebaseUID found for event: ${event.id} (type: ${event.type})`,
     );
     return new NextResponse("Webhook error: Missing firebaseUID.", {
@@ -83,10 +84,10 @@ export async function POST(request: Request) {
         break;
       }
       default:
-        console.warn(`Unhandled webhook event type: ${event.type}`);
+        logger.warn(`Unhandled webhook event type: ${event.type}`);
     }
   } catch (error) {
-    console.error("Error handling webhook:", error);
+    logger.error("Error handling webhook:", error);
     return new NextResponse("Webhook handler failed. See logs.", {
       status: 500,
     });

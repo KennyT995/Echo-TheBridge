@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import NextImage from "next/image";
 import { Rocket } from "lucide-react";
-import Link from "next/link";
 import placeholderData from "@/lib/placeholder-images.json";
 
 interface TeamMember {
@@ -13,7 +12,17 @@ interface TeamMember {
 export const metadata: Metadata = {
   title: "About Us | Echo: The Bridge",
   description:
-    "Learn about Echo: The Bridge and our mission to help you turn your long-term vision into daily action.",
+    "Learn about Echo: The Bridge and our mission to help you turn your long-term vision into daily action. Engineered for the human optimization cycle.",
+  openGraph: {
+    title: "About Us | Echo: The Bridge",
+    description: "Engineered to solve the Execution Gap. Sync your Current Self with your Architected Self.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About Us | Echo: The Bridge",
+    description: "Bridge the gap between vision and reality.",
+  },
 };
 
 export default function AboutPage() {

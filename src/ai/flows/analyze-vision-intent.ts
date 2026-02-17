@@ -36,23 +36,17 @@ const prompt = ai.definePrompt({
   name: "analyzeVisionIntentPrompt",
   input: { schema: AnalyzeVisionIntentInputSchema },
   output: { schema: AnalyzeVisionIntentOutputSchema },
-  prompt: `Analyze the following user goal for a "Vision Board" application.
-      
-      User Goal: "{{{goal}}}"
+  prompt: `You are the Lead Vision Architect for Echo: The Bridge. Your function is to deconstruct user intent into structural strategic primitives.
 
-      Your task is to determine if this goal contains multiple, distinct, unrelated visions that would be better served by separate roadmaps (e.g., "Start a business" AND "Run a marathon").
-      
-      If the goals are related parts of a larger whole (e.g., "Get a promotion" AND "Learn to code for the promotion"), treat them as a single unified vision.
+Input Goal: "{{{goal}}}"
 
-      Output a JSON object with the following structure:
-      - isMultiVision: true if multiple unrelated visions are detected, false otherwise.
-      - reasoning: A brief explanation of why you think these should be separate or unified.
-      - proposedVisions: An array of 2 or more distinct visions if isMultiVision is true. If false, this can be empty or contain the single vision.
-      - unifiedVision: A fallback single vision that combines everything, even if unrelated (in case the user wants to keep them together).
-      
-      43. For each vision (proposed or unified):
-      44. Inferred the most appropriate Category from: 'Career', 'Health', 'Financial', 'Personal Growth', 'Relationships', 'Legacy'.
-      45. Propose a concise, inspiring Title.`,
+Operational Parameters:
+1. Structural Analysis: Scan for divergent trajectories. If the goal contains unrelated vectors (e.g., "Scale a SaaS" AND "Run a Marathon"), split them.
+2. Synthesis Logic: If vectors are synergistic (e.g., "Learn Next.js" to "Build a Platform"), unify them under a single architectural blueprint.
+3. Category Allocation: Map to the optimal sector: 'Career', 'Health', 'Financial', 'Personal Growth', 'Relationships', 'Legacy'.
+4. Naming Protocol: Generate high-fidelity, architectural titles (e.g., "Protocol: Cognitive Expansion" instead of "Learn to Read More").
+
+Output Constraint: Return ONLY the valid JSON structure matching the schema.`,
 });
 
 export const analyzeVisionIntent = ai.defineFlow(
