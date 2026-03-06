@@ -11,7 +11,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
 
 export function InstallPrompt() {
   const [platform, setPlatform] = useState<"ios" | "android" | "desktop">("desktop");
@@ -106,7 +105,7 @@ export function InstallPrompt() {
                 </div>
                 <div>
                   <p className="text-white font-medium text-sm">Step 2: Install App</p>
-                  <p className="text-xs text-muted-foreground mt-1">Select 'Install App' or 'Add to Home Screen'.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Select &apos;Install App&apos; or &apos;Add to Home Screen&apos;.</p>
                 </div>
               </div>
             </div>
@@ -118,7 +117,7 @@ export function InstallPrompt() {
                 <Monitor className="h-6 w-6 text-white group-hover:text-primary transition-colors" />
               </div>
               <div className="text-sm text-muted-foreground/80 leading-relaxed">
-                Locate the <Download className="inline h-3 w-3 mx-1 text-primary animate-bounce lg:animate-none" /> icon in your browser's address bar to install the desktop protocol.
+                Locate the <Download className="inline h-3 w-3 mx-1 text-primary animate-bounce lg:animate-none" /> icon in your browser&apos;s address bar to install the desktop protocol.
               </div>
             </div>
           )}

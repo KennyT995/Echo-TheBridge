@@ -1,7 +1,6 @@
 "use client";
 
-import { useCollection, useDoc, useMemoFirebase } from "@/firebase";
-import { useFirestore, useUser } from "@/firebase";
+import { useCollection, useDoc, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 
 import { collection, doc, writeBatch, getDoc } from "firebase/firestore";
 import { Loader2, Check, ExternalLink } from "lucide-react";

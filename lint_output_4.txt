@@ -1,0 +1,5 @@
+
+> echo-the-bridge@0.1.0 lint
+> ./node_modules/.bin/next lint
+
+✔ No ESLint warnings or errors

@@ -10,6 +10,13 @@ import {
     ArrowRight,
 } from "lucide-react";
 
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 interface DashboardHeaderProps {
     isLoading: boolean;
     isLimitReached: boolean;
@@ -47,38 +54,63 @@ export function DashboardHeader({
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center gap-2 p-1.5 rounded-2xl glass border-white/5 mr-2">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onOpenFutureLetter}
-                        disabled={isLoading}
-                        className="h-11 w-11 rounded-xl text-primary hover:bg-primary/10 transition-all hover:scale-110"
-                        aria-label="Open Future Letter"
-                    >
-                        <Mail className="h-5 w-5" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onOpenJournal}
-                        disabled={isLoading}
-                        className="h-11 w-11 rounded-xl text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all"
-                        aria-label="Open Journal"
-                    >
-                        <BookOpen className="h-5 w-5" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={onOpenDecision}
-                        disabled={isLoading}
-                        className="h-11 w-11 rounded-xl text-accent hover:bg-accent/10 transition-all hover:scale-110"
-                        aria-label="Align Vision"
-                    >
-                        <Compass className="h-5 w-5" />
-                    </Button>
-                </div>
+                <TooltipProvider>
+                    <div className="flex items-center gap-2 p-1.5 rounded-2xl glass border-white/5 mr-2">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={onOpenFutureLetter}
+                                    disabled={isLoading}
+                                    className="h-11 w-11 rounded-xl text-primary hover:bg-primary/10 transition-all hover:scale-110"
+                                    aria-label="Open Future Letter"
+                                >
+                                    <Mail className="h-5 w-5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="glass-card border-primary/20 text-primary font-bold uppercase tracking-widest text-[10px]">
+                                Signal from the Future
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={onOpenJournal}
+                                    disabled={isLoading}
+                                    className="h-11 w-11 rounded-xl text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all"
+                                    aria-label="Open Journal"
+                                >
+                                    <BookOpen className="h-5 w-5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="glass-card border-white/20 text-white font-bold uppercase tracking-widest text-[10px]">
+                                Strategic Reflection
+                            </TooltipContent>
+                        </Tooltip>
+
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={onOpenDecision}
+                                    disabled={isLoading}
+                                    className="h-11 w-11 rounded-xl text-accent hover:bg-accent/10 transition-all hover:scale-110"
+                                    aria-label="Align Vision"
+                                >
+                                    <Compass className="h-5 w-5" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent className="glass-card border-accent/20 text-accent font-bold uppercase tracking-widest text-[10px]">
+                                Vision Alignment
+                            </TooltipContent>
+                        </Tooltip>
+                    </div>
+                </TooltipProvider>
 
                 <div className="flex items-center gap-3">
                     {isSunday && (

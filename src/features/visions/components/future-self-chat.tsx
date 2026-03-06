@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, Sparkles, User, Loader2, X, Minimize2, Radio, Wifi } from "lucide-react";
+import { Send, Sparkles, Loader2, Minimize2, Radio, Wifi } from "lucide-react";
 import { getFutureSelfChat } from "@/app/actions";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/firebase";

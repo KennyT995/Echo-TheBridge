@@ -14,46 +14,19 @@ import Loading from "../loading";
 
 import { checkFutureLetter } from "@/app/actions";
 import { useDeleteVision } from "@/features/visions/hooks/use-delete-vision";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { collection, query, orderBy, doc } from "firebase/firestore";
 import type { Vision, Roadmap, UserData } from "@/lib/types";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { VisionForm } from "@/features/visions/components/vision-form";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { calculateStreak } from "@/lib/streaks";
 import { calculateOverallProgress } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Loader2 } from "lucide-react";
 import { FirestorePaths } from "@/lib/firestore-paths";
 import { logger } from "@/lib/logger";
 
 // Feature Components
 import { StreakWidget } from "@/features/dashboard/components/streak-widget";
 import { DailyBriefing } from "@/features/dashboard/components/daily-briefing";
-import { JournalDialog } from "@/features/journal/components/journal-dialog";
-import { NightlyReviewDialog } from "@/features/journal/components/nightly-review-dialog";
-import { DecisionDialog } from "@/features/journal/components/decision-dialog";
-import { FutureLetterModal } from "@/features/dashboard/components/future-letter-modal";
 import { GenerateFutureLetterOutput } from "@/ai/flows/generate-future-letter";
-import { CrossingCelebration } from "@/features/roadmaps/components/crossing-celebration";
-import { WeeklyRetroDialog } from "@/features/journal/components/weekly-retro-dialog";
 import { usePlan } from "@/hooks/use-plan";
 
 import { usePrevious } from "@/hooks/use-previous";
@@ -63,6 +36,7 @@ import { useConfetti } from "@/hooks/use-confetti";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { VisionsGrid } from "@/features/dashboard/components/visions-grid";
 import { EmptyVisionsState } from "@/features/dashboard/components/empty-visions-state";
+import { DashboardDialogs } from "@/features/dashboard/components/dashboard-dialogs";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function DashboardPage() {
@@ -335,100 +309,33 @@ export default function DashboardPage() {
           </>
         )}
 
-        {/* Dialogs and Modals */}
-        <Dialog open={isCreateVisionOpen} onOpenChange={setCreateVisionOpen}>
-          <DialogContent className="max-w-4xl">
-            <DialogHeader>
-              <DialogTitle>Create a New Vision</DialogTitle>
-              <DialogDescription>
-                Define your future. We&apos;ll architect the path.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="max-h-[80vh] overflow-y-auto p-1">
-              <VisionForm onVisionCreated={onVisionCreated} />
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        <AlertDialog
-          open={!!visionToDelete}
-          onOpenChange={(open) => {
-            if (!open) {
-              setVisionToDelete(null);
-              setDeleteConfirmationInput("");
-            }
-          }}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your
-                vision and its associated roadmap.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="py-2 space-y-4">
-              <Label htmlFor="delete-confirm-dashboard">
-                To confirm, type:{" "}
-                <span className="font-mono text-primary/90">
-                  &quot;{deleteConfirmationPhrase}&quot;
-                </span>
-              </Label>
-              <Input
-                id="delete-confirm-dashboard"
-                value={deleteConfirmationInput}
-                onChange={(e) => setDeleteConfirmationInput(e.target.value)}
-                placeholder={deleteConfirmationPhrase}
-                className="border-destructive/50 focus:ring-destructive/50"
-              />
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleDeleteVision();
-                }}
-                disabled={
-                  isDeleting ||
-                  deleteConfirmationInput !== deleteConfirmationPhrase
-                }
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                {isDeleting && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                {isDeleting ? "Deleting..." : "Delete Vision"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-
-        <JournalDialog open={isJournalOpen} onOpenChange={setJournalOpen} />
-        <NightlyReviewDialog
-          open={isNightlyReviewOpen}
-          onOpenChange={setNightlyReviewOpen}
-        />
-        <DecisionDialog
-          open={isDecisionOpen}
-          onOpenChange={setDecisionOpen}
+        <DashboardDialogs
+          isCreateVisionOpen={isCreateVisionOpen}
+          setCreateVisionOpen={setCreateVisionOpen}
+          onVisionCreated={onVisionCreated}
+          visionToDelete={visionToDelete}
+          setVisionToDelete={setVisionToDelete}
+          isDeleting={isDeleting}
+          deleteConfirmationInput={deleteConfirmationInput}
+          setDeleteConfirmationInput={setDeleteConfirmationInput}
+          deleteConfirmationPhrase={deleteConfirmationPhrase}
+          handleDeleteVision={handleDeleteVision}
+          isJournalOpen={isJournalOpen}
+          setJournalOpen={setJournalOpen}
+          isNightlyReviewOpen={isNightlyReviewOpen}
+          setNightlyReviewOpen={setNightlyReviewOpen}
+          isDecisionOpen={isDecisionOpen}
+          setDecisionOpen={setDecisionOpen}
           activeVisions={visions?.map((v) => v.title) || []}
-        />
-        <FutureLetterModal
-          open={isFutureLetterOpen}
-          onOpenChange={setFutureLetterOpen}
-          letter={futureLetter}
-          isLoading={isGeneratingLetter}
-          onGenerate={handleGenerateLetter}
-        />
-        <CrossingCelebration
-          progress={completedRoadmap ? 100 : 0}
-          roadmapTitle={completedRoadmap?.visionTitle || ""}
-          onClose={() => setCompletedRoadmap(null)}
-        />
-        <WeeklyRetroDialog
-          open={isWeeklyRetroOpen}
-          onOpenChange={setWeeklyRetroOpen}
+          isFutureLetterOpen={isFutureLetterOpen}
+          setFutureLetterOpen={setFutureLetterOpen}
+          futureLetter={futureLetter}
+          isGeneratingLetter={isGeneratingLetter}
+          handleGenerateLetter={handleGenerateLetter}
+          completedRoadmap={completedRoadmap}
+          setCompletedRoadmap={setCompletedRoadmap}
+          isWeeklyRetroOpen={isWeeklyRetroOpen}
+          setWeeklyRetroOpen={setWeeklyRetroOpen}
         />
       </main>
     </>

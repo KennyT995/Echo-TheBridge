@@ -96,7 +96,7 @@ export function BridgeVisualizer({
                 transformOrigin: `${x}px ${y}px`,
                 transform: `rotate(${angle}deg)`,
               }}
-              className="transition-all duration-700 ease-in-out"
+              className="transition-all duration-700 ease-in-out group/plank cursor-help"
             >
               {/* Plank Shadow/Glow */}
               {isBuilt && (
@@ -107,8 +107,9 @@ export function BridgeVisualizer({
                   height="5"
                   rx="2.5"
                   className={cn(
-                    "fill-primary/20 blur-[2px]",
-                    isCurrent && "animate-pulse fill-primary/40"
+                    "fill-primary/20 blur-[2px] transition-all duration-300",
+                    isCurrent && "animate-pulse fill-primary/40",
+                    "group-hover/plank:fill-primary/60 group-hover/plank:blur-[4px]"
                   )}
                 />
               )}
@@ -121,11 +122,12 @@ export function BridgeVisualizer({
                 height="3"
                 rx="1.5"
                 className={cn(
-                  "transition-all duration-700 ease-out",
+                  "transition-all duration-500 ease-out",
                   isBuilt
                     ? "fill-primary"
                     : "fill-muted-foreground/10",
-                  isCurrent && "stroke-white/20 stroke-1"
+                  isCurrent && "stroke-white/20 stroke-1",
+                  "group-hover/plank:scale-x-125 group-hover/plank:brightness-125"
                 )}
                 style={{
                   ...(isBuilt ? { fill: "url(#builtGradient)" } : {}),

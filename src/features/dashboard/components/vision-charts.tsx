@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { Vision, Roadmap, RoadmapItem } from "@/lib/types";
+import type { Vision, Roadmap } from "@/lib/types";
 import {
   Card,
   CardContent,

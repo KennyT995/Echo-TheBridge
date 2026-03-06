@@ -76,7 +76,7 @@ export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
               className="justify-start gap-4 h-12 rounded-xl text-muted-foreground/60 hover:text-white hover:bg-white/5 transition-all group"
             >
               <Link href={item.href} onClick={onLinkClick}>
-                <div className="w-1.5 h-1.5 rounded-full bg-primary/20 group-hover:bg-primary transition-all" />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/20 group-hover:bg-primary transition-all block" />
                 <span className="font-bold text-sm tracking-tight">{item.label}</span>
               </Link>
             </Button>
@@ -141,8 +141,8 @@ export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
                               : "text-muted-foreground/60 hover:text-white hover:bg-white/5 border border-transparent"
                           )}
                         >
-                          <div className={cn(
-                            "w-1.5 h-6 rounded-full transition-all",
+                          <span className={cn(
+                            "w-1.5 h-6 rounded-full transition-all block",
                             pathname === `/vision/${vision.id}` ? "bg-primary" : "bg-white/10 group-hover/item:bg-primary/40"
                           )} />
                           <span className="truncate font-medium">{vision.title}</span>

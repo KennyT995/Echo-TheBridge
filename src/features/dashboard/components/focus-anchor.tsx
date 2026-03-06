@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { X, Minimize2, Crosshair, Target, CheckCircle2 } from "lucide-react";
+import { X, Minimize2, Crosshair, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FocusAnchorProps {
