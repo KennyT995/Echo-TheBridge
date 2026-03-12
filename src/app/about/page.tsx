@@ -1,13 +1,5 @@
 import type { Metadata } from "next";
-import NextImage from "next/image";
 import { Rocket } from "lucide-react";
-import placeholderData from "@/lib/placeholder-images.json";
-
-interface TeamMember {
-  name: string;
-  role: string;
-  img: string;
-}
 
 export const metadata: Metadata = {
   title: "About Us | Echo: The Bridge",
@@ -77,40 +69,6 @@ export default function AboutPage() {
           <div className="p-10 rounded-[3rem] glass-card border-white/5 space-y-6 group hover:border-primary/20 transition-all">
             <h3 className="text-3xl font-black font-headline tracking-tighter">Inevitable Reality</h3>
             <p className="text-muted-foreground/60 font-light leading-relaxed">When action is mathematically aligned with vision, the outcome shifts from &quot;possible&quot; to &quot;logically certain.&quot;</p>
-          </div>
-        </div>
-
-        <div className="max-w-6xl mx-auto animate-reveal delay-500">
-          <div className="flex items-center justify-center gap-3 text-primary mb-16">
-            <div className="h-px w-12 bg-primary/20" />
-            <span className="text-[11px] font-black uppercase tracking-[0.4em]">The Architects</span>
-            <div className="h-px w-12 bg-primary/20" />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
-            {(placeholderData.about.members as TeamMember[]).map((member) => (
-              <div
-                key={member.name}
-                className="group relative overflow-hidden rounded-[3rem] bg-white/[0.02] border border-white/5 p-8 transition-all duration-700 hover:-translate-y-4 hover:bg-white/[0.05] hover:border-primary/20"
-              >
-                <div className="relative aspect-[4/5] mb-8 overflow-hidden rounded-[2.5rem] border border-white/5">
-                  <NextImage
-                    src={member.img}
-                    alt={member.name}
-                    fill
-                    className="object-cover grayscale group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-transparent opacity-60" />
-                </div>
-                <h3 className="text-3xl font-black font-headline tracking-tighter mb-2">{member.name}</h3>
-                <p className="text-primary font-bold text-[10px] uppercase tracking-[0.3em] mb-6">
-                  {member.role}
-                </p>
-                <p className="text-base text-muted-foreground/40 leading-relaxed font-light italic">
-                  Dedicated to engineering the neural infrastructure of individual transcendence.
-                </p>
-              </div>
-            ))}
           </div>
         </div>
       </main>

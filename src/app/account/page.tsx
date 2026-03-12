@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useUser, useFirestore, useDoc, useMemoFirebase } from "@/firebase";
 import { doc } from "firebase/firestore";
+import { FirestorePaths } from "@/lib/firestore-paths";
 import { updateDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,7 +50,7 @@ export default function AccountPage() {
 
   const userDocRef = useMemoFirebase(() => {
     if (!user) return null;
-    return doc(firestore, "users", user.uid);
+    return doc(firestore, FirestorePaths.user(user.uid));
   }, [user, firestore]);
 
   const { data: userData, isLoading: isUserDataLoading } =

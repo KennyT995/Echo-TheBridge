@@ -129,6 +129,7 @@ export default function HomePage() {
                       src={feature.image}
                       alt={feature.title}
                       fill
+                      sizes="(max-width: 1024px) 100vw, 33vw"
                       className="object-cover transition-transform duration-1000 group-hover:scale-110"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-8">

@@ -10,6 +10,7 @@ import {
 } from "@/firebase";
 import { collection, query, orderBy } from "firebase/firestore";
 import type { Vision } from "@/lib/types";
+import { FirestorePaths } from "@/lib/firestore-paths";
 import {
   Accordion,
   AccordionContent,
@@ -55,7 +56,7 @@ export default function AppSidebar({ onLinkClick }: AppSidebarProps) {
   const visionsQuery = useMemoFirebase(() => {
     if (!user) return null;
     return query(
-      collection(firestore, "users", user.uid, "visions"),
+      collection(firestore, FirestorePaths.visions(user.uid)),
       orderBy("createdAt", "desc"),
     );
   }, [user, firestore]);

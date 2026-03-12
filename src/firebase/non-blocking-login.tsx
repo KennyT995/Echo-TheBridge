@@ -8,6 +8,7 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 import { getFirestore } from "firebase/firestore";
 import { updateProfile } from "firebase/auth";
+import { FirestorePaths } from "@/lib/firestore-paths";
 import { logger } from "@/lib/logger";
 
 // This function is now internal to this module.
@@ -25,7 +26,7 @@ const createUserProfile = async (userCredential: UserCredential) => {
     );
   }
 
-  const userRef = doc(getFirestore(), "users", user.uid);
+  const userRef = doc(getFirestore(), FirestorePaths.user(user.uid));
   const userData = {
     id: user.uid,
     email: user.email,

@@ -2,7 +2,8 @@
 
 import { useCollection, useDoc, useMemoFirebase, useFirestore, useUser } from "@/firebase";
 
-import { collection, doc, writeBatch, getDoc } from "firebase/firestore";
+import { collection, doc } from "firebase/firestore";
+import { FirestorePaths } from "@/lib/firestore-paths";
 import { Loader2, Check, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { getStripe } from "@/lib/stripe";
 import type { PlanTier, UserData } from "@/lib/types";
@@ -70,28 +71,12 @@ const defaultPlans: PlanTier[] = [
   },
 ];
 
-import { Firestore } from "firebase/firestore";
-
-async function seedDefaultPlans(db: Firestore) {
-  const plansRef = collection(db, "plan_tiers");
-  // Check if plans already exist to avoid overwriting
-  const snapshot = await getDoc(doc(plansRef, defaultPlans[0].id));
-  if (!snapshot.exists()) {
-    const batch = writeBatch(db);
-    defaultPlans.forEach((plan) => {
-      const docRef = doc(plansRef, plan.id);
-      batch.set(docRef, plan);
-    });
-    await batch.commit();
-  }
-}
 
 export default function PlansPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const router = useRouter();
   const { toast } = useToast();
-  const [isSeeding, setIsSeeding] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const plansQuery = useMemoFirebase(() => {
@@ -102,26 +87,9 @@ export default function PlansPage() {
   const { data: plans, isLoading: plansLoading } =
     useCollection<PlanTier>(plansQuery);
 
-  useEffect(() => {
-    async function handleSeeding() {
-      if (firestore && !plansLoading) {
-        if (!plans || plans.length === 0) {
-          try {
-            await seedDefaultPlans(firestore);
-            // This might require a manual refresh or a state change to re-trigger useCollection
-          } catch (e) {
-            logger.error("Error seeding plans:", e);
-          }
-        }
-        setIsSeeding(false);
-      }
-    }
-    handleSeeding();
-  }, [firestore, plans, plansLoading]);
-
   const userDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
-    return doc(firestore, "users", user.uid);
+    return doc(firestore, FirestorePaths.user(user.uid));
   }, [firestore, user]);
   const { data: userData } = useDoc<UserData>(userDocRef);
 
@@ -220,7 +188,7 @@ export default function PlansPage() {
     }
   };
 
-  if (plansLoading || isSeeding) {
+  if (plansLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#050505]">
         <div className="relative">

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { headers } from "next/headers";
 import { admin } from "@/firebase/admin";
+import { FirestorePaths } from "@/lib/firestore-paths";
 import { logger } from "@/lib/logger";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -103,7 +104,7 @@ async function updateUserSubscription(
   priceId?: string,
   isDeleted: boolean = false,
 ) {
-  const userRef = admin.firestore().collection("users").doc(userId);
+  const userRef = admin.firestore().doc(FirestorePaths.user(userId));
   const plans = await admin.firestore().collection("plan_tiers").get();
 
   let planId = "trailblazer"; // Default to free plan

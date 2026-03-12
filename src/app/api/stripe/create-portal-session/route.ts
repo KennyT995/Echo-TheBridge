@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { headers } from "next/headers";
 import { admin, auth } from "@/firebase/admin";
+import { FirestorePaths } from "@/lib/firestore-paths";
 import { logger } from "@/lib/logger";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -41,8 +42,7 @@ export async function POST() {
 
     const userDoc = await admin
       .firestore()
-      .collection("users")
-      .doc(userId)
+      .doc(FirestorePaths.user(userId))
       .get();
     const customerId = userDoc.data()?.stripeCustomerId;
 
