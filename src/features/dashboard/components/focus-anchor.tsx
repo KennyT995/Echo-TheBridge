@@ -60,7 +60,7 @@ export function FocusAnchor({
         ) : (
           <div className="relative">
             {/* Header / Draggable Area */}
-            <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-gradient-x" />
+            <div className="h-1 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-gradient" />
 
             <div className="p-4 space-y-3">
               <div className="flex items-start justify-between mb-1">

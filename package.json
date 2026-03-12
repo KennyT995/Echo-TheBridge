@@ -8,7 +8,7 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "NODE_ENV=production ./node_modules/.bin/next build",
     "start": "./node_modules/.bin/next start",
-    "lint": "./node_modules/.bin/next lint",
+    "lint": "./node_modules/.bin/eslint .",
     "typecheck": "./node_modules/.bin/tsc --noEmit"
   },
   "dependencies": {

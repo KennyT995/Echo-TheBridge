@@ -225,8 +225,12 @@ export default function DashboardPage() {
     isUserDataLoading ||
     isPlanLoading;
 
-  if (isLoading || !user) {
+  if (isUserLoading) {
     return <Loading />;
+  }
+
+  if (!user) {
+    return null;
   }
 
   const visionCount = visions?.length ?? 0;

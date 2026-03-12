@@ -26,6 +26,7 @@ import { CrossingCelebration } from "@/features/roadmaps/components/crossing-cel
 import { WeeklyRetroDialog } from "@/features/journal/components/weekly-retro-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2 } from "lucide-react";
 import { GenerateFutureLetterOutput } from "@/ai/flows/generate-future-letter";
 
@@ -110,9 +111,9 @@ export function DashboardDialogs({
                             Define your future. We&apos;ll architect the path.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="max-h-[80vh] overflow-y-auto p-1 custom-scrollbar">
+                    <ScrollArea className="max-h-[80vh] p-1">
                         <VisionForm onVisionCreated={onVisionCreated} />
-                    </div>
+                    </ScrollArea>
                 </DialogContent>
             </Dialog>
 

@@ -587,7 +587,7 @@ export default function VisionDetailPage() {
       </main>
 
       <Dialog open={isShareModalOpen} onOpenChange={setShareModalOpen}>
-        <DialogContent>
+        <DialogContent className="glass-card border-white/5 bg-black/90 backdrop-blur-2xl">
           <DialogHeader>
             <DialogTitle>Share Your Vision</DialogTitle>
             <DialogDescription>
@@ -624,7 +624,7 @@ export default function VisionDetailPage() {
       </Dialog>
 
       <Dialog open={isRefocusModalOpen} onOpenChange={setRefocusModalOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl glass-card border-white/5 bg-black/90 backdrop-blur-2xl">
           <DialogHeader>
             <DialogTitle>Refocus & Regenerate Roadmap</DialogTitle>
             <DialogDescription>
